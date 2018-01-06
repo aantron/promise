@@ -35,13 +35,13 @@ external copyFile: (string, string, int, (unit) => unit) => unit = "copyFile";
 external exists: (string, (bool) => unit) => unit = "exists";
 
 [@bs.module "fs"]
-external fchmod: (int, int, (unit) => unit) => unit = "fchmod";
+external fchmod: (int, int, unit => unit) => unit = "fchmod";
 
 [@bs.module "fs"]
-external fchown: (int, int, int, (unit) => unit) => unit = "fchown";
+external fchown: (int, int, int, unit => unit) => unit = "fchown";
 
 [@bs.module "fs"]
-external fdatasync: (int, (unit) => unit) => unit = "fdatasync";
+external fdatasync: (int, unit => unit) => unit = "fdatasync";
 
 /*
   Needs to type second arg of callback to a Js.t in node.js - fs.Stats
@@ -51,28 +51,28 @@ external fdatasync: (int, (unit) => unit) => unit = "fdatasync";
 external fstat: (int, (unit, 'a) => unit) => unit = "fstat";
 
 [@bs.module "fs"]
-external fsync: (int, (unit) => unit) => unit = "fsync";
+external fsync: (int, unit => unit) => unit = "fsync";
 
 [@bs.module "fs"]
-external ftruncate: (fd, int, (unit) => unit) => unit = "ftruncate";
+external ftruncate: (fd, int, unit => unit) => unit = "ftruncate";
 
 [@bs.module "fs"]
-external futimes: (int, int, int, (unit) => unit) => unit = "futimes";
+external futimes: (int, int, int, unit => unit) => unit = "futimes";
 
 [@bs.module "fs"]
-external lchmod: (string, int, (unit) => unit) => unit = "lchmod";
+external lchmod: (string, int, unit => unit) => unit = "lchmod";
 
 [@bs.module "fs"]
-external lchown: (string, int, int, (unit) => unit) => unit = "lchown";
+external lchown: (string, int, int, unit => unit) => unit = "lchown";
 
 [@bs.module "fs"]
-external link: (string, string, (unit) => unit) => unit = "link";
+external link: (string, string, unit => unit) => unit = "link";
 
 [@bs.module "fs"]
 external lstat: (string, (unit, 'a) => unit) => unit = "lstat";
 
 [@bs.module "fs"]
-external mkdir: (string, int, (unit) => unit) => unit = "mkdir";
+external mkdir: (string, int, unit => unit) => unit = "mkdir";
 /*
  Ommitted an optional argument that required typing a Js.t
  https://nodejs.org/dist/latest-v9.x/docs/api/fs.html#fs_fs_mkdtemp_prefix_options_callback
@@ -100,7 +100,7 @@ external readLink: (string, string, (unit, string) => unit) => unit = "readLink"
 external realpath: (string, string, (unit, string) => unit) => unit = "realpath";
 
 [@bs.module "fs"]
-external rename: (string, string, (unit) => unit) => unit = "rename";
+external rename: (string, string, unit => unit) => unit = "rename";
 
 [@bs.module "fs"]
 external rmdir: (string, (unit) => unit) => unit = "rmdir";
@@ -109,22 +109,22 @@ external rmdir: (string, (unit) => unit) => unit = "rmdir";
 external stat: (string, string, (unit, 'a) => unit) => unit = "stat";
 
 [@bs.module "fs"]
-external symlink: (string, string, string, (unit) => unit) => unit = "symlink";
+external symlink: (string, string, string, unit => unit) => unit = "symlink";
 
 [@bs.module "fs"]
-external truncate: (string, int, (unit) => unit) => unit = "truncate";
+external truncate: (string, int, unit => unit) => unit = "truncate";
 
 [@bs.module "fs"]
-external unlink: (string, (unit) => unit) => unit = "unlink";
+external unlink: (string, unit => unit) => unit = "unlink";
 
 [@bs.module "fs"]
-external utimes: (string, float, float, (unit) => unit) => unit = "utimes";
+external utimes: (string, float, float, unit => unit) => unit = "utimes";
 
 [@bs.module "fs"]
 external write: (fd, string, int, int, int, (unit, int, string) => unit) => unit = "write";
 
 [@bs.module "fs"]
-external writeFile: (string, string, string, (unit) => unit) => unit = "writeFile";
+external writeFile: (string, string, string, unit => unit) => unit = "writeFile";
 
 [@bs.module "fs"]
 external open_: (string, string, (unit, int) => unit) => unit = "open";
