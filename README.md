@@ -33,13 +33,16 @@ just haven't exposed them yet.
 Finally, Repromise includes a small preprocessor so you can write the neat and
 familiar `let%await` syntax as in the example above!
 
-<br>
 
-This repository is in a **proof-of-concept** stage at the moment. We intend to
-expand it to a full-blown implementation. However, for the time being, the repo
-is *very* rough: there is a functioning skeleton, but the packaging isn't there,
-the C FFI is rife with obvious memory leaks, etc. All to be fixed shortly; the
-initial code was written just yesterday :p
+
+<br/>
+
+## Why?
+
+Repromise is basically a prototype of the future [Lwt][lwt]. We want to
+quickly study a new JavaScript-friendly Lwt core and new libuv-based event loop.
+
+[lwt]: https://github.com/ocsigen/lwt
 
 
 
@@ -69,10 +72,22 @@ Before that, the commands check that you have [opam][opam], [Node.js][node], and
 [NPM][npm] installed. They are best installed from your system's package
 manager if missing.
 
-Then, they use opam to download and install the main native dependencies,
-[libuv][libuv] and [Ctypes][ctypes], and NPM to install [BuckleScript][bs] and
+Then, they use opam to install the main native dependencies, [libuv][libuv] and
+[Ctypes][ctypes], and NPM to install [BuckleScript][bs] and
 [bsb-native][bsb-native]. They also install a `refmt` from Reason `master`,
 because that is needed for the `let%await ...` syntax.
+
+
+
+<br/>
+
+## Status
+
+This repository is in a **proof-of-concept** stage at the moment. We intend to
+expand it to a full-blown implementation. However, for the time being, the repo
+is *very* rough: there is a functioning skeleton, but the packaging isn't there,
+the C FFI is rife with obvious memory leaks, etc. All to be fixed shortly; the
+initial code was written just yesterday :p
 
 
 [opam]: http://opam.ocaml.org/
