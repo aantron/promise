@@ -1,0 +1,40 @@
+{
+  "name": "repromise",
+  "version": "0.1.0",
+
+  "ocamlfind-dependencies": ["ctypes.foreign"],
+  "ppx-flags": ["matchenv/matchenv", "ppx_await/ppx_await"],
+
+  "build-script": "make c ppx",
+  "static-libraries": ["_build/libuv_accessors.o"],
+  "c-linker-flags": ["-luv"],
+  "refmt": "PREFIX/bin/refmt",
+  "sources": [
+    {
+      "dir": "src",
+      "subdirs": [
+        {
+          "dir": "js",
+          "backend": ["js"]
+        },
+        {
+          "dir": "native",
+          "backend": ["native"]
+        }
+      ]
+    },
+    {
+      "dir": "test",
+      "type": "dev"
+    }
+  ],
+  "entries": [
+    {
+      "backend": "js"
+    },
+    {
+      "backend": "native",
+      "main-module": "Test"
+    }
+  ]
+}

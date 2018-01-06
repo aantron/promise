@@ -1,0 +1,31 @@
+{
+  "name": "repromise",
+  "version": "0.1.0",
+  "description": "Promises and async I/O for Reason and OCaml, Node and native",
+  "keywords": [
+    "BuckleScript",
+    "reason",
+    "ocaml",
+    "promise"
+  ],
+  "license": "MIT",
+
+  "repository": "aantron/repromise",
+  "author": {
+    "name": "Anton Bachin",
+    "email": "antonbachin@yahoo.com",
+    "url": "github.com/aantron"
+  },
+
+  "devDependencies": {
+    "bs-platform": "bsansouci/bsb-native#2.1.1",
+    "matchenv": "github:bsansouci/matchenv"
+  },
+
+  "scripts": {
+    "build": "bsb -make-world -backend js",
+    "build-native": "bsb -make-world -backend native",
+    "clean": "bsb -clean-world",
+    "watch": "bsb -make-world -w"
+  }
+}
