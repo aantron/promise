@@ -6,32 +6,32 @@ type t = {.
   "ext": string
 };
 
-[@bs.module "fs"]
+[@bs.module "path"]
 external basename: (~path: string, ~ext: string) => string = "basename";
 
-[@bs.module "fs"]
+[@bs.module "path"]
 external delimeter: string = "delimeter";
 
-[@bs.module "fs"]
+[@bs.module "path"]
 external dirname: string => string = "dirname";
 
-[@bs.module "fs"]
+[@bs.module "path"]
 external extname: string => string = "extname";
 
-[@bs.module "fs"]
+[@bs.module "path"]
 external format: t => string = "format";
 
-[@bs.module "fs"]
+[@bs.module "path"]
 external isAbsolute: string => bool = "isAbsolute";
 
-[@bs.module "fs"]
+[@bs.module "path"]
 external join: array(string) => string = "join";
 
-[@bs.module "fs"]
+[@bs.module "path"]
 external normalize: string => string = "normalize";
 
-[@bs.module "fs"]
+[@bs.module "path"]
 external parse: string => t = "parse";
 
-[@bs.module "fs"]
+[@bs.module "path"]
 external relative: (~from: string, ~to_: string) => string = "relative";
