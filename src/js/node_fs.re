@@ -2,13 +2,6 @@ type fd = int;
 
 type buffer;
 
-[@bs.val]
-external node_buffer_alloc: int => buffer = "Buffer.alloc";
-
-[@bs.send]
-external node_buffer_to_string:
-  (buffer, string, int, int) => string = "toString";
-
 [@bs.module "fs"]
 external access: (~path: string, ~mode: int, unit => unit) => unit = "access";
 

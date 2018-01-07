@@ -42,7 +42,7 @@ let mkdir: (~path: string, ~mode: int, unit => unit) => unit;
 
 let mkdtemp: (~prefix: string, ~options: string, (unit, string) => unit) => unit;
 
-let open_: (~path: string, ~flags: string, ~mode: int, (unit, int) => unit) => unit;
+let open_: (~path: string, ~flags: string, ~mode: int, (unit, fd) => unit) => unit;
 
 let read_: (~fd: fd, ~buffer: buffer, ~offset: int, ~length: int, ~position: int, (unit, int, buffer) => unit) => unit;
 
