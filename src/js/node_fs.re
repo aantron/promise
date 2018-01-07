@@ -118,14 +118,3 @@ external write: (~fd: fd, ~str: string, ~position: int, ~encoding: string, (unit
 
 [@bs.module "fs"]
 external writeFile: (~file: string, ~data: string, ~options: string, unit => unit) => unit = "writeFile";
-
-/* let open_ = (path, callback) =>
-  open_(path, "r", 438, (_error, result) => callback(result)); */
-
-/* let read = (~fd, ~length, ~position, callback) => {
-  let buffer = node_buffer_alloc(length);
-  read_(fd, buffer, 0, length, position, (_error, result, _buffer) => {
-    let s = node_buffer_to_string(buffer, "utf8", 0, result);
-    callback(s);
-  });
-}; */
