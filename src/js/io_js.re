@@ -9,7 +9,7 @@ external node_buffer_alloc: int => Node_fs.buffer = "Buffer.alloc";
 external node_buffer_to_string:
   (Node_fs.buffer, string, int, int) => string = "toString";
 
-let open_: (string) => Promise.promise(fd) = filename =>
+let open_ = filename =>
   Promise.new_((~resolve) =>
     Node_fs.open_(~path=filename, ~flags="r", ~mode=438, (_error) => resolve));
 
