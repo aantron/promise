@@ -35,3 +35,9 @@ external parse: string => t = "parse";
 
 [@bs.module "path"]
 external relative: (~from: string, ~to_: string) => string = "relative";
+
+[@bs.module "path"]
+external resolve: array(string) => string = "resolve";
+
+[@bs.module "path"]
+external sep: string = "sep";

@@ -25,3 +25,7 @@ let normalize: string => string;
 let parse: string => t;
 
 let relative: (~from: string, ~to_: string) => string;
+
+let resolve: array(string) => string;
+
+let sep: string;
