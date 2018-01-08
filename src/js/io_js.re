@@ -11,15 +11,15 @@ external node_buffer_to_string:
 
 let open_ = filename =>
   Promise.new_((~resolve) =>
-    Node_fs.open_(~path=filename, ~flags="r", ~mode=438, (_error) => resolve));
+    Node_fs.open_(~path=filename, ~flags="r", ~mode=438, (_error, result) => resolve(result)));
+
 
 let read = (~fd, ~length) => {
-  let buffer: Node_fs.buffer = node_buffer_alloc(length);
-  Promise.new_((~resolve) => {
+  let buffer = node_buffer_alloc(length);
+  Promise.new_((~resolve) =>
     Node_fs.read_(~fd, ~buffer, ~offset=0, ~length, ~position=0, (_error, result, _buffer) => {
       let s = node_buffer_to_string(buffer, "utf8", 0, result);
       resolve(s);
     })
-  });
-}
-  
+  )
+};
