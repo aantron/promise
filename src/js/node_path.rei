@@ -8,7 +8,7 @@ type t = {.
 
 let basename: (~path: string, ~ext: string) => string;
 
-let delimeter: string;
+let delimiter: string;
 
 let dirname: string => string;
 

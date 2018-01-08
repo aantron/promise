@@ -10,7 +10,7 @@ type t = {.
 external basename: (~path: string, ~ext: string) => string = "basename";
 
 [@bs.module "path"]
-external delimeter: string = "delimeter";
+external delimiter: string = "delimiter";
 
 [@bs.module "path"]
 external dirname: string => string = "dirname";
