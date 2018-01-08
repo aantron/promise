@@ -3,7 +3,7 @@ let eol: string;
 let arch: string;
 
 type cpuCore = {.
-  "model": string, 
+  "model": string,
   "speed": int,
   "times": {.
     "user": int,

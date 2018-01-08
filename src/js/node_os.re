@@ -5,7 +5,7 @@ external eol: string = "EOL";
 external arch: string = "arch";
 
 type cpuCore = {.
-  "model": string, 
+  "model": string,
   "speed": int,
   "times": {.
     "user": int,
