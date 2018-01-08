@@ -86,7 +86,4 @@ external setuid: int => unit = "setuid";
 external title: string = "title";
 
 [@bs.module "process"]
-external setuid: unit => int = "setuid";
-
-[@bs.module "process"]
 external version: string = "version";
