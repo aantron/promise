@@ -1,0 +1,10 @@
+(jbuild_version 1)
+
+(library
+ ((name repromise)
+  (public_name repromise)
+  (wrapped false)
+  (flags (:standard -w +A))
+  (c_names (accessors))
+  (libraries (ctypes.foreign))
+  (c_library_flags (:standard -luv))))

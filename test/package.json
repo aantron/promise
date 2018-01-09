@@ -1,7 +1,7 @@
 {
-  "name": "repromise",
+  "name": "repromise-tests",
   "version": "0.1.0",
-  "description": "Node and native promises and I/O for Reason, OCaml",
+  "description": "Tests for repromise",
   "license": "MIT",
   "repository": "aantron/repromise",
   "author": {
@@ -10,10 +10,12 @@
     "url": "github.com/aantron"
   },
   "dependencies": {
-    "bs-platform": "^2.1.0"
+    "bs-platform": "^2.1.0",
+    "ppx_await": "file:../src/ppx",
+    "repromise": "file:.."
   },
   "scripts": {
     "build": "bsb -make-world",
-    "clean": "bsb -clean-world && rm -rf _build/ lib/ && (cd src/ppx && bsb -clean-world && rm -rf _build/ lib/)"
+    "clean": "bsb -clean-world"
   }
 }

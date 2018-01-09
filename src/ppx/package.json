@@ -1,4 +1,20 @@
 {
   "name": "ppx_await",
-  "version": "0.1.0"
+  "version": "0.1.0",
+  "description": "async-await syntax for repromise",
+  "license": "MIT",
+  "repository": "aantron/repromise",
+  "author": {
+    "name": "Anton Bachin",
+    "email": "antonbachin@yahoo.com",
+    "url": "github.com/aantron"
+  },
+  "dependencies": {
+    "bs-platform": "bsansouci/bsb-native#2.1.1"
+  },
+  "scripts": {
+    "build": "bsb -make-world -backend native",
+    "clean": "bsb -clean-world",
+    "postinstall": "bsb -make-world -backend native && cp lib/bs/native/ppx_await.native ppx_await"
+  }
 }

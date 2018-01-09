@@ -1,0 +1,23 @@
+opam-version: "1.2"
+
+version: "dev"
+homepage: "https://github.com/aantron/repromise"
+doc: "https://github.com/aantron/repromise"
+bug-reports: "https://github.com/aantron/repromise/issues"
+license: "MIT"
+
+authors: "Anton Bachin <antonbachin@yahoo.com>"
+maintainer: "Anton Bachin <antonbachin@yahoo.com>"
+dev-repo: "https://github.com/aantron/repromise.git"
+
+depends: [
+  "conf-libuv"
+  "ctypes"
+  "ctypes-foreign"
+  "jbuilder" {build & >= "1.0+beta10"}
+  "reason" {build & >= "3.0.0"}
+]
+
+build: [
+  ["jbuilder" "build" "-p" name "-j" jobs]
+]

@@ -1,7 +1,9 @@
 node_modules/
 lib/
 package-lock.json
-/bsconfig.json
 _build/
 .merlin
+*.install
+esy.lock
+ppx_await
 scratch/

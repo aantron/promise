@@ -1,7 +1,7 @@
 open Ast_mapper;
 open Parsetree;
 
-let rec mapper = {
+let mapper = {
   ...default_mapper,
   expr: (mapper, e) =>
     switch e.pexp_desc {
@@ -13,7 +13,7 @@ let rec mapper = {
         let e'' = mapper.expr(mapper, binding.pvb_expr);
         let e' = mapper.expr(mapper, e');
 
-        let open Ast_helper.Exp;
+        let open! Ast_helper.Exp;
 
         let then_ = ident(Location.mknoloc(Longident.parse("Promise.then_")));
         let x = binding.pvb_pat;

@@ -1,0 +1,45 @@
+{
+  "name": "repromise",
+  "version": "0.1.0",
+  "description": "Node and native promises and I/O for Reason, OCaml",
+  "keywords": [
+    "BuckleScript",
+    "reason",
+    "ocaml",
+    "promise"
+  ],
+  "license": "MIT",
+
+  "repository": "aantron/repromise",
+  "author": {
+    "name": "Anton Bachin",
+    "email": "antonbachin@yahoo.com",
+    "url": "github.com/aantron"
+  },
+
+  "dependencies": {
+    "@esy-ocaml/esy-installer": "^0.0.0",
+    "@opam/ctypes": "^0.13.0",
+    "@opam/ctypes-foreign": "*",
+    "@opam/jbuilder": "^1.0.0-beta16",
+    "@opam/ocaml-migrate-parsetree": "^1.0.0",
+    "@opam/reason": "facebook/reason#b622e8f40c5605e9ab2b2423eb78053b8690d14e"
+  },
+  "peerDependencies": {
+    "ocaml": "4.6.x"
+  },
+  "devDependencies": {
+    "@opam/merlin": "^3.0.5",
+    "ocaml": "4.6.x"
+  },
+
+  "esy": {
+    "build": [
+      ["jbuilder", "build"]
+    ],
+    "install": [
+      ["esy-installer"]
+    ],
+    "buildsInSource": "_build"
+  }
+}

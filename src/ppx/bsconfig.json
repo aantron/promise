@@ -1,0 +1,12 @@
+{
+  "name": "matchenv",
+  "refmt": 3,
+  "sources": "bucklescript",
+  "ocaml-dependencies": ["compiler-libs"],
+  "entries": [
+    {
+      "backend": "native",
+      "main-module": "Ppx_await"
+    }
+  ]
+}

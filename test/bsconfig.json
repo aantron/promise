@@ -1,0 +1,7 @@
+{
+  "name": "repromise-tests",
+  "refmt": "refmt",
+  "ppx-flags": ["ppx_await/ppx_await"],
+  "bs-dependencies": ["repromise"],
+  "sources": "."
+}

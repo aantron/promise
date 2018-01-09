@@ -37,6 +37,50 @@ familiar `let%await` syntax as in the example above!
 
 <br/>
 
+## Install
+
+#### With esy:
+
+```
+git clone https://github.com/aantron/repromise.git
+cd repromise
+esy install
+esy build
+```
+
+To run the test,
+
+```
+esy jbuilder build test/test.exe
+_build/default/test/test.exe
+```
+
+#### With opam:
+
+```
+git clone https://github.com/aantron/repromise.git
+cd repromise
+opam pin add --dev-repo reason
+opam pin add repromise .
+opam pin add ppx_await .
+jbuilder build test/test.exe
+_build/default/test/test.exep
+```
+
+#### With npm:
+
+```
+git clone https://github.com/aantron/repromise.git
+cd repromise
+npm install
+(cd test && npm install && npm run build)
+node ./test/lib/js/test.js
+```
+
+
+
+<br/>
+
 ## Why?
 
 Repromise is basically a prototype of the future [Lwt][lwt]. We want to
