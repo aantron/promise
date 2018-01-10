@@ -1,10 +1,8 @@
-let () = {
-  ignore ({
-    let%await fd = Io.open_("test/test.re");
-    let%await data = Io.read(~fd, ~length = 1024);
-    print_endline(data);
-    Promise.resolve();
-  });
+let tests = [
+  Test_promise.suite,
+  Test_ffi.suite,
+  Test_io.suite,
+];
 
-  Io.run();
-};
+let () =
+  Framework.run("repromise", tests);
