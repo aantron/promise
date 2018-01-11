@@ -16,3 +16,5 @@ let suite = Framework.suite("libuv", [
         resolve(fd > 0)));
   }),
 ]);
+
+let suites = [suite];
