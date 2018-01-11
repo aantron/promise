@@ -15,7 +15,7 @@ let mapper = {
 
         let open! Ast_helper.Exp;
 
-        let then_ = ident(Location.mknoloc(Longident.parse("Promise.then_")));
+        let then_ = ident(Location.mknoloc(Longident.parse("Repromise.then_")));
         let x = binding.pvb_pat;
         let fun_ = fun_("", None, x, e');
 

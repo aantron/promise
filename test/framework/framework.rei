@@ -34,7 +34,8 @@
 type test;
 type suite;
 
-let test: (string, ~only_if: unit => bool = ?, unit => Promise.t(bool)) => test;
+let test:
+  (string, ~only_if: unit => bool = ?, unit => Repromise.t(bool)) => test;
 /** Like [test_direct], but defines a test which runs a thread. */
 
 let suite: (string, ~only_if: unit => bool = ?, list(test)) => suite;

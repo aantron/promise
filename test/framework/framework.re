@@ -37,7 +37,7 @@
 type test = {
   test_name: string,
   skip_if_this_is_false: unit => bool,
-  run: unit => Promise.t(bool),
+  run: unit => Repromise.t(bool),
 };
 
 type outcome =
@@ -50,22 +50,22 @@ let test = (test_name, ~only_if = () => true, run) =>
 
 let run_test = test =>
   if (test.skip_if_this_is_false() == false) {
-    Promise.resolve(Skipped)
+    Repromise.resolve(Skipped)
   }
   else {
     test.run()
-    |> Promise.then_(test_did_pass =>
+    |> Repromise.then_(test_did_pass =>
       if (test_did_pass) {
-        Promise.resolve(Passed)
+        Repromise.resolve(Passed)
       }
       else {
-        Promise.resolve(Failed)
+        Repromise.resolve(Failed)
       })
   };
 
 /* We don't support exception handling in the tester for now, largely because
-   the [Promise] module doesn't know what to do about exceptions at this point.
-   Future work. */
+   the [Repromise] module doesn't know what to do about exceptions at this
+   point. Future work. */
 let outcome_to_character = fun
   | Passed => '.'
   | Failed => 'F'
@@ -87,7 +87,7 @@ let suite = (name, ~only_if = () => true, tests) =>
    suite_tests: tests,
    skip_entire_suite_if_this_is_false: only_if};
 
-let run_test_suite: suite => Promise.t(suite_outcomes) = suite =>
+let run_test_suite: suite => Repromise.t(suite_outcomes) = suite =>
   if (suite.skip_entire_suite_if_this_is_false() == false) {
     /* For the outcome list, list all tests in the suite as skipped. */
     let outcomes =
@@ -101,15 +101,15 @@ let run_test_suite: suite => Promise.t(suite_outcomes) = suite =>
     |> print_string;
     Pervasives.flush(stdout);
 
-    Promise.resolve(outcomes);
+    Repromise.resolve(outcomes);
   }
   else {
     let rec run_each_test(tests, reversed_outcomes) =
       switch tests {
-      | [] => Promise.resolve(List.rev(reversed_outcomes))
+      | [] => Repromise.resolve(List.rev(reversed_outcomes))
       | [test, ...more_tests] =>
         run_test(test)
-        |> Promise.then_(new_outcome => {
+        |> Repromise.then_(new_outcome => {
           new_outcome |> outcome_to_character |> print_char;
           Pervasives.flush(stdout);
           let outcome_with_name = (test.test_name, new_outcome);
@@ -176,11 +176,11 @@ let run = (library_name, suites) => {
         "\nOk. %i tests ran, %i tests skipped\n",
         count_ran(aggregated_outcomes),
         count_skipped(aggregated_outcomes));
-      Promise.resolve();
+      Repromise.resolve();
 
     | [suite, ...rest] =>
       run_test_suite(suite)
-      |> Promise.then_(outcomes =>
+      |> Repromise.then_(outcomes =>
         if (not(outcomes_all_ok(outcomes))) {
           print_newline();
           Pervasives.flush(stdout);
