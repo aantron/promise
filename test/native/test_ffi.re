@@ -11,7 +11,7 @@ let suite = Framework.suite("libuv", [
   }),
 
   test("open_ async", () => {
-    Repromise.new_((~resolve) =>
+    Repromise.new_(resolve =>
       Libuv_fs.Async.open_(loop, "test/test.re", ~flags = 0, ~mode = 0, fd =>
         resolve(fd > 0)));
   }),

@@ -1,7 +1,7 @@
 type promise('a);
 type t('a) = promise('a);
 
-let new_: ((~resolve: 'a => unit) => unit) => promise('a);
+let new_: (('a => unit) => unit) => promise('a);
 
 let resolve: 'a => promise('a);
 

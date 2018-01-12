@@ -36,7 +36,7 @@ function then(callback, promise) {
 |}];
 
 [@bs.val]
-external new_: ((~resolve: 'a => unit) => unit) => promise('a) = "";
+external new_: (('a => unit) => unit) => promise('a) = "";
 
 /* To what will this... resolve? */
 [@bs.val]

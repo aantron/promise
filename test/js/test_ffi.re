@@ -14,7 +14,7 @@ let test = Framework.test;
 
 let interopTests = Framework.suite("interop", [
   test("new_ is js promise", () => {
-    let p = Repromise.new_((~resolve as _) => ());
+    let p = Repromise.new_(_resolve => ());
     Repromise.resolve(isPromise(p));
   }),
 
@@ -25,7 +25,7 @@ let interopTests = Framework.suite("interop", [
 
   test("then_ is js promise", () => {
     let p =
-      Repromise.new_((~resolve as _) => ())
+      Repromise.new_(_resolve => ())
       |> Repromise.then_((_) => Repromise.resolve());
     Repromise.resolve(isPromise(p));
   }),
@@ -48,12 +48,12 @@ let interopTests = Framework.suite("interop", [
   }),
 
   test("new_ does not collapse", () => {
-    Repromise.new_((~resolve) => resolve(Repromise.resolve()))
+    Repromise.new_(resolve => resolve(Repromise.resolve()))
     |> Repromise.then_(p => Repromise.resolve(isPromise(p)));
   }),
 
   test("then_ extracts nested promise (new_)", () => {
-    Repromise.new_((~resolve) => resolve(Repromise.resolve(42)))
+    Repromise.new_(resolve => resolve(Repromise.resolve(42)))
     |> Repromise.then_(p =>
       p |> Repromise.then_(n =>
         Repromise.resolve(n == 42)));
@@ -78,7 +78,7 @@ let interopTests = Framework.suite("interop", [
   }),
 
   test("new_ does not collapse, JS promise", () => {
-    Repromise.new_((~resolve) => resolve(Js.Promise.resolve()))
+    Repromise.new_(resolve => resolve(Js.Promise.resolve()))
     |> Repromise.then_(p => Repromise.resolve(jsPromiseIsPromise(p)));
   }),
 

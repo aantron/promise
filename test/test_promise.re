@@ -60,13 +60,13 @@ let suite = Framework.suite("promise", [
   }),
 
   test("new_", () => {
-    Repromise.new_((~resolve) => resolve(true));
+    Repromise.new_(resolve => resolve(true));
   }),
 
   test("defer", () => {
     let resolve_p = ref(ignore);
     let p =
-      Repromise.new_((~resolve) => resolve_p := resolve)
+      Repromise.new_(resolve => resolve_p := resolve)
       |> Repromise.then_(n => Repromise.resolve(n == 1));
     resolve_p^(1);
     p;
@@ -75,7 +75,7 @@ let suite = Framework.suite("promise", [
   test("await defer", () => {
     let resolve_p = ref(ignore);
     let p = {
-      let%await n = Repromise.new_((~resolve) => resolve_p := resolve);
+      let%await n = Repromise.new_(resolve => resolve_p := resolve);
       Repromise.resolve(n == 1);
     };
     resolve_p^(1);

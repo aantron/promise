@@ -20,14 +20,14 @@ let new_ = executor => {
         promise := `Resolved(value);
       }
     };
-  executor(~resolve);
+  executor(resolve);
   promise
 };
 
 let resolve = value => ref(`Resolved(value));
 
 let then_ = (callback, promise) =>
-  new_((~resolve) => {
+  new_((resolve) => {
     let run_callback = (value) => {
       let nested_promise = callback(value);
       switch nested_promise^ {
