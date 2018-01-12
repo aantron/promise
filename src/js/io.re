@@ -13,13 +13,15 @@ external node_buffer_to_string:
 
 let open_ = filename =>
   Repromise.new_((resolve, _) =>
-    Fs.open_(~path=filename, ~flags="r", ~mode=438, (_error, result) => resolve(result)));
+    Fs.open_(~path=filename, ~flags="r", ~mode=438, (_error, result) =>
+      resolve(result)));
 
 
 let read = (~fd, ~length) => {
   let buffer = node_buffer_alloc(length);
   Repromise.new_((resolve, _) =>
-    Fs.read_(~fd, ~buffer, ~offset=0, ~length, ~position=0, (_error, result, _buffer) => {
+    Fs.read_(~fd, ~buffer, ~offset=0, ~length, ~position=0,
+             (_error, result, _buffer) => {
       let s = node_buffer_to_string(buffer, "utf8", 0, result);
       resolve(s);
     })

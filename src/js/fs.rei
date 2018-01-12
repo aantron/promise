@@ -4,7 +4,8 @@ type buffer;
 
 let access: (~path: string, ~mode: int, unit => unit) => unit;
 
-let appendFile: (~file: string, ~data: string, ~options: string, unit => unit) => unit;
+let appendFile:
+  (~file: string, ~data: string, ~options: string, unit => unit) => unit;
 
 let chmod: (~path: string, ~mode: int, unit => unit) => unit;
 
@@ -44,9 +45,12 @@ let mkdtemp: (~prefix: string, ~options: string, (unit, string) => unit) => unit
 
 let open_: (~path: string, ~flags: string, ~mode: int, (unit, fd) => unit) => unit;
 
-let read_: (~fd: fd, ~buffer: buffer, ~offset: int, ~length: int, ~position: int, (unit, int, buffer) => unit) => unit;
+let read_:
+  (~fd: fd, ~buffer: buffer, ~offset: int, ~length: int, ~position: int,
+   (unit, int, buffer) => unit) => unit;
 
-let readdir: (~path: string, ~options: string, (unit, array(string)) => unit) => unit;
+let readdir:
+  (~path: string, ~options: string, (unit, array(string)) => unit) => unit;
 
 let readFile: (~path: string, ~options: string, (unit, string) => unit) => unit;
 
@@ -60,7 +64,8 @@ let rmdir: (~path: string, (unit) => unit) => unit;
 
 let stat: (~path: string, (unit, 'a) => unit) => unit;
 
-let symlink: (~target: string, ~path: string, ~typ: string, unit => unit) => unit;
+let symlink:
+  (~target: string, ~path: string, ~typ: string, unit => unit) => unit;
 
 let truncate: (~path: string, ~len: int, unit => unit) => unit;
 
@@ -68,6 +73,9 @@ let unlink: (~path: string, unit => unit) => unit;
 
 let utimes: (~path: string, ~atime: float, ~mtime: float, unit => unit) => unit;
 
-let write: (~fd: fd, ~str: string, ~position: int, ~encoding: string, (unit, int, string) => unit) => unit;
+let write:
+  (~fd: fd, ~str: string, ~position: int, ~encoding: string,
+   (unit, int, string) => unit) => unit;
 
-let writeFile: (~file: string, ~data: string, ~options: string, unit => unit) => unit;
+let writeFile:
+  (~file: string, ~data: string, ~options: string, unit => unit) => unit;
