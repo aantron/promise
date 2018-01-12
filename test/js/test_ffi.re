@@ -71,6 +71,12 @@ let interopTests = Framework.suite("interop", [
         Repromise.resolve(n == 42)));
   }),
 
+  test("then_ does not collapse", () => {
+    Repromise.resolve()
+    |> Repromise.then_(() => Repromise.resolve(Repromise.resolve()))
+    |> Repromise.then_(p => Repromise.resolve(isPromise(p)));
+  }),
+
   test("resolve does not collapse, JS promise", () => {
     Repromise.new_((~resolve) => resolve(Js.Promise.resolve()))
     |> Repromise.then_(p => Repromise.resolve(jsPromiseIsPromise(p)));
