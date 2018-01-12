@@ -49,13 +49,6 @@ esy jbuilder build test/test.exe
 _build/default/test/test.exe
 ```
 
-To run the test,
-
-```
-esy jbuilder build test/test.exe
-_build/default/test/test.exe
-```
-
 #### With opam:
 
 ```
@@ -85,9 +78,9 @@ node ./test/lib/js/test.js
 
 ## Why?
 
-Repromise is basically a prototype of the future [Lwt][lwt]. Among other things,
-we want to quickly study a new JavaScript-friendly Lwt core and new libuv-based
-event loop.
+Repromise is basically an effort to unify the Node API on JS and libuv with the
+native [Lwt][lwt] ecosystem. Among other things, we want to quickly study a new
+JavaScript-friendly Lwt core and new libuv-based event loop.
 
 [lwt]: https://github.com/ocsigen/lwt
 
