@@ -6,11 +6,11 @@ macOS, Windows:
 
 ```reason
 let () = {
-  ignore ({
+  ignore({
     let%await fd   = Io.open_("test/test.re");
     let%await data = Io.read (~fd, ~length = 1024);
     print_endline(data);
-    Promise.resolve(());
+    Repromise.resolve();
   });
 
   Io.run();
@@ -19,9 +19,9 @@ let () = {
 
 ...the above compiles to both JavaScript and machine code!
 
-Interoperability is key: on JavaScript, Repromise `Promise.t`s are exactly
-JavaScript's familiar `Promise`s. For targeting native code, Repromise provides
-an implementation with the same semantics.
+Interoperability is key: on JavaScript, `Repromise.t`s are exactly JavaScript's
+familiar `Promise`s. For targeting native code, Repromise provides an
+implementation with the same semantics.
 
 The `Io` module is powered by libuv when targeting native code, and Node.js on
 JavaScript. Either way, the underlying implementation is the same, because
@@ -37,7 +37,7 @@ familiar `let%await` syntax as in the example above!
 
 <br/>
 
-## Install
+## Trying it out
 
 #### With esy:
 
@@ -45,7 +45,8 @@ familiar `let%await` syntax as in the example above!
 git clone https://github.com/aantron/repromise.git
 cd repromise
 esy install
-esy build
+esy jbuilder build test/test.exe
+_build/default/test/test.exe
 ```
 
 To run the test,
@@ -64,7 +65,7 @@ opam pin add --dev-repo reason
 opam pin add repromise .
 opam pin add ppx_await .
 jbuilder build test/test.exe
-_build/default/test/test.exep
+_build/default/test/test.exe
 ```
 
 #### With npm:
@@ -73,6 +74,7 @@ _build/default/test/test.exep
 git clone https://github.com/aantron/repromise.git
 cd repromise
 npm install
+npm run build
 (cd test && npm install && npm run build)
 node ./test/lib/js/test.js
 ```
@@ -83,43 +85,11 @@ node ./test/lib/js/test.js
 
 ## Why?
 
-Repromise is basically a prototype of the future [Lwt][lwt]. We want to
-quickly study a new JavaScript-friendly Lwt core and new libuv-based event loop.
+Repromise is basically a prototype of the future [Lwt][lwt]. Among other things,
+we want to quickly study a new JavaScript-friendly Lwt core and new libuv-based
+event loop.
 
 [lwt]: https://github.com/ocsigen/lwt
-
-
-
-
-<br/>
-
-## Trying it out
-
-At the moment, the repo contains a minimalist isomorphic promise library, and a
-small demo/test that runs both directly on your system, and under Node. You're
-welcome to play with the demo and all the other code and see what you can come
-up with; join us discussing the repo on [Discord][discord], open an issue, or
-send a PR!
-
-The easiest way to get started is to clone the repo and use the `Makefile`:
-
-```
-git clone https://github.com/aantron/repromise.git
-cd repromise
-make deps
-make
-```
-
-You'll see the test compile and run.
-
-Before that, the commands check that you have [opam][opam], [Node.js][node], and
-[NPM][npm] installed. They are best installed from your system's package
-manager if missing.
-
-Then, they use opam to install the main native dependencies, [libuv][libuv] and
-[Ctypes][ctypes], and NPM to install [BuckleScript][bs] and
-[bsb-native][bsb-native]. They also install a `refmt` from Reason `master`,
-because that is needed for the `let%await ...` syntax.
 
 
 
