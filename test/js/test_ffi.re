@@ -37,7 +37,7 @@ let interopTests = Framework.suite("interop", [
     |> Repromise.then_(n => Repromise.resolve(n == 2));
   }),
 
-  test("repromsie as js argument", () => {
+  test("repromise as js argument", () => {
     module Then = {
       [@bs.send.pipe: Repromise.t('a)]
       external js_then: ('a => Repromise.t('b)) => Repromise.t('b) = "then";
@@ -77,7 +77,7 @@ let interopTests = Framework.suite("interop", [
     |> Repromise.then_(p => Repromise.resolve(isPromise(p)));
   }),
 
-  test("resolve does not collapse, JS promise", () => {
+  test("new_ does not collapse, JS promise", () => {
     Repromise.new_((~resolve) => resolve(Js.Promise.resolve()))
     |> Repromise.then_(p => Repromise.resolve(jsPromiseIsPromise(p)));
   }),
