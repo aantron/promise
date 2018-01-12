@@ -34,10 +34,12 @@
 
 
 
+type never = Repromise.never;
+
 type test = {
   test_name: string,
   skip_if_this_is_false: unit => bool,
-  run: unit => Repromise.t(bool),
+  run: unit => Repromise.t(bool, never),
 };
 
 type outcome =
@@ -87,7 +89,7 @@ let suite = (name, ~only_if = () => true, tests) =>
    suite_tests: tests,
    skip_entire_suite_if_this_is_false: only_if};
 
-let run_test_suite: suite => Repromise.t(suite_outcomes) = suite =>
+let run_test_suite: suite => Repromise.t(suite_outcomes, never) = suite =>
   if (suite.skip_entire_suite_if_this_is_false() == false) {
     /* For the outcome list, list all tests in the suite as skipped. */
     let outcomes =

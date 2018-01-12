@@ -1,13 +1,19 @@
-type promise('a);
-type t('a) = promise('a);
+type promise('a, 'e);
+type t('a, 'e) = promise('a, 'e);
 
-let new_: (('a => unit) => unit) => promise('a);
+type never;
 
-let resolve: 'a => promise('a);
+let new_: (('a => unit) => ('e => unit) => unit) => promise('a, 'e);
 
-let then_: ('a => promise('b), promise('a)) => promise('b);
+let resolve: 'a => promise('a, _);
+
+let reject: 'e => promise(_, 'e);
+
+let then_: ('a => promise('b, 'e), promise('a, 'e)) => promise('b, 'e);
+
+let catch: ('e => promise('a, 'e2), promise('a, 'e)) => promise('a, 'e2);
 
 /* This shouldn't really be visible in the API. It is used by the native Io to
    drive the native promise callbacks. It is not used on JavaScript, because
    Node and browsers call callbacks themselves. */
-let ready_callbacks: ref(list(unit => unit));
+let readyCallbacks: ref(list(unit => unit));

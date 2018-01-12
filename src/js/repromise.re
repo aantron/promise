@@ -1,5 +1,7 @@
-type promise('a);
-type t('a) = promise('a);
+type promise('a, 'e);
+type t('a, 'e) = promise('a, 'e);
+
+type never;
 
 [%%bs.raw {|
 function WrappedRepromise(p) {
@@ -14,7 +16,7 @@ function new_(executor) {
             else
                 resolve(value);
         };
-        executor(wrappingResolve);
+        executor(wrappingResolve, reject);
     });
 };
 
@@ -36,13 +38,21 @@ function then(callback, promise) {
 |}];
 
 [@bs.val]
-external new_: (('a => unit) => unit) => promise('a) = "";
+external new_: (('a => unit) => ('e => unit) => unit) => promise('a, 'e) = "";
 
 /* To what will this... resolve? */
 [@bs.val]
-external resolve: 'a => promise('a) = "";
+external resolve: 'a => promise('a, _) = "";
 
 [@bs.val]
-external then_: ('a => promise('b), promise('a)) => promise('b) = "then";
+external then_:
+  ('a => promise('b, 'e), promise('a, _)) => promise('b, 'e) = "then";
 
-let ready_callbacks: ref(list(unit => unit)) = ref([]);
+[@bs.scope "Promise"]
+[@bs.val]
+external reject: 'e => promise(_, 'e) = "";
+
+[@bs.send.pipe: promise('a, 'e)]
+external catch: ('e => promise('a, 'e2)) => promise('a, 'e2) = "catch";
+
+let readyCallbacks: ref(list(unit => unit)) = ref([]);

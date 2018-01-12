@@ -1,6 +1,6 @@
 let test = Framework.test;
 
-let suite = Framework.suite("promise", [
+let basicTests = Framework.suite("basic", [
   /* The basic [resolve]-[then_] tests are a bit useless, because the testing
      framework itself already uses both [resolved] and [then], i.e. every test
      implicitly tests those. However, we include these for completeness, in case
@@ -60,13 +60,13 @@ let suite = Framework.suite("promise", [
   }),
 
   test("new_", () => {
-    Repromise.new_(resolve => resolve(true));
+    Repromise.new_((resolve, _) => resolve(true));
   }),
 
   test("defer", () => {
     let resolve_p = ref(ignore);
     let p =
-      Repromise.new_(resolve => resolve_p := resolve)
+      Repromise.new_((resolve, _) => resolve_p := resolve)
       |> Repromise.then_(n => Repromise.resolve(n == 1));
     resolve_p^(1);
     p;
@@ -75,10 +75,65 @@ let suite = Framework.suite("promise", [
   test("await defer", () => {
     let resolve_p = ref(ignore);
     let p = {
-      let%await n = Repromise.new_(resolve => resolve_p := resolve);
+      let%await n = Repromise.new_((resolve, _) => resolve_p := resolve);
       Repromise.resolve(n == 1);
     };
     resolve_p^(1);
     p;
   }),
 ]);
+
+let rejectTests = Framework.suite("reject", [
+  test("new_", () => {
+    Repromise.new_((_, reject) => reject(1))
+    |> Repromise.catch(n => Repromise.resolve(n == 1));
+  }),
+
+  test("reject, catch", () => {
+    Repromise.reject("foo")
+    |> Repromise.catch(s => Repromise.resolve(s == "foo"));
+  }),
+
+  test("catch chosen", () => {
+    Repromise.reject("foo")
+    |> Repromise.then_((_) => Repromise.resolve(false))
+    |> Repromise.catch(s => Repromise.resolve(s == "foo"));
+  }),
+
+  test("then_, reject, catch", () => {
+    Repromise.resolve(1)
+    |> Repromise.then_(n => Repromise.reject(n + 1))
+    |> Repromise.catch(n => Repromise.resolve(n == 2));
+  }),
+
+  test("reject, catch, then_", () => {
+    Repromise.reject(1)
+    |> Repromise.catch(n => Repromise.resolve(n + 1))
+    |> Repromise.then_(n => Repromise.resolve(n == 2));
+  }),
+
+  test("no double catch", () => {
+    Repromise.reject("foo")
+    |> Repromise.catch(s => Repromise.resolve(s == "foo"))
+    |> Repromise.catch((_) => Repromise.resolve(false));
+  }),
+
+  test("catch chain", () => {
+    Repromise.reject(1)
+    |> Repromise.catch(n => Repromise.reject(n + 1))
+    |> Repromise.catch(n => Repromise.resolve(n == 2));
+  }),
+
+  test("no catching resolved", () => {
+    Repromise.resolve(true)
+    |> Repromise.catch((_) => Repromise.resolve(false));
+  }),
+
+  test("no catching resolved, after then_", () => {
+    Repromise.resolve()
+    |> Repromise.then_(() => Repromise.resolve(true))
+    |> Repromise.catch((_) => Repromise.resolve(false));
+  }),
+]);
+
+let suites = [basicTests, rejectTests];
