@@ -47,17 +47,17 @@ let suite = Framework.suite("promise", [
     Repromise.resolve(n == 2);
   }),
 
-  /* This test fails on Node.js but passes on native. This is because JS
-     promises collapse: [Repromise.resolve(p)] when [p] is a promise doesn't
-     create a promise that is resolved with [p]. It just returns a reference
-     directly to [p]. This is one of the things we need to address. */
-  /*
+  /* If promises are implemented on JS directly as ordinary JS promises,
+     [resolve(resolve(42))] will collapse to just a [promise(int)], even though
+     the Reason type is [promise(promise(int))]. This causes a soundness bug,
+     because, due to the type, the callback of [then_] will expect the nested
+     value to be a [promise(int)]. A correct implementation of Reason promises
+     on JS will avoid this bug. */
   test("no collapsing", () => {
     Repromise.resolve(Repromise.resolve(1))
     |> Repromise.then_ (p =>
       p |> Repromise.then_ (n => Repromise.resolve (n == 1)));
   }),
-  */
 
   test("new_", () => {
     Repromise.new_((~resolve) => resolve(true));

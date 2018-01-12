@@ -1,15 +1,48 @@
-type promise('a) = Js.Promise.t('a);
+type promise('a);
 type t('a) = promise('a);
 
-let new_ = executor =>
-  Js.Promise.make((~resolve, ~reject) => {
-    let resolve = (value) => [@bs] resolve(value);
-    ignore(reject);
-    executor(~resolve);
-  });
+[%%bs.raw {|
+function WrappedRepromise(p) {
+    this.wrapped = p;
+};
 
-let resolve = Js.Promise.resolve;
+function new_(executor) {
+    return new Promise(function (resolve, reject) {
+        var wrappingResolve = function(value) {
+            if (value instanceof Promise)
+                resolve(new WrappedRepromise(value));
+            else
+                resolve(value);
+        };
+        executor(wrappingResolve);
+    });
+};
 
-let then_ = Js.Promise.then_;
+function resolve(value) {
+    if (value instanceof Promise)
+        return Promise.resolve(new WrappedRepromise(value));
+    else
+        return Promise.resolve(value);
+};
+
+function then(callback, promise) {
+    return promise.then(function (value) {
+        if (value instanceof WrappedRepromise)
+            return callback(value.wrapped);
+        else
+            return callback(value);
+    })
+};
+|}];
+
+[@bs.val]
+external new_: ((~resolve: 'a => unit) => unit) => promise('a) = "";
+
+/* To what will this... resolve? */
+[@bs.val]
+external resolve: 'a => promise('a) = "";
+
+[@bs.val]
+external then_: ('a => promise('b), promise('a)) => promise('b) = "then";
 
 let ready_callbacks: ref(list(unit => unit)) = ref([]);
