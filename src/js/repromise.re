@@ -3,6 +3,12 @@ type t('a, 'e) = promise('a, 'e);
 
 type never;
 
+let onUnhandledException = ref(exn => {
+  prerr_endline("Unhandled exception in promise callback:");
+  prerr_endline(Printexc.to_string(exn));
+  exit(2);
+});
+
 [%%bs.raw {|
 function WrappedRepromise(p) {
     this.wrapped = p;
@@ -28,13 +34,36 @@ function resolve(value) {
 };
 
 function then(callback, promise) {
+    var safeCallback = function (value) {
+        try {
+            return callback(value);
+        }
+        catch (exception) {
+            onUnhandledException[0](exception);
+        }
+    };
+
     return promise.then(function (value) {
         if (value instanceof WrappedRepromise)
-            return callback(value.wrapped);
+            return safeCallback(value.wrapped);
         else
-            return callback(value);
-    })
+            return safeCallback(value);
+    });
 };
+
+function catch_(callback, promise) {
+    var safeCallback = function (error) {
+        try {
+            return callback(error);
+        }
+        catch (exception) {
+            onUnhandledException[0](exception);
+        }
+    };
+
+    return promise.catch(safeCallback);
+}
+
 |}];
 
 [@bs.val]
@@ -46,13 +75,14 @@ external resolve: 'a => promise('a, _) = "";
 
 [@bs.val]
 external then_:
-  ('a => promise('b, 'e), promise('a, _)) => promise('b, 'e) = "then";
+  ('a => promise('b, 'e), promise('a, 'e)) => promise('b, 'e) = "then";
 
 [@bs.scope "Promise"]
 [@bs.val]
 external reject: 'e => promise(_, 'e) = "";
 
-[@bs.send.pipe: promise('a, 'e)]
-external catch: ('e => promise('a, 'e2)) => promise('a, 'e2) = "catch";
+[@bs.val]
+external catch:
+  ('e => promise('a, 'e2), promise('a, 'e)) => promise('a, 'e2) = "catch_";
 
 let readyCallbacks: ref(list(unit => unit)) = ref([]);

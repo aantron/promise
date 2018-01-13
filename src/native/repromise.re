@@ -14,6 +14,13 @@ type t('a, 'e) = promise('a, 'e);
 
 type never;
 
+let onUnhandledException = ref(exn => {
+  prerr_endline("Unhandled exception in promise callback:");
+  prerr_endline(Printexc.to_string(exn));
+  Printexc.print_backtrace(stderr);
+  exit(2);
+});
+
 let readyCallbacks: ref(list(unit => unit)) =
   ref([]);
 
@@ -67,10 +74,13 @@ let makePromiseBehaveAs = (resolveOuter, rejectOuter, nestedPromise) =>
 
 let then_ = (callback, promise) =>
   new_((resolveOuter, rejectOuter) => {
-    let onResolve = (value) => {
-      let nestedPromise = callback(value);
-      makePromiseBehaveAs(resolveOuter, rejectOuter, nestedPromise);
-    };
+    let onResolve = (value) =>
+      switch (callback(value)) {
+      | exception exn =>
+        ignore(onUnhandledException^(exn))
+      | nestedPromise =>
+        makePromiseBehaveAs(resolveOuter, rejectOuter, nestedPromise)
+      };
 
     switch promise^ {
     | `Resolved(value) =>
@@ -85,10 +95,13 @@ let then_ = (callback, promise) =>
 
 let catch = (callback, promise) =>
   new_((resolveOuter, rejectOuter) => {
-    let onReject = (error) => {
-      let nestedPromise = callback(error);
-      makePromiseBehaveAs(resolveOuter, rejectOuter, nestedPromise);
-    };
+    let onReject = (error) =>
+      switch (callback(error)) {
+      | exception exn =>
+        ignore(onUnhandledException^(exn))
+      | nestedPromise =>
+        makePromiseBehaveAs(resolveOuter, rejectOuter, nestedPromise)
+      };
 
     switch promise^ {
     | `Resolved(value) =>
