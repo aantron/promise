@@ -1,8 +1,7 @@
 type promise('a);
 type t('a) = promise('a);
 
-[%%bs.raw
-  {|
+[%%bs.raw {|
 function WrappedRepromise(p) {
     this.wrapped = p;
 };
@@ -34,8 +33,7 @@ function then(callback, promise) {
             return callback(value);
     })
 };
-|}
-];
+|}];
 
 [@bs.val]
 external new_: ((~resolve: 'a => unit) => unit) => promise('a) = "";
