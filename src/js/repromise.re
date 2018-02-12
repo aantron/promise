@@ -9,7 +9,7 @@ function WrappedRepromise(p) {
 function new_(executor) {
     return new Promise(function (resolve, reject) {
         var wrappingResolve = function(value) {
-            if (value instanceof Promise)
+            if (value && value.then && (typeof (value.then) === 'function'))
                 resolve(new WrappedRepromise(value));
             else
                 resolve(value);
@@ -19,7 +19,7 @@ function new_(executor) {
 };
 
 function resolve(value) {
-    if (value instanceof Promise)
+    if (value && value.then && (typeof (value.then) === 'function'))
         return Promise.resolve(new WrappedRepromise(value));
     else
         return Promise.resolve(value);
