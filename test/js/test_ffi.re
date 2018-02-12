@@ -2,6 +2,10 @@
 function isPromise (p) {
     return (p instanceof Promise);
 }
+
+function isPromiseLike(v) {
+  return v && v.then && typeof(v.then) === 'function';
+};
 |}];
 
 [@bs.val]
@@ -9,6 +13,9 @@ external isPromise: Repromise.t(_, _) => bool = "";
 
 [@bs.val]
 external jsPromiseIsPromise: Js.Promise.t(_) => bool = "isPromise";
+
+[@bs.val]
+external jsPromiseIsPromiseLike: Js.Promise.t(_) => bool = "isPromiseLike";
 
 
 
@@ -67,6 +74,16 @@ let interopTests = Framework.suite("interop", [
 ]);
 
 
+
+external castToPromise:
+  {."_then": ('a => unit, 'e => unit) => unit} => Js.Promise.t('a) =
+  "%identity";
+
+let makePromiseLike: 'a => Js.Promise.t('a) = v =>
+  {"_then": (resolve, _) => resolve(v)} |> castToPromise;
+
+let makeAlmostPromiseLike = v =>
+  {"_then": v};
 
 let isPromiseResolvedWith42 = p =>
   if (not(isPromise(p))) {
@@ -163,9 +180,17 @@ let soundnessTests = Framework.suite("soundness", [
     Repromise.reject(Js.Promise.resolve(42))
     |> Repromise.catch(p => Repromise.resolve(jsPromiseIsPromise(p)));
   }),
+
+  test("resolve: Promise-like", () => {
+    Repromise.resolve(makePromiseLike())
+    |> Repromise.then_(p => Repromise.resolve(jsPromiseIsPromiseLike(p)));
+  }),
+
+  test("resolve: Almost-Promise-like", () => {
+    Repromise.resolve(makeAlmostPromiseLike(42))
+    |> Repromise.then_(x => Repromise.resolve(x##_then == 42))
+  }),
 ]);
-
-
 
 let nodeTests = Framework.suite("node", [
   test("path.delimiter", () => {

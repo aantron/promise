@@ -63,7 +63,6 @@ function catch_(callback, promise) {
 
     return promise.catch(safeCallback);
 }
-
 |}];
 
 [@bs.val]
