@@ -75,6 +75,10 @@ let interopTests = Framework.suite("interop", [
 
 
 
+/* The method name "_then," below, is actually resolved to "then" in JavaScript.
+   The leading underscore is removed by BuckleScript. This mangling is for
+   avoiding collision with the OCaml keyword "then." */
+
 external castToPromise:
   {."_then": ('a => unit, 'e => unit) => unit} => Js.Promise.t('a) =
   "%identity";
@@ -191,6 +195,8 @@ let soundnessTests = Framework.suite("soundness", [
     |> Repromise.then_(x => Repromise.resolve(x##_then == 42))
   }),
 ]);
+
+
 
 let nodeTests = Framework.suite("node", [
   test("path.delimiter", () => {
