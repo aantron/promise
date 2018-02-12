@@ -39,7 +39,7 @@ familiar `let%await` syntax as in the example above!
 
 ## Trying it out
 
-#### With esy:
+#### With esy (native):
 
 ```
 git clone https://github.com/aantron/repromise.git
@@ -49,7 +49,7 @@ esy jbuilder build test/test.exe
 _build/default/test/test.exe
 ```
 
-#### With opam:
+#### With opam (native):
 
 ```
 git clone https://github.com/aantron/repromise.git
@@ -61,7 +61,7 @@ jbuilder build test/test.exe
 _build/default/test/test.exe
 ```
 
-#### With npm:
+#### With npm (JS):
 
 ```
 git clone https://github.com/aantron/repromise.git
