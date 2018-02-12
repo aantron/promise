@@ -7,7 +7,7 @@
   "author": {
     "name": "Anton Bachin",
     "email": "antonbachin@yahoo.com",
-    "url": "github.com/aantron"
+    "url": "https://github.com/aantron"
   },
   "dependencies": {
     "bs-platform": "^2.1.0",
@@ -16,6 +16,7 @@
   },
   "scripts": {
     "build": "bsb -make-world",
+    "watch": "bsb -w -make-world",
     "clean": "bsb -clean-world"
   }
 }

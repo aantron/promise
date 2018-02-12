@@ -7,3 +7,4 @@ _build/
 esy.lock
 ppx_await
 scratch/
+.vscode/
