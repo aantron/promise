@@ -72,6 +72,23 @@ npm run build
 node ./test/lib/js/test.js
 ```
 
+#### Note for npm and opam:
+
+The Repromise `let%await` syntax depends on the latest development Reason
+toolchain, hopefully to be released soon as Reason 3.0.5. In the meantime, you
+need to have the development `refmt` installed and accessible through your
+`PATH`.
+
+The esy build already handles this. For npm and opam, one suggested way to get
+the latest `refmt` is to use opam to pin the `reason` package, which contains
+`refmt`, to its development repo:
+
+```
+opam switch 4.02.3+buckle-master
+eval `opam config env`
+opam pin --dev-repo reason
+```
+
 
 
 <br/>
