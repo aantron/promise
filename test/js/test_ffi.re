@@ -47,6 +47,11 @@ let interopTests = Framework.suite("interop", [
     Repromise.resolve(isPromise(p));
   }),
 
+  test("map is js promise", () => {
+    let p = Repromise.new_((_, _) => ()) |> Repromise.map(v => v);
+    Repromise.resolve(isPromise(p));    
+  }),
+
   test("catch is js promise", () => {
     let p =
       Repromise.new_((_, _) => ())
