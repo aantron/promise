@@ -29,9 +29,9 @@ let basicTests = Framework.suite("basic", [
 
   test("map soundness", () => {    
       Repromise.resolve(6) 
-      |> Repromise.map(v => Repromise.resolve(v * 7))
-      |> Repromise.map(Repromise.then_((x: int) => Repromise.resolve(x == 42)))
-      |> Repromise.map(r => r);
+      |> Repromise.map(v => v * 7)
+      |> Repromise.map(x => Repromise.resolve(x == 42))
+      |> Repromise.then_(r => r);
   }),
   
   test("await", () => {
