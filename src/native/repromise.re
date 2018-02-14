@@ -92,8 +92,10 @@ let then_ = (callback, promise) =>
       callbacks.onReject = callbacks.onReject @ [rejectOuter];
     };
   });
-let map = (mapper, promise) => 
-  then_(value => resolve(mapper(value)), promise);  
+
+let map = (mapper, promise) =>
+  then_(value => resolve(mapper(value)), promise);
+
 let catch = (callback, promise) =>
   new_((resolveOuter, rejectOuter) => {
     let onReject = (error) =>
