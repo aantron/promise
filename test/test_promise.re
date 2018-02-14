@@ -14,6 +14,26 @@ let basicTests = Framework.suite("basic", [
     |> Repromise.then_ (n => Repromise.resolve (n == 1));
   }),
 
+  test("map", () => {
+    let p = Repromise.resolve(6) |> Repromise.map(v => v * 7);
+    p |> Repromise.then_(r => Repromise.resolve(r == 42));
+  }),
+
+  test("map chain", () => {
+    let p =
+      Repromise.resolve(6)
+      |> Repromise.map(v => v * 7)
+      |> Repromise.map(r => r * 10);
+    p |> Repromise.then_(r => Repromise.resolve(r == 420));
+  }),
+
+  test("map soundness", () => {
+      Repromise.resolve(6)
+      |> Repromise.map(v => v * 7)
+      |> Repromise.map(x => Repromise.resolve(x == 42))
+      |> Repromise.then_(r => r);
+  }),
+
   test("await", () => {
     let%await n = Repromise.resolve(1);
     Repromise.resolve(n == 1);

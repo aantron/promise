@@ -76,6 +76,9 @@ external resolve: 'a => promise('a, _) = "";
 external then_:
   ('a => promise('b, 'e), promise('a, 'e)) => promise('b, 'e) = "then";
 
+[@bs.val]
+external map: ('a => 'b, promise('a, 'e)) => promise('b, 'e) = "then";
+
 [@bs.scope "Promise"]
 [@bs.val]
 external reject: 'e => promise(_, 'e) = "";
