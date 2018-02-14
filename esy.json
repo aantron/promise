@@ -23,7 +23,7 @@
     "@opam/ctypes-foreign": "*",
     "@opam/jbuilder": "^1.0.0-beta16",
     "@opam/ocaml-migrate-parsetree": "^1.0.0",
-    "@opam/reason": "facebook/reason#b622e8f40c5605e9ab2b2423eb78053b8690d14e"
+    "@opam/reason": "facebook/reason#6abc3c31c18a9e4acd8bfbe90faf4d8304791b33"
   },
   "peerDependencies": {
     "ocaml": "4.6.x"
