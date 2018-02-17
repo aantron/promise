@@ -1,0 +1,18 @@
+sudo: required
+
+language: generic
+
+env:
+  - BUILD_SYSTEM=npm
+  - BUILD_SYSTEM=esy
+  - BUILD_SYSTEM=opam
+
+script:
+  bash test/travis.sh
+
+notifications:
+  email:
+    recipients:
+      - antonbachin@yahoo.com
+    on_success: always
+    on_failure: always

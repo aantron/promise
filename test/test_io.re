@@ -11,6 +11,7 @@ let suite = Framework.suite("io", [
   test("read", () => {
     let%await fd = Io.open_("test/test_io.re");
     let%await data = Io.read(~fd, ~length = 3);
+    Printf.eprintf("%s %i %s", data, String.length(data), Sys.getcwd());
     Repromise.resolve(data == "let");
   }),
 ]);
