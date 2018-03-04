@@ -86,7 +86,7 @@ the latest `refmt` is to use opam to pin the `reason` package, which contains
 ```
 opam switch 4.02.3+buckle-master
 eval `opam config env`
-opam pin --dev-repo reason
+opam pin add --dev-repo reason
 ```
 
 
