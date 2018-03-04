@@ -199,6 +199,14 @@ let soundnessTests = Framework.suite("soundness", [
     Repromise.resolve(makeAlmostPromiseLike(42))
     |> Repromise.then_(x => Repromise.resolve(x##_then == 42))
   }),
+
+  test("race", () => {
+    let resolveP1 = ref(ignore);
+    let p1 = Repromise.new_((resolve, _reject) => resolveP1 := resolve);
+    let p2 = Repromise.race([p1]);
+    resolveP1^(Repromise.resolve(42));
+    p2 |> Repromise.then_(isPromiseResolvedWith42);
+  }),
 ]);
 
 

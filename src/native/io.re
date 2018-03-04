@@ -24,20 +24,22 @@ let rec run = () => {
        again is if some I/O completes. So, in this case, we want to put our
        thread to sleep until then. */
   let libuv_loop_run_mode =
-    switch Repromise.readyCallbacks^ {
-      | [] => `One_iteration
-      | _ => `Poll_only
+    if (Repromise.ReadyCallbacks.callbacksPending()) {
+      `Poll_only
+    }
+    else {
+      `One_iteration
     };
 
   let io_status = Libuv_loop.run(loop, libuv_loop_run_mode);
-  let callbacks_for_this_tick = Repromise.readyCallbacks^;
+  let snapshot = Repromise.ReadyCallbacks.snapshot();
 
   /* If we don't have any callbacks to run, and also libuv says that no I/O is
      pending, then we should stop the loop by returning from this function
      [run], which typically terminates the program, because [run] is typically
      the last thing called by the user. */
-  switch (io_status, callbacks_for_this_tick) {
-    | (`Done, []) => ()
+  switch (io_status, Repromise.ReadyCallbacks.isEmpty(snapshot)) {
+    | (`Done, true) => ()
     | _ => {
       /* We have either callbacks or more I/O waiting. Call all the callbacks.
 
@@ -45,8 +47,7 @@ let rec run = () => {
          can also directly add new callbacks to the ready callback queue.
          However, we won't run those new callbacks until the next tick, because
          we snapshotted the callback list into [callbacks_for_this_tick]. */
-      Repromise.readyCallbacks := [];
-      callbacks_for_this_tick |> List.iter(callback => callback());
+      Repromise.ReadyCallbacks.call(snapshot);
 
       /* Repeat the loop. */
       run();

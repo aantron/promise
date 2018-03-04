@@ -1,5 +1,7 @@
 let test = Framework.test;
 
+
+
 let basicTests = Framework.suite("basic", [
   /* The basic [resolve]-[then_] tests are a bit useless, because the testing
      framework itself already uses both [resolved] and [then], i.e. every test
@@ -103,6 +105,8 @@ let basicTests = Framework.suite("basic", [
   }),
 ]);
 
+
+
 let rejectTests = Framework.suite("reject", [
   test("new_", () => {
     Repromise.new_((_, reject) => reject(1))
@@ -156,4 +160,124 @@ let rejectTests = Framework.suite("reject", [
   }),
 ]);
 
-let suites = [basicTests, rejectTests];
+
+
+let remainsPending = (p, dummyValue) => {
+  let rec repeat = (n, f) =>
+    if (n == 0) {
+      Repromise.resolve(true);
+    }
+    else {
+      f ()
+      |> Repromise.then_(result =>
+        if (not(result)) {
+          Repromise.resolve(false);
+        }
+        else {
+          repeat(n - 1, f);
+        })
+    };
+
+  repeat(10, () =>
+    Repromise.race([p, Repromise.resolve(dummyValue)])
+    |> Repromise.then_(v1 =>
+      Repromise.race([Repromise.resolve(dummyValue), p])
+      |> Repromise.map(v2 =>
+        v1 == dummyValue && v2 == dummyValue)));
+};
+
+let raceTests = Framework.suite("race", [
+  test("first resolves", () => {
+    let resolveP1 = ref(ignore);
+    let p1 = Repromise.new_((resolve, _reject) => resolveP1 := resolve);
+    let p2 = Repromise.new_((_resolve, _reject) => ());
+    let p3 = Repromise.race([p1, p2]);
+    resolveP1^(42);
+    p3 |> Repromise.map(n => n == 42);
+  }),
+
+  test("second resolves", () => {
+    let resolveP2 = ref(ignore);
+    let p1 = Repromise.new_((_resolve, _reject) => ());
+    let p2 = Repromise.new_((resolve, _reject) => resolveP2 := resolve);
+    let p3 = Repromise.race([p1, p2]);
+    resolveP2^(43);
+    p3 |> Repromise.map(n => n == 43);
+  }),
+
+  test("first resolves first", () => {
+    let resolveP1 = ref(ignore);
+    let resolveP2 = ref(ignore);
+    let p1 = Repromise.new_((resolve, _reject) => resolveP1 := resolve);
+    let p2 = Repromise.new_((resolve, _reject) => resolveP2 := resolve);
+    let p3 = Repromise.race([p1, p2]);
+    resolveP1^(42);
+    resolveP2^(43);
+    p3 |> Repromise.map(n => n == 42);
+  }),
+
+  test("second resolves first", () => {
+    let resolveP1 = ref(ignore);
+    let resolveP2 = ref(ignore);
+    let p1 = Repromise.new_((resolve, _reject) => resolveP1 := resolve);
+    let p2 = Repromise.new_((resolve, _reject) => resolveP2 := resolve);
+    let p3 = Repromise.race([p1, p2]);
+    resolveP2^(43);
+    resolveP1^(42);
+    p3 |> Repromise.map(n => n == 43);
+  }),
+
+  test("rejection", () => {
+    let rejectP1 = ref(ignore);
+    let p1 = Repromise.new_((_resolve, reject) => rejectP1 := reject);
+    let p2 = Repromise.new_((_resolve, _reject) => ());
+    let p3 = Repromise.race([p1, p2]);
+    rejectP1^(42);
+    p3 |> Repromise.catch(n => Repromise.resolve(n == 42));
+  }),
+
+  test("already resolved", () => {
+    let p1 = Repromise.new_((_resolve, _reject) => ());
+    let p2 = Repromise.resolve(43);
+    let p3 = Repromise.race([p1, p2]);
+    p3 |> Repromise.map(n => n == 43);
+  }),
+
+  test("already rejected", () => {
+    let p1 = Repromise.new_((_resolve, _reject) => ());
+    let p2 = Repromise.reject(43);
+    let p3 = Repromise.race([p1, p2]);
+    p3 |> Repromise.catch(n => Repromise.resolve(n == 43));
+  }),
+
+  test("two resolved", () => {
+    let p1 = Repromise.resolve(42);
+    let p2 = Repromise.resolve(43);
+    let p3 = Repromise.race([p1, p2]);
+    p3 |> Repromise.map(n => n == 42 || n == 43);
+  }),
+
+  test("forever pending", () => {
+    let p1 = Repromise.new_((_resolve, _reject) => ());
+    let p2 = Repromise.new_((_resolve, _reject) => ());
+    let p3 = Repromise.race([p1, p2]);
+    remainsPending(p3, 43);
+  }),
+
+  test("simultaneous resolve", () => {
+    let resolveP1 = ref(ignore);
+    let p1 = Repromise.new_((resolve, _reject) => resolveP1 := resolve);
+    let p2 = Repromise.race([p1, p1]);
+    resolveP1^(42);
+    p2 |> Repromise.map(n => n == 42);
+  }),
+
+  test("empty", () => {
+    let p = Repromise.race([]);
+    remainsPending(p, ());
+  }),
+]);
+
+
+
+let suites = [basicTests, rejectTests, raceTests];

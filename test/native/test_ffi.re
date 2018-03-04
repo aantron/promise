@@ -2,18 +2,39 @@ let test = Framework.test;
 
 
 
+/* Counts the number of live words in the heap at the time it is called. To get
+   the number allocated and retained between two points, call this function at
+   both points, then subtract the two results from each other. */
+let countAllocatedWords = () => {
+  Gc.full_major();
+  let stat = Gc.stat();
+  stat.Gc.live_words;
+};
+
+/* Checks that loop() does not leak memory. loop() is a function that starts an
+   asynchronous computation, and the promise it returns resolves with the number
+   of words allocated in the heap during the computation. loop() is run twice,
+   the second time for 10 times as many iterations as the first. IF the number
+   of words allocated is not roughly constant, the computation leaks memory.
+
+   baseIterations is used to adjust how many iterations to run. Different loops
+   take different amounts of time, and we don't want to slow down the tests too
+   much by running a slow loop for too many iterations. */
+let doesNotLeakMemory = (loop, baseIterations) =>
+  loop(baseIterations)
+  |> Repromise.then_(wordsAllocated =>
+
+    loop(baseIterations * 10)
+    |> Repromise.then_(wordsAllocated' => {
+
+      let ratio = float_of_int(wordsAllocated') /. float_of_int(wordsAllocated);
+      Repromise.resolve(ratio < 2.);
+    }));
+
+
+
 let promiseLoopTests = Framework.suite("promise loop", [
   test("promise loop memory leak", () => {
-    /* Counts the number of live words in the heap at the time it is called. To
-       get the number allocated and retained between two points, call this
-       function at both points, then subtract the two results from each
-       other. */
-    let countAllocatedWords = () => {
-      Gc.full_major();
-      let stat = Gc.stat();
-      stat.Gc.live_words;
-    };
-
     /* A pretty simple promise loop. This is just a function that takes a
        promise, and calls .then_ on it. The callback passed to .then_ calls the
        loop recursively, passing another promise to the next iteration. The
@@ -54,24 +75,60 @@ let promiseLoopTests = Framework.suite("promise loop", [
       promiseLoop(Repromise.resolve(n));
     };
 
-    /* Run the above promise loop for N iterations, then for k*N iterations. If
-       about k times more memory was allocated during k*N iterations, then the
-       loop leaks memory. */
-    let n = 1337;
-    let k = 10;
+    doesNotLeakMemory(instrumentedPromiseLoop, 1000);
+  }),
+]);
 
-    instrumentedPromiseLoop(n)
-    |> Repromise.then_(wordsAllocated =>
 
-      instrumentedPromiseLoop(k * n)
-      |> Repromise.then_(wordsAllocated' => {
 
-        let ratio =
-          float_of_int(wordsAllocated') /. float_of_int(wordsAllocated);
-        let ratio_ok = ratio < 2.;
+let raceLoopTests = Framework.suite("race loop", [
+  test("race loop memory leak", () => {
+    /* To implement p3 = Repromise.race([p1, p2]), Repromise has to attach
+       callbacks to p1 and p2, so that whichever of them is the first to resolve
+       will cause the resolution of p3. This means that p1 and p2 hold
+       references to p3.
 
-        Repromise.resolve(ratio_ok);
-      }))
+       If, say, p1 is a promise that remains pending for a really long time, and
+       it is raced with many other promises in a loop, i.e.
+
+         p3 = Repromise.race([p1, p2])
+         p3' = Repromise.race([p1, p2'])
+         etc.
+
+       Then p1 will accumulate callbacks with references to p3, p3', etc. This
+       will be a memory leak, that grows in proportion to the number of times
+       the race loop has run.
+
+       Since this is a common usage pattern, a reasonable implementation has to
+       remove callbacks from p1  when p3, p3', etc. are resolved by race. This
+       test checks for such an implementation. */
+    let instrumentedRaceLoop = n => {
+      let foreverPendingPromise = Repromise.new_((_resolve, _reject) => ());
+
+      let initialWords = countAllocatedWords();
+
+      let rec raceLoop = n =>
+        if (n == 0) {
+          let wordsAllocated = countAllocatedWords() - initialWords;
+          Repromise.resolve(wordsAllocated);
+        }
+        else {
+          let resolveShortLivedPromise = ref(ignore);
+          let shortLivedPromise = Repromise.new_((resolve, _reject) =>
+            resolveShortLivedPromise := resolve);
+
+          let racePromise =
+            Repromise.race([foreverPendingPromise, shortLivedPromise]);
+
+          resolveShortLivedPromise^();
+
+          racePromise |> Repromise.then_(() => raceLoop(n - 1));
+        };
+
+      raceLoop(n);
+    };
+
+    doesNotLeakMemory(instrumentedRaceLoop, 100);
   }),
 ]);
 
@@ -96,4 +153,4 @@ let libuvTests = Framework.suite("libuv", [
 
 
 
-let suites = [promiseLoopTests, libuvTests];
+let suites = [promiseLoopTests, raceLoopTests, libuvTests];

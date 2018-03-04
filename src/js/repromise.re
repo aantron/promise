@@ -68,7 +68,6 @@ function catch_(callback, promise) {
 [@bs.val]
 external new_: (('a => unit) => ('e => unit) => unit) => promise('a, 'e) = "";
 
-/* To what will this... resolve? */
 [@bs.val]
 external resolve: 'a => promise('a, _) = "";
 
@@ -87,4 +86,27 @@ external reject: 'e => promise(_, 'e) = "";
 external catch:
   ('e => promise('a, 'e2), promise('a, 'e)) => promise('a, 'e2) = "catch_";
 
-let readyCallbacks: ref(list(unit => unit)) = ref([]);
+[@bs.scope "Promise"]
+[@bs.val]
+external jsRace: array(promise('a, 'e)) => promise('a, 'e) = "race";
+
+let race = promises =>
+  jsRace(Array.of_list(promises));
+
+
+
+module ReadyCallbacks = {
+  let callbacksPending = () =>
+    failwith("unnecessary on JS");
+
+  type snapshot;
+
+  let snapshot = () =>
+    failwith("unnecessary on JS");
+
+  let isEmpty = _snapshot =>
+    failwith("unnecessary on JS");
+
+  let call = _snapshot =>
+    failwith("unnecessary on JS");
+};
