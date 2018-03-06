@@ -113,6 +113,25 @@ let basicTests = Framework.suite("basic", [
       p |> Repromise.map(n' =>
         n == 42 && n' == 42)});
   }),
+
+  test("callback order (already resolved)", () => {
+    let firstCallbackCalled = ref(false);
+    let p = Repromise.resolve();
+    p |> Repromise.map(() => firstCallbackCalled := true) |> ignore;
+    p |> Repromise.map(() => firstCallbackCalled^);
+  }),
+
+  test("callback order (resolved later)", () => {
+    let firstCallbackCalled = ref(false);
+    let secondCallbackCalledSecond = ref(false);
+    let resolveP = ref(ignore);
+    let p = Repromise.new_((resolve, _reejct) => resolveP := resolve);
+    p |> Repromise.map(() => firstCallbackCalled := true) |> ignore;
+    p |> Repromise.map(() =>
+      secondCallbackCalledSecond := firstCallbackCalled^) |> ignore;
+    resolveP^();
+    p |> Repromise.map(() => secondCallbackCalledSecond^);
+  }),
 ]);
 
 
