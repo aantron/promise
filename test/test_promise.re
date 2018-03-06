@@ -286,6 +286,54 @@ let raceTests = Framework.suite("race", [
     let p = Repromise.race([]);
     remainsPending(p, ());
   }),
+
+  /* This test is for an implementation detail. When a pending promise p is
+     returned by the callback of then_, the native implementation (and
+     non-memory-leaking JavaScript implementations) will move the callbacks
+     attached to p into the list attached to the outer promise of then_. We want
+     to make sure that callbacks attached by race survive this moving. For that,
+     p has to be involved in a call to race. */
+  test("race, then callbacks moved", () => {
+    let resolveP = ref(ignore);
+    let p = Repromise.new_((resolve, _reject) => resolveP := resolve);
+    let final = Repromise.race([p]);
+
+    /* We are using this resolve() just so we can call then_ on it, guaranteeing
+       that the second time will run after the first time.. */
+    let delay = Repromise.resolve();
+
+    delay
+    |> Repromise.then_(fun () => p)
+    |> ignore;
+
+    delay
+    |> Repromise.then_(fun () => {
+      resolveP^(42);
+      /* This tests now succeeds only if resolving p resolved final^, despite
+         the fact that p was returned to then_ while still a pending promise. */
+      final |> Repromise.map(n => n == 42);
+    });
+  }),
+
+  /* Similar to the preceding test, but the race callback is attached to p after
+     its callback list has been merged with the outer promise of then_. */
+  test("callbacks moved, then race", () => {
+    let resolveP = ref(ignore);
+    let p = Repromise.new_((resolve, _reject) => resolveP := resolve);
+
+    let delay = Repromise.resolve();
+
+    delay
+    |> Repromise.then_(fun () => p)
+    |> ignore;
+
+    delay
+    |> Repromise.then_(fun () => {
+      let final = Repromise.race([p]);
+      resolveP^(42);
+      final |> Repromise.map(n => n == 42);
+    });
+  }),
 ]);
 
 

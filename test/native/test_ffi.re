@@ -77,6 +77,52 @@ let promiseLoopTests = Framework.suite("promise loop", [
 
     doesNotLeakMemory(instrumentedPromiseLoop, 1000);
   }),
+
+  test("promise tower memory leak", () => {
+    /* The fix for the above memory leak carries a potential pitfall: the fix is
+       to merge the inner promise returned to then_ into then_'s outer promise.
+       After that, all operations on the inner promise reference are actually
+       performed on the outer promise.
+
+       This carries the danger that a tower of these merged promises can build
+       up. If a pending promise is repeatedly returned to then_, it will
+       gradually become the head of a growing chain of forwarding promises, that
+       point to the outer promise created in the last call to then_.
+
+       To avoid this, the implementation has to perform union-find: each time it
+       traverses a chain of merged promises, it has to set the head promise to
+       point directly to the final outer promise, cutting out all intermediate
+       merged promises. Then, any of these merged promises that aren't being
+       referenced by the user program can be garbage-collected. */
+    let instrumentedPromiseTower = n => {
+      let foreverPendingPromise = Repromise.new_((_resolve, _reject) => ());
+
+      let initialWords = countAllocatedWords();
+
+      let rec tryToBuildTower = n =>
+        if (n == 0) {
+          let wordsAllocated = countAllocatedWords() - initialWords;
+          Repromise.resolve(wordsAllocated);
+        }
+        else {
+          /* The purpose of the delay promise is to make sure the second call to
+             then_ runs after the first. */
+          let delay = Repromise.resolve();
+
+          /* If union-find is not implemented, we will leak memory here. */
+          delay
+          |> Repromise.then_(() => foreverPendingPromise)
+          |> ignore;
+
+          delay
+          |> Repromise.then_(() => tryToBuildTower(n - 1));
+        };
+
+      tryToBuildTower(n);
+    };
+
+    doesNotLeakMemory(instrumentedPromiseTower, 1000);
+  }),
 ]);
 
 
@@ -123,6 +169,63 @@ let raceLoopTests = Framework.suite("race loop", [
           resolveShortLivedPromise^();
 
           racePromise |> Repromise.then_(() => raceLoop(n - 1));
+        };
+
+      raceLoop(n);
+    };
+
+    doesNotLeakMemory(instrumentedRaceLoop, 100);
+  }),
+
+  test("race loop memory leak with then_ merging", () => {
+    /* This test is like the one above, but it tests for the interaction of the
+       fixes for the then_ and race loop memory leaks. The danger is:
+
+       - The then_ fix "wants" to merge callback lists when an inner pending
+         promise is returned from the callback of then_.
+       - The race fix "wants" to delete callbacks from a callback list, when a
+         promise "loses" to another one that resolved sooner.
+
+       It is important that the callback list merging performed by then_ doesn't
+       prevent race from finding and deleting the correct callbacks in the
+       merged lists. */
+    let instrumentedRaceLoop = n => {
+      let foreverPendingPromise = Repromise.new_((_resolve, _reject) => ());
+
+      let initialWords = countAllocatedWords();
+
+      let rec raceLoop = n =>
+        if (n == 0) {
+          let wordsAllocated = countAllocatedWords() - initialWords;
+          Repromise.resolve(wordsAllocated);
+        }
+        else {
+          let resolveShortLivedPromise = ref(ignore);
+          let shortLivedPromise = Repromise.new_((resolve, _reject) =>
+            resolveShortLivedPromise := resolve);
+
+          let racePromise =
+            Repromise.race([foreverPendingPromise, shortLivedPromise]);
+
+          /* Return foreverPendingPromise from the callback of then_. This
+             causes all of its callbacks to be moved to the outer promise of the
+             then_ (which we don't give a name to). The delay promise is just
+             used to make the second call to then_ definitely run after the
+             first. */
+          let delay = Repromise.resolve();
+
+          delay
+          |> Repromise.then_(() => foreverPendingPromise)
+          |> ignore;
+
+          delay
+          |> Repromise.then_(() => {
+            /* Now, we resolve the short-lived promise. If that doesn't delete
+               the callback that was merged away from foreverPendingPromise,
+               then this is where we will accumulate the memory leak. */
+            resolveShortLivedPromise^();
+            racePromise |> Repromise.then_(() => raceLoop(n - 1));
+          });
         };
 
       raceLoop(n);
