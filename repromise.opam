@@ -14,7 +14,7 @@ depends: [
   "conf-libuv"
   "ctypes"
   "ctypes-foreign"
-  "jbuilder" {build & >= "1.0+beta10"}
+  "jbuilder" {build & >= "1.0+beta17"}
   "reason" {build & >= "3.0.0"}
 ]
 

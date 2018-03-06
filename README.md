@@ -45,8 +45,7 @@ familiar `let%await` syntax as in the example above!
 git clone https://github.com/aantron/repromise.git
 cd repromise
 esy install
-esy jbuilder build test/test.exe
-_build/default/test/test.exe
+esy jbuilder exec test/test.exe
 ```
 
 #### With opam (native):
@@ -57,8 +56,7 @@ cd repromise
 opam pin add --dev-repo reason
 opam pin add repromise .
 opam pin add ppx_await .
-jbuilder build test/test.exe
-_build/default/test/test.exe
+jbuilder exec test/test.exe
 ```
 
 #### With npm (JS):
