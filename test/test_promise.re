@@ -103,6 +103,16 @@ let basicTests = Framework.suite("basic", [
     resolve_p^(1);
     p;
   }),
+
+  test("double resolve", () => {
+    let resolveP = ref(ignore);
+    let p = Repromise.new_((resolve, _reject) => resolveP := resolve);
+    resolveP^(42);
+    p |> Repromise.then_(n => {
+      resolveP^(43);
+      p |> Repromise.map(n' =>
+        n == 42 && n' == 42)});
+  }),
 ]);
 
 
