@@ -215,6 +215,83 @@ let remainsPending = (p, dummyValue) => {
         v1 == dummyValue && v2 == dummyValue)));
 };
 
+let allTests = Framework.suite("all", [
+  test("already resolved", () => {
+    Repromise.all([Repromise.resolve(42), Repromise.resolve(43)])
+    |> Repromise.map(results => results == [42, 43]);
+  }),
+
+  test("resolved later", () => {
+    let resolveP1 = ref(ignore);
+    let resolveP2 = ref(ignore);
+    let p1 = Repromise.new_((resolve, _reject) => resolveP1 := resolve);
+    let p2 = Repromise.new_((resolve, _reject) => resolveP2 := resolve);
+    let p3 = Repromise.all([p1, p2]);
+    resolveP1^(42);
+    resolveP2^(43);
+    p3 |> Repromise.map(results => results == [42, 43]);
+  }),
+
+  test("not all resolved", () => {
+    let resolveP1 = ref(ignore);
+    let p1 = Repromise.new_((resolve, _reject) => resolveP1 := resolve);
+    let p2 = Repromise.new_((_, _) => ());
+    let p3 = Repromise.all([p1, p2]);
+    resolveP1^(42);
+    remainsPending(p3, []);
+  }),
+
+  test("simultaneous resolve", () => {
+    let resolveP1 = ref(ignore);
+    let p1 = Repromise.new_((resolve, _reject) => resolveP1 := resolve);
+    let p2 = Repromise.all([p1, p1]);
+    resolveP1^(42);
+    p2 |> Repromise.map(results => results == [42, 42]);
+  }),
+
+  test("already rejected", () => {
+    let p1 = Repromise.new_((_, _) => ());
+    let p2 = Repromise.all([p1, Repromise.reject(43)]);
+    p2
+    |> Repromise.then_((_) => Repromise.resolve(false))
+    |> Repromise.catch(n => Repromise.resolve(n == 43));
+  }),
+
+  test("rejected later", () => {
+    let rejectP1 = ref(ignore);
+    let p1 = Repromise.new_((_resolve, reject) => rejectP1 := reject);
+    let p2 = Repromise.new_((_, _) => ());
+    let p3 = Repromise.all([p1, p2]);
+    rejectP1^(42);
+    p3
+    |> Repromise.then_((_) => Repromise.resolve(false))
+    |> Repromise.catch(n => Repromise.resolve(n == 42));
+  }),
+
+  test("remains rejected", () => {
+    let rejectP1 = ref(ignore);
+    let resolveP2 = ref(ignore);
+    let p1 = Repromise.new_((_resolve, reject) => rejectP1 := reject);
+    let p2 = Repromise.new_((resolve, _reject) => resolveP2 := resolve);
+    let p3 = Repromise.all([p1, p2]);
+    rejectP1^(42);
+    resolveP2^(43);
+    p2
+    |> Repromise.catch((_) => assert false)
+    |> Repromise.then_((_) =>
+      p3
+      |> Repromise.then_((_) => Repromise.resolve(false))
+      |> Repromise.catch(n => Repromise.resolve(n == 42)));
+  }),
+
+  test("empty", () => {
+    let p = Repromise.all([]);
+    remainsPending(p, []);
+  }),
+]);
+
+
+
 let raceTests = Framework.suite("race", [
   test("first resolves", () => {
     let resolveP1 = ref(ignore);
@@ -357,4 +434,4 @@ let raceTests = Framework.suite("race", [
 
 
 
-let suites = [basicTests, rejectTests, raceTests];
+let suites = [basicTests, rejectTests, allTests, raceTests];

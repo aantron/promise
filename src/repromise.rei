@@ -15,7 +15,11 @@ let map: ('a => 'b, promise('a, 'e)) => promise('b, 'e);
 
 let catch: ('e => promise('a, 'e2), promise('a, 'e)) => promise('a, 'e2);
 
+let all: list(promise('a, 'e)) => promise(list('a), 'e);
+
 let race: list(promise('a, 'e)) => promise('a, 'e);
+
+
 
 let onUnhandledException: ref(exn => never);
 

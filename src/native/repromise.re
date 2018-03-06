@@ -390,6 +390,81 @@ let catch = (callback, promise) => {
 
 
 
+let all = promises => {
+  let callbackRemovers: ref(list(unit => unit)) = ref([]);
+  let removeAllCallbacks = () => {
+    callbackRemovers^ |> List.iter(remover => remover());
+    callbackRemovers := [];
+  };
+
+  let addCallbackRemover = (promise, whichList, callbackNode) => {
+    let remover = () =>
+      switch (underlying(promise))^ {
+      | `Pending(callbacks) =>
+        MutableList.remove(whichList(callbacks), callbackNode);
+      | _ =>
+        ();
+      };
+    callbackRemovers := [remover, ...callbackRemovers^];
+  };
+
+  let finalPromise = newInternal();
+
+  let unresolvedPromiseCount = ref(List.length(promises));
+  let results = ref([]);
+
+  let onResolve = (cell, value) => {
+    cell := Some(value);
+    unresolvedPromiseCount := unresolvedPromiseCount^ - 1;
+    if (unresolvedPromiseCount^ == 0) {
+      results^
+      |> List.map(cell =>
+        switch cell^ {
+        | None => assert(false)
+        | Some(value) => value
+        })
+      |> resolveInternal(finalPromise);
+    };
+  };
+
+  let rejectFinalPromise = error => {
+    removeAllCallbacks();
+    rejectInternal(finalPromise, error);
+  };
+
+  results :=
+    promises |> List.map(promise => {
+      let cell = ref(None);
+
+      switch (underlying(promise))^ {
+      | `Resolved(value) =>
+        ReadyCallbacks.defer(onResolve(cell), value);
+      | `Rejected(error) =>
+        ReadyCallbacks.defer(rejectFinalPromise, error);
+      | `Pending(callbacks) =>
+        let callbackNode =
+          MutableList.append(callbacks.onResolve, onResolve(cell));
+        addCallbackRemover(
+          promise, callbacks => callbacks.onResolve, callbackNode);
+
+        let callbackNode =
+          MutableList.append(callbacks.onReject, rejectFinalPromise);
+        addCallbackRemover(
+          promise, callbacks => callbacks.onReject, callbackNode);
+
+      | `Merged(_) =>
+        /* Impossible because of the call to underlying above. */
+        assert(false);
+      };
+
+      cell;
+    });
+
+  finalPromise;
+};
+
+
+
 let race = promises => {
   /* We need to keep track of the callbacks we attach to the promises in the
      argument list, so that when the first promise resolves, we remove all the

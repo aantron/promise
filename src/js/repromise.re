@@ -14,6 +14,13 @@ function WrappedRepromise(p) {
     this.wrapped = p;
 };
 
+function unwrap(value) {
+    if (value instanceof WrappedRepromise)
+        return value.wrapped;
+    else
+        return value;
+}
+
 function new_(executor) {
     return new Promise(function (resolve, reject) {
         var wrappingResolve = function(value) {
@@ -44,10 +51,7 @@ function then(callback, promise) {
     };
 
     return promise.then(function (value) {
-        if (value instanceof WrappedRepromise)
-            return safeCallback(value.wrapped);
-        else
-            return safeCallback(value);
+        return safeCallback(unwrap(value));
     });
 };
 
@@ -85,6 +89,20 @@ external reject: 'e => promise(_, 'e) = "";
 [@bs.val]
 external catch:
   ('e => promise('a, 'e2), promise('a, 'e)) => promise('a, 'e2) = "catch_";
+
+[@bs.val]
+external unwrap: 'a => 'a = "";
+
+[@bs.scope "Promise"]
+[@bs.val]
+external jsAll: array(promise('a, 'e)) => promise(array('a), 'e) = "all";
+
+let all = promises =>
+  promises
+  |> Array.of_list
+  |> jsAll
+  |> map (results =>
+    results |> Array.map(unwrap) |> Array.to_list);
 
 [@bs.scope "Promise"]
 [@bs.val]

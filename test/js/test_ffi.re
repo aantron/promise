@@ -96,6 +96,8 @@ let makeAlmostPromiseLike = v =>
 
 let isPromiseResolvedWith42 = p =>
   if (not(isPromise(p))) {
+    prerr_endline("not a promise");
+    Js.log(p);
     Repromise.resolve(false);
   }
   else {
@@ -198,6 +200,18 @@ let soundnessTests = Framework.suite("soundness", [
   test("resolve: Almost-Promise-like", () => {
     Repromise.resolve(makeAlmostPromiseLike(42))
     |> Repromise.then_(x => Repromise.resolve(x##_then == 42))
+  }),
+
+  test("all", () => {
+    let resolveP1 = ref(ignore);
+    let p1 = Repromise.new_((resolve, _reject) => resolveP1 := resolve);
+    let p2 = Repromise.all([p1]);
+    resolveP1^(Repromise.resolve(42));
+    p2 |> Repromise.then_(results =>
+      switch (results) {
+      | [maybePromise] => isPromiseResolvedWith42(maybePromise)
+      | _ => Repromise.resolve(false)
+      });
   }),
 
   test("race", () => {
