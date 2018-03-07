@@ -14,12 +14,16 @@ let countAllocatedWords = () => {
 /* Checks that loop() does not leak memory. loop() is a function that starts an
    asynchronous computation, and the promise it returns resolves with the number
    of words allocated in the heap during the computation. loop() is run twice,
-   the second time for 10 times as many iterations as the first. IF the number
+   the second time for 10 times as many iterations as the first. If the number
    of words allocated is not roughly constant, the computation leaks memory.
 
    baseIterations is used to adjust how many iterations to run. Different loops
    take different amounts of time, and we don't want to slow down the tests too
-   much by running a slow loop for too many iterations. */
+   much by running a slow loop for too many iterations.
+
+   loop must call countAllocatedWords itself. Factoring the call out to this
+   function doesNotLeakMemory will call countAllocatedWords too late, because
+   loop will have returned and released all references that it is holding. */
 let doesNotLeakMemory = (loop, baseIterations) =>
   loop(baseIterations)
   |> Repromise.then_(wordsAllocated =>
@@ -127,111 +131,102 @@ let promiseLoopTests = Framework.suite("promise loop", [
 
 
 
-let raceLoopTests = Framework.suite("race loop", [
-  test("race loop memory leak", () => {
-    /* To implement p3 = Repromise.race([p1, p2]), Repromise has to attach
-       callbacks to p1 and p2, so that whichever of them is the first to resolve
-       will cause the resolution of p3. This means that p1 and p2 hold
-       references to p3.
-
-       If, say, p1 is a promise that remains pending for a really long time, and
-       it is raced with many other promises in a loop, i.e.
-
-         p3 = Repromise.race([p1, p2])
-         p3' = Repromise.race([p1, p2'])
-         etc.
-
-       Then p1 will accumulate callbacks with references to p3, p3', etc. This
-       will be a memory leak, that grows in proportion to the number of times
-       the race loop has run.
-
-       Since this is a common usage pattern, a reasonable implementation has to
-       remove callbacks from p1  when p3, p3', etc. are resolved by race. This
-       test checks for such an implementation. */
-    let instrumentedRaceLoop = n => {
+/* The skeleton of a test for memory safety of Repromise.race. Creates a
+   long-lived promise, and repeatedly calls the body function on it, which is
+   customized by each test. */
+let raceTest = (name, body) =>
+  test(name, () => {
+    let instrumentedLoop = n => {
       let foreverPendingPromise = Repromise.new_((_resolve, _reject) => ());
 
       let initialWords = countAllocatedWords();
 
-      let rec raceLoop = n =>
+      let rec theLoop = n =>
         if (n == 0) {
           let wordsAllocated = countAllocatedWords() - initialWords;
           Repromise.resolve(wordsAllocated);
         }
         else {
-          let resolveShortLivedPromise = ref(ignore);
-          let shortLivedPromise = Repromise.new_((resolve, _reject) =>
-            resolveShortLivedPromise := resolve);
-
-          let racePromise =
-            Repromise.race([foreverPendingPromise, shortLivedPromise]);
-
-          resolveShortLivedPromise^();
-
-          racePromise |> Repromise.then_(() => raceLoop(n - 1));
+          let nextIteration = () => theLoop(n - 1);
+          body(foreverPendingPromise, nextIteration);
         };
-
-      raceLoop(n);
+      theLoop(n);
     };
 
-    doesNotLeakMemory(instrumentedRaceLoop, 100);
+    doesNotLeakMemory(instrumentedLoop, 100);
+  });
+
+let raceLoopTests = Framework.suite("race loop", [
+  /* To implement p3 = Repromise.race([p1, p2]), Repromise has to attach
+     callbacks to p1 and p2, so that whichever of them is the first to resolve
+     will cause the resolution of p3. This means that p1 and p2 hold references
+     to p3.
+
+     If, say, p1 is a promise that remains pending for a really long time, and
+     it is raced with many other promises in a loop, i.e.
+
+       p3 = Repromise.race([p1, p2])
+       p3' = Repromise.race([p1, p2'])
+       etc.
+
+     Then p1 will accumulate callbacks with references to p3, p3', etc. This
+     will be a memory leak, that grows in proportion to the number of times the
+     race loop has run.
+
+     Since this is a common usage pattern, a reasonable implementation has to
+     remove callbacks from p1  when p3, p3', etc. are resolved by race. This
+     test checks for such an implementation. */
+  raceTest("race loop memory leak", (foreverPendingPromise, nextIteration) => {
+    let resolveShortLivedPromise = ref(ignore);
+    let shortLivedPromise = Repromise.new_((resolve, _reject) =>
+      resolveShortLivedPromise := resolve);
+
+    let racePromise =
+      Repromise.race([foreverPendingPromise, shortLivedPromise]);
+
+    resolveShortLivedPromise^();
+
+    racePromise |> Repromise.then_(nextIteration);
   }),
 
-  test("race loop memory leak with then_ merging", () => {
-    /* This test is like the one above, but it tests for the interaction of the
-       fixes for the then_ and race loop memory leaks. The danger is:
+  /* This test is like the one above, but it tests for the interaction of the
+     fixes for the then_ and race loop memory leaks. The danger is:
 
-       - The then_ fix "wants" to merge callback lists when an inner pending
-         promise is returned from the callback of then_.
-       - The race fix "wants" to delete callbacks from a callback list, when a
-         promise "loses" to another one that resolved sooner.
+     - The then_ fix "wants" to merge callback lists when an inner pending
+       promise is returned from the callback of then_.
+     - The race fix "wants" to delete callbacks from a callback list, when a
+       promise "loses" to another one that resolved sooner.
 
-       It is important that the callback list merging performed by then_ doesn't
-       prevent race from finding and deleting the correct callbacks in the
-       merged lists. */
-    let instrumentedRaceLoop = n => {
-      let foreverPendingPromise = Repromise.new_((_resolve, _reject) => ());
+     It is important that the callback list merging performed by then_ doesn't
+     prevent race from finding and deleting the correct callbacks in the merged
+     lists. */
+  raceTest("race loop memory leak with then_ merging",
+      (foreverPendingPromise, nextIteration) => {
+    let resolveShortLivedPromise = ref(ignore);
+    let shortLivedPromise = Repromise.new_((resolve, _reject) =>
+      resolveShortLivedPromise := resolve);
 
-      let initialWords = countAllocatedWords();
+    let racePromise =
+      Repromise.race([foreverPendingPromise, shortLivedPromise]);
 
-      let rec raceLoop = n =>
-        if (n == 0) {
-          let wordsAllocated = countAllocatedWords() - initialWords;
-          Repromise.resolve(wordsAllocated);
-        }
-        else {
-          let resolveShortLivedPromise = ref(ignore);
-          let shortLivedPromise = Repromise.new_((resolve, _reject) =>
-            resolveShortLivedPromise := resolve);
+    /* Return foreverPendingPromise from the callback of then_. This causes all
+       of its callbacks to be moved to the outer promise of the then_ (which we
+       don't give a name to). The delay promise is just used to make the second
+       call to then_ definitely run after the first. */
+    let delay = Repromise.resolve();
 
-          let racePromise =
-            Repromise.race([foreverPendingPromise, shortLivedPromise]);
+    delay
+    |> Repromise.then_(() => foreverPendingPromise)
+    |> ignore;
 
-          /* Return foreverPendingPromise from the callback of then_. This
-             causes all of its callbacks to be moved to the outer promise of the
-             then_ (which we don't give a name to). The delay promise is just
-             used to make the second call to then_ definitely run after the
-             first. */
-          let delay = Repromise.resolve();
-
-          delay
-          |> Repromise.then_(() => foreverPendingPromise)
-          |> ignore;
-
-          delay
-          |> Repromise.then_(() => {
-            /* Now, we resolve the short-lived promise. If that doesn't delete
-               the callback that was merged away from foreverPendingPromise,
-               then this is where we will accumulate the memory leak. */
-            resolveShortLivedPromise^();
-            racePromise |> Repromise.then_(() => raceLoop(n - 1));
-          });
-        };
-
-      raceLoop(n);
-    };
-
-    doesNotLeakMemory(instrumentedRaceLoop, 100);
+    delay
+    |> Repromise.then_(() => {
+      /* Now, we resolve the short-lived promise. If that doesn't delete the
+         callback that was merged away from foreverPendingPromise, then this is
+         where we will accumulate the memory leak. */
+      resolveShortLivedPromise^();
+      racePromise |> Repromise.then_(nextIteration);
+    });
   }),
 ]);
 
