@@ -189,8 +189,46 @@ let raceLoopTests = Framework.suite("race loop", [
     racePromise |> Repromise.then_(nextIteration);
   }),
 
-  /* This test is like the one above, but it tests for the interaction of the
-     fixes for the then_ and race loop memory leaks. The danger is:
+  raceTest("race loop memory leak, with already-resolved promises",
+      (foreverPendingPromise, nextIteration) => {
+    let resolvedPromise = Repromise.resolve();
+
+    let racePromise =
+      Repromise.race([foreverPendingPromise, resolvedPromise]);
+
+    racePromise |> Repromise.then_(nextIteration);
+  }),
+
+  raceTest("race loop memory leak, with rejection",
+      (foreverPendingPromise, nextIteration) => {
+    let rejectShortLivedPromise = ref(ignore);
+    let shortLivedPromise = Repromise.new_((_resolve, reject) =>
+      rejectShortLivedPromise := reject);
+
+    let racePromise =
+      Repromise.race([foreverPendingPromise, shortLivedPromise]);
+
+    rejectShortLivedPromise^();
+
+    racePromise
+    |> Repromise.then_(() => assert(false))
+    |> Repromise.catch(nextIteration);
+  }),
+
+  raceTest("race loop memory leak, with already-rejected promises",
+      (foreverPendingPromise, nextIteration) => {
+    let rejectedPromise = Repromise.reject();
+
+    let racePromise =
+      Repromise.race([foreverPendingPromise, rejectedPromise]);
+
+    racePromise
+    |> Repromise.then_(() => assert(false))
+    |> Repromise.catch(nextIteration);
+  }),
+
+  /* This test is like the first, but it tests for the interaction of the fixes
+     for the then_ and race loop memory leaks. The danger is:
 
      - The then_ fix "wants" to merge callback lists when an inner pending
        promise is returned from the callback of then_.

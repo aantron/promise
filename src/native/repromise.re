@@ -507,9 +507,9 @@ let race = promises => {
          in the iteration over the promise list. It is possible to resolve
          immediately but then the code has to be changed, probably to perform
          two passes over the promise list. */
-      ReadyCallbacks.defer(resolveInternal(finalPromise), value);
+      ReadyCallbacks.defer(resolveFinalPromise, value);
     | `Rejected(error) =>
-      ReadyCallbacks.defer(rejectInternal(finalPromise), error);
+      ReadyCallbacks.defer(rejectFinalPromise, error);
 
     | `Pending(callbacks) =>
       let callbackNode =
