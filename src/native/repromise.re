@@ -152,7 +152,7 @@ type callbacks('a, 'e) = {
 
 type promise('a, 'e) =
   ref([
-    | `Resolved('a)
+    | `Fulfilled('a)
     | `Rejected('e)
     | `Pending(callbacks('a, 'e))
     | `Merged(promise('a, 'e))
@@ -182,7 +182,7 @@ type never;
    operations should be performed, rather than working directly on proxies. */
 let rec underlying = p =>
   switch p^ {
-  | `Resolved(_)
+  | `Fulfilled(_)
   | `Rejected(_)
   | `Pending(_) =>
     p;
@@ -245,12 +245,12 @@ let newInternal = () =>
 
 let resolveInternal = p => value =>
   switch (underlying(p))^ {
-  | `Resolved(_)
+  | `Fulfilled(_)
   | `Rejected(_) =>
     ()
   | `Pending(callbacks) =>
     ReadyCallbacks.deferMultiple(callbacks.onResolve, value);
-    p := `Resolved(value);
+    p := `Fulfilled(value);
   | `Merged(_) =>
     /* This case is impossible, because we called underyling on the promise,
        above. */
@@ -259,7 +259,7 @@ let resolveInternal = p => value =>
 
 let rejectInternal = p => error =>
   switch (underlying(p))^ {
-  | `Resolved(_)
+  | `Fulfilled(_)
   | `Rejected(_) =>
     ()
   | `Pending(callbacks) =>
@@ -282,7 +282,7 @@ let new_ = executor => {
 
 
 let resolve = value =>
-  ref(`Resolved(value));
+  ref(`Fulfilled(value));
 
 let reject = error =>
   ref(`Rejected(error));
@@ -293,7 +293,7 @@ let makePromiseBehaveAs = (outerPromise, nestedPromise) => {
   let underlyingNested = underlying(nestedPromise);
 
   switch underlyingNested^ {
-  | `Resolved(value) =>
+  | `Fulfilled(value) =>
     resolveInternal(outerPromise, value);
   | `Rejected(error) =>
     rejectInternal(outerPromise, error);
@@ -301,7 +301,7 @@ let makePromiseBehaveAs = (outerPromise, nestedPromise) => {
   | `Pending(callbacks) =>
     let underlyingOuter = underlying(outerPromise);
     switch underlyingOuter^ {
-    | `Resolved(_)
+    | `Fulfilled(_)
     | `Rejected(_) =>
       /* These two cases are impossible, because if makePromiseBehaveAs is
          called, then_ or catch_ called the callback that was passed to it, so
@@ -337,7 +337,7 @@ let then_ = (callback, promise) => {
     };
 
   switch (underlying(promise))^ {
-  | `Resolved(value) =>
+  | `Fulfilled(value) =>
     ReadyCallbacks.defer(onResolve, value);
   | `Rejected(error) =>
     rejectInternal(outerPromise, error)
@@ -370,7 +370,7 @@ let catch = (callback, promise) => {
     };
 
   switch (underlying(promise))^ {
-  | `Resolved(value) =>
+  | `Fulfilled(value) =>
     resolveInternal(outerPromise, value);
   | `Rejected(error) =>
     ReadyCallbacks.defer(onReject, error);
@@ -437,7 +437,7 @@ let all = promises => {
       let cell = ref(None);
 
       switch (underlying(promise))^ {
-      | `Resolved(value) =>
+      | `Fulfilled(value) =>
         ReadyCallbacks.defer(onResolve(cell), value);
       | `Rejected(error) =>
         ReadyCallbacks.defer(rejectFinalPromise, error);
@@ -500,7 +500,7 @@ let race = promises => {
 
   promises |> List.iter(promise =>
     switch (underlying(promise))^ {
-    | `Resolved(value) =>
+    | `Fulfilled(value) =>
       /* It's very important to defer here instead of resolving the final
          promise immediately. Doing the latter will cause the callback removal
          mechanism to forget about removing callbacks which will be added later
