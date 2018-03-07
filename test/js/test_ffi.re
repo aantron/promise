@@ -214,12 +214,32 @@ let soundnessTests = Framework.suite("soundness", [
       });
   }),
 
+  test("all, rejection", () => {
+    let rejectP1 = ref(ignore);
+    let p1 = Repromise.new_((_resolve, reject) => rejectP1 := reject);
+    let p2 = Repromise.all([p1]);
+    rejectP1^(Repromise.resolve(42));
+    p2
+    |> Repromise.map((_) => false)
+    |> Repromise.catch(isPromiseResolvedWith42);
+  }),
+
   test("race", () => {
     let resolveP1 = ref(ignore);
     let p1 = Repromise.new_((resolve, _reject) => resolveP1 := resolve);
     let p2 = Repromise.race([p1]);
     resolveP1^(Repromise.resolve(42));
     p2 |> Repromise.then_(isPromiseResolvedWith42);
+  }),
+
+  test("race, rejection", () => {
+    let rejectP1 = ref(ignore);
+    let p1 = Repromise.new_((_resolve, reject) => rejectP1 := reject);
+    let p2 = Repromise.race([p1]);
+    rejectP1^(Repromise.resolve(42));
+    p2
+    |> Repromise.map((_) => false)
+    |> Repromise.catch(isPromiseResolvedWith42);
   }),
 ]);
 
