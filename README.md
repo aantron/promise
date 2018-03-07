@@ -1,8 +1,7 @@
 # Repromise
 
-**Repromise** is an asynchronous programming library that makes your Reason
-code run everywhere: on the browser or in Node.js, and natively under Linux,
-macOS, Windows:
+**Repromise** is a promise library that works on all platforms supported by
+Reason: the browser, Node.js, and native Linux, macOS, Windows:
 
 ```reason
 let () = {
@@ -17,7 +16,7 @@ let () = {
 };
 ```
 
-...the above compiles to both JavaScript and machine code!
+...the above works on both Node and native.
 
 Interoperability is key: on JavaScript, `Repromise.t`s are exactly JavaScript's
 familiar `Promise`s. For targeting native code, Repromise provides an
@@ -25,13 +24,10 @@ implementation with the same semantics.
 
 The `Io` module is powered by libuv when targeting native code, and Node.js on
 JavaScript. Either way, the underlying implementation is the same, because
-Node.js is *itself* powered by libuv!
+Node.js is *itself* powered by libuv.
 
-Repromise is actually capable of providing synchronous I/O functions as well, we
-just haven't exposed them yet.
-
-Finally, Repromise includes a small preprocessor so you can write the neat and
-familiar `let%await` syntax as in the example above!
+Repromise includes a small preprocessor so you can write the neat and familiar
+`let%await` syntax as in the example above.
 
 
 
@@ -106,10 +102,9 @@ JavaScript-friendly Lwt core and new libuv-based event loop.
 ## Status
 
 This repository is in a **proof-of-concept** stage at the moment. We intend to
-expand it to a full-blown implementation. However, for the time being, the repo
-is *very* rough: there is a functioning skeleton, but the packaging isn't there,
-the C FFI is rife with obvious memory leaks, etc. All to be fixed shortly; the
-initial code was written just yesterday :p
+expand it to a full implementation. However, for the time being, the repo is
+*very* rough: there is a functioning skeleton, but the packaging isn't there,
+the C FFI is rife with obvious memory leaks, etc.
 
 
 [opam]: http://opam.ocaml.org/
