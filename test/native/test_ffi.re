@@ -38,28 +38,28 @@ let doesNotLeakMemory = (loop, baseIterations) =>
 
 
 let promiseLoopTests = Framework.suite("promise loop", [
+  /* A pretty simple promise loop. This is just a function that takes a promise,
+     and calls .then_ on it. The callback passed to .then_ calls the loop
+     recursively, passing another promise to the next iteration. The interesting
+     part is not the argument promise, but the result promise returned by each
+     iteration.
+
+     If Repromise is implemented naively, the iteration will result in a big
+     chain of promises hanging in memory: a memory leak. Here is how:
+
+     - At the first iteration, .then_ creates an outer pending promise p0, and
+       returns it immediately to the rest of the code.
+     - Later, the callback passed to .then_ runs. It again calls .then_,
+       creating another pending promise p1. The callback then returns p1. This
+       means that resolving p1 should resolve p0, so a naive implementation
+       will store a reference in p1 to p0.
+     - Later, the callback passed to p1's .then_ runs, doing the same thing:
+       creating another pending promise p2, pointing to p1.
+     - By iteration N, there is a chain of N pending promises set up, such that
+       resolving the inner-most promise in the chain, created by the last
+       .then_, will resolve the outer-most promise p0, created by the first
+       .then_. This is the memory leak. */
   test("promise loop memory leak", () => {
-    /* A pretty simple promise loop. This is just a function that takes a
-       promise, and calls .then_ on it. The callback passed to .then_ calls the
-       loop recursively, passing another promise to the next iteration. The
-       interesting part is not the argument promise, but the result promise
-       returned by each iteration.
-
-       If Repromise is implemented naively, the iteration will result in a big
-       chain of promises hanging in memory: a memory leak. Here is how:
-
-       - At the first iteration, .then_ creates an outer pending promise p0, and
-         returns it immediately to the rest of the code.
-       - Later, the callback passed to .then_ runs. It again calls .then_,
-         creating another pending promise p1. The callback then returns p1. This
-         means that resolving p1 should resolve p0, so a naive implementation
-         will store a reference in p1 to p0.
-       - Later, the callback passed to p1's .then_ runs, doing the same thing:
-         creating another pending promise p2, pointing to p1.
-       - By iteration N, there is a chain of N pending promises set up, such
-         that resolving the inner-most promise in the chain, created by the last
-         .then_, will resolve the outer-most promise p0, created by the first
-         .then_. This is the memory leak. */
     let instrumentedPromiseLoop = n => {
       let initialWords = countAllocatedWords();
 
@@ -82,22 +82,22 @@ let promiseLoopTests = Framework.suite("promise loop", [
     doesNotLeakMemory(instrumentedPromiseLoop, 1000);
   }),
 
+  /* The fix for the above memory leak carries a potential pitfall: the fix is
+     to merge the inner promise returned to then_ into then_'s outer promise.
+     After that, all operations on the inner promise reference are actually
+     performed on the outer promise.
+
+     This carries the danger that a tower of these merged promises can build
+     up. If a pending promise is repeatedly returned to then_, it will
+     gradually become the head of a growing chain of forwarding promises, that
+     point to the outer promise created in the last call to then_.
+
+     To avoid this, the implementation has to perform union-find: each time it
+     traverses a chain of merged promises, it has to set the head promise to
+     point directly to the final outer promise, cutting out all intermediate
+     merged promises. Then, any of these merged promises that aren't being
+     referenced by the user program can be garbage-collected. */
   test("promise tower memory leak", () => {
-    /* The fix for the above memory leak carries a potential pitfall: the fix is
-       to merge the inner promise returned to then_ into then_'s outer promise.
-       After that, all operations on the inner promise reference are actually
-       performed on the outer promise.
-
-       This carries the danger that a tower of these merged promises can build
-       up. If a pending promise is repeatedly returned to then_, it will
-       gradually become the head of a growing chain of forwarding promises, that
-       point to the outer promise created in the last call to then_.
-
-       To avoid this, the implementation has to perform union-find: each time it
-       traverses a chain of merged promises, it has to set the head promise to
-       point directly to the final outer promise, cutting out all intermediate
-       merged promises. Then, any of these merged promises that aren't being
-       referenced by the user program can be garbage-collected. */
     let instrumentedPromiseTower = n => {
       let foreverPendingPromise = Repromise.new_((_resolve, _reject) => ());
 
