@@ -390,14 +390,18 @@ let catch = (callback, promise) => {
 
 
 
-let all = promises => {
-  let callbackRemovers: ref(list(unit => unit)) = ref([]);
-  let removeAllCallbacks = () => {
-    callbackRemovers^ |> List.iter(remover => remover());
-    callbackRemovers := [];
+/* Repromise.all and Repromise.race have to remove callbacks in some
+   circumstances; see test/native/test_ffi.re for details. */
+module CallbackRemovers = {
+  let empty = () =>
+    ref([]);
+
+  let call = removers => {
+    removers^ |> List.iter(remover => remover());
+    removers := [];
   };
 
-  let addCallbackRemover = (promise, whichList, callbackNode) => {
+  let add = (removers, promise, whichList, callbackNode) => {
     let remover = () =>
       switch (underlying(promise))^ {
       | `Pending(callbacks) =>
@@ -405,11 +409,17 @@ let all = promises => {
       | _ =>
         ();
       };
-    callbackRemovers := [remover, ...callbackRemovers^];
+
+    removers := [remover, ...removers^];
   };
+};
+
+
+
+let all = promises => {
+  let callbackRemovers = CallbackRemovers.empty();
 
   let finalPromise = newInternal();
-
   let unresolvedPromiseCount = ref(List.length(promises));
   let results = ref([]);
 
@@ -428,7 +438,7 @@ let all = promises => {
   };
 
   let rejectFinalPromise = error => {
-    removeAllCallbacks();
+    CallbackRemovers.call(callbackRemovers);
     rejectInternal(finalPromise, error);
   };
 
@@ -438,19 +448,32 @@ let all = promises => {
 
       switch (underlying(promise))^ {
       | `Fulfilled(value) =>
+      /* It's very important to defer here instead of resolving the final
+         promise immediately. Doing the latter will cause the callback removal
+         mechanism to forget about removing callbacks which will be added later
+         in the iteration over the promise list. It is possible to resolve
+         immediately but then the code has to be changed, probably to perform
+         two passes over the promise list. */
         ReadyCallbacks.defer(onResolve(cell), value);
       | `Rejected(error) =>
         ReadyCallbacks.defer(rejectFinalPromise, error);
+
       | `Pending(callbacks) =>
         let callbackNode =
           MutableList.append(callbacks.onResolve, onResolve(cell));
-        addCallbackRemover(
-          promise, callbacks => callbacks.onResolve, callbackNode);
+        CallbackRemovers.add(
+          callbackRemovers,
+          promise,
+          callbacks => callbacks.onResolve,
+          callbackNode);
 
         let callbackNode =
           MutableList.append(callbacks.onReject, rejectFinalPromise);
-        addCallbackRemover(
-          promise, callbacks => callbacks.onReject, callbackNode);
+        CallbackRemovers.add(
+          callbackRemovers,
+          promise,
+          callbacks => callbacks.onReject,
+          callbackNode);
 
       | `Merged(_) =>
         /* Impossible because of the call to underlying above. */
@@ -466,47 +489,21 @@ let all = promises => {
 
 
 let race = promises => {
-  /* We need to keep track of the callbacks we attach to the promises in the
-     argument list, so that when the first promise resolves, we remove all the
-     callbacks. If the callbacks are not removed, some programs will leak
-     memory. See the test "race loop memory leak" for a more detailed
-     description. */
-  let callbackRemovers: ref(list(unit => unit)) = ref([]);
-  let removeAllCallbacks = () => {
-    callbackRemovers^ |> List.iter(remover => remover());
-    callbackRemovers := [];
-  };
-
-  let addCallbackRemover = (promise, whichList, callbackNode) => {
-    let remover = () =>
-      switch (underlying(promise))^ {
-      | `Pending(callbacks) =>
-        MutableList.remove(whichList(callbacks), callbackNode);
-      | _ =>
-        ();
-      };
-    callbackRemovers := [remover, ...callbackRemovers^];
-  };
+  let callbackRemovers = CallbackRemovers.empty();
 
   let finalPromise = newInternal();
   let resolveFinalPromise = value => {
-    removeAllCallbacks();
+    CallbackRemovers.call(callbackRemovers);
     resolveInternal(finalPromise, value);
   };
   let rejectFinalPromise = error => {
-    removeAllCallbacks();
+    CallbackRemovers.call(callbackRemovers);
     rejectInternal(finalPromise, error);
   };
 
   promises |> List.iter(promise =>
     switch (underlying(promise))^ {
     | `Fulfilled(value) =>
-      /* It's very important to defer here instead of resolving the final
-         promise immediately. Doing the latter will cause the callback removal
-         mechanism to forget about removing callbacks which will be added later
-         in the iteration over the promise list. It is possible to resolve
-         immediately but then the code has to be changed, probably to perform
-         two passes over the promise list. */
       ReadyCallbacks.defer(resolveFinalPromise, value);
     | `Rejected(error) =>
       ReadyCallbacks.defer(rejectFinalPromise, error);
@@ -514,13 +511,19 @@ let race = promises => {
     | `Pending(callbacks) =>
       let callbackNode =
         MutableList.append(callbacks.onResolve, resolveFinalPromise);
-      addCallbackRemover(
-        promise, callbacks => callbacks.onResolve, callbackNode);
+      CallbackRemovers.add(
+          callbackRemovers,
+          promise,
+          callbacks => callbacks.onResolve,
+          callbackNode);
 
       let callbackNode =
         MutableList.append(callbacks.onReject, rejectFinalPromise);
-      addCallbackRemover(
-        promise, callbacks => callbacks.onReject, callbackNode);
+      CallbackRemovers.add(
+          callbackRemovers,
+          promise,
+          callbacks => callbacks.onReject,
+          callbackNode);
 
     | `Merged(_) =>
       /* Impossible, because of the call to underlying above. */
