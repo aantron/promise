@@ -270,6 +270,69 @@ let raceLoopTests = Framework.suite("race loop", [
 
 
 
+let allLoopTests = Framework.suite("all loop", [
+  /* Like Repromise.race, there is a danger of memory leak in Repromise.all.
+     When one of the promises in Repromise.all is rejected, the final promise is
+     rejected immediately. If callbacks attached to still-pending promises are
+     not removed, a memory leak will accumulate.
+
+     We reuse the raceTest helper, because the tests are structurally the same.
+     race remains the function with the most opportunities to leak memory. */
+  raceTest("all loop memory leak", (foreverPendingPromise, nextIteration) => {
+    let rejectShortLivedPromise = ref(ignore);
+    let shortLivedPromise = Repromise.new_((_resolve, reject) =>
+      rejectShortLivedPromise := reject);
+
+    let allPromise = Repromise.all([foreverPendingPromise, shortLivedPromise]);
+
+    rejectShortLivedPromise^();
+
+    allPromise
+    |> Repromise.then_((_) => assert false)
+    |> Repromise.catch(nextIteration);
+  }),
+
+  raceTest("all loop memory leak, with already-rejected promises",
+      (foreverPendingPromise, nextIteration) => {
+    let rejectedPromise = Repromise.reject();
+
+    let allPromise = Repromise.all([foreverPendingPromise, rejectedPromise]);
+
+    allPromise
+    |> Repromise.then_((_) => assert false)
+    |> Repromise.catch(nextIteration);
+  }),
+
+  /* Tests the interaction of the memory-leak fixes in all and then_, as tested
+     for race and then_ above. */
+  raceTest("race loop memory leak with then_ merging",
+      (foreverPendingPromise, nextIteration) => {
+    let rejectShortLivedPromise = ref(ignore);
+    let shortLivedPromise = Repromise.new_((_resolve, reject) =>
+      rejectShortLivedPromise := reject);
+
+    let allPromise = Repromise.all([foreverPendingPromise, shortLivedPromise]);
+
+    let delay = Repromise.resolve();
+
+    delay
+    |> Repromise.catch((_) => assert(false))
+    |> Repromise.then_(() => foreverPendingPromise)
+    |> ignore;
+
+    delay
+    |> Repromise.catch((_) => assert(false))
+    |> Repromise.then_(() => {
+      rejectShortLivedPromise^();
+      allPromise
+      |> Repromise.then_((_) => assert false)
+      |> Repromise.catch(nextIteration);
+    });
+  }),
+]);
+
+
+
 let loop = Libuv_loop.default ();
 
 let libuvTests = Framework.suite("libuv", [
@@ -289,4 +352,4 @@ let libuvTests = Framework.suite("libuv", [
 
 
 
-let suites = [promiseLoopTests, raceLoopTests, libuvTests];
+let suites = [promiseLoopTests, raceLoopTests, allLoopTests, libuvTests];
