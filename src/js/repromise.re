@@ -21,23 +21,24 @@ function unwrap(value) {
         return value;
 }
 
+function wrap(value) {
+    if (value != null && typeof value.then === 'function')
+        return new WrappedRepromise(value);
+    else
+        return value;
+}
+
 function new_(executor) {
     return new Promise(function (resolve, reject) {
         var wrappingResolve = function(value) {
-            if (value && value.then && (typeof (value.then) === 'function'))
-                resolve(new WrappedRepromise(value));
-            else
-                resolve(value);
+            resolve(wrap(value));
         };
         executor(wrappingResolve, reject);
     });
 };
 
 function resolve(value) {
-    if (value && value.then && (typeof (value.then) === 'function'))
-        return Promise.resolve(new WrappedRepromise(value));
-    else
-        return Promise.resolve(value);
+    return Promise.resolve(wrap(value));
 };
 
 function then(callback, promise) {
