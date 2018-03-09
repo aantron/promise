@@ -80,8 +80,8 @@ external resolve: 'a => promise('a, _) = "";
 external then_:
   ('a => promise('b, 'e), promise('a, 'e)) => promise('b, 'e) = "then";
 
-[@bs.val]
-external map: ('a => 'b, promise('a, 'e)) => promise('b, 'e) = "then";
+let map = (callback, promise) =>
+  promise |> then_(value => resolve(callback(value)));
 
 [@bs.scope "Promise"]
 [@bs.val]

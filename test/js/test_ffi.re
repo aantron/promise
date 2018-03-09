@@ -96,8 +96,6 @@ let makeAlmostPromiseLike = v =>
 
 let isPromiseResolvedWith42 = p =>
   if (not(isPromise(p))) {
-    prerr_endline("not a promise");
-    Js.log(p);
     Repromise.resolve(false);
   }
   else {
@@ -163,6 +161,18 @@ let soundnessTests = Framework.suite("soundness", [
     Repromise.resolve()
     |> Repromise.then_(() => Repromise.reject(Repromise.reject(42)))
     |> Repromise.catch(isPromiseRejectedWith42);
+  }),
+
+  test("map: resolve", () => {
+    Repromise.resolve()
+    |> Repromise.map(() => Repromise.resolve(42))
+    |> Repromise.then_(isPromiseResolvedWith42);
+  }),
+
+  test("map: reject", () => {
+    Repromise.resolve()
+    |> Repromise.map(() => Repromise.reject(42))
+    |> Repromise.then_(isPromiseRejectedWith42);
   }),
 
   test("catch: resolve", () => {
