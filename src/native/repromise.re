@@ -5,17 +5,18 @@ type callbacks('a, 'e) = {
 
 
 
-type promise('a, 'e) =
+type rejectable('a, 'e) =
   ref([
     | `Fulfilled('a)
     | `Rejected('e)
     | `Pending(callbacks('a, 'e))
-    | `Merged(promise('a, 'e))
+    | `Merged(rejectable('a, 'e))
   ]);
 
-type t('a, 'e) = promise('a, 'e);
-
 type never;
+
+type promise('a) = rejectable('a, never);
+type t('a) = promise('a);
 
 
 
@@ -387,3 +388,25 @@ let race = promises => {
 
   finalPromise;
 };
+
+
+
+module Rejectable = {
+  type t('a, 'e) = rejectable('a, 'e);
+
+  external relax: promise('a) => rejectable('a, _) = "%identity";
+
+  let new_ = new_;
+  let resolve = resolve;
+  let reject = reject;
+  let then_ = then_;
+  let map = map;
+  let catch = catch;
+  let all = all;
+  let race = race;
+};
+
+
+
+let new_ = executor =>
+  new_((resolve, _) => executor(resolve));

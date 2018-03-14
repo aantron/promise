@@ -9,7 +9,7 @@ function isPromiseLike(v) {
 |}];
 
 [@bs.val]
-external isPromise: Repromise.t(_, _) => bool = "";
+external isPromise: Repromise.Rejectable.t(_, _) => bool = "";
 
 [@bs.val]
 external jsPromiseIsPromise: Js.Promise.t(_) => bool = "isPromise";
@@ -25,7 +25,7 @@ let test = Framework.test;
 
 let interopTests = Framework.suite("interop", [
   test("new_ is js promise", () => {
-    let p = Repromise.new_((_, _) => ());
+    let p = Repromise.new_(ignore);
     Repromise.resolve(isPromise(p));
   }),
 
@@ -35,32 +35,34 @@ let interopTests = Framework.suite("interop", [
   }),
 
   test("reject is js promise", () => {
-    let p = Repromise.reject();
-    let _ = p |> Repromise.catch(() => Repromise.resolve());
+    let p = Repromise.Rejectable.reject();
+    let _ = p |> Repromise.Rejectable.catch(() => Repromise.resolve());
     Repromise.resolve(isPromise(p));
   }),
 
   test("then_ is js promise", () => {
     let p =
-      Repromise.new_((_, _) => ())
+      Repromise.new_(ignore)
       |> Repromise.then_((_) => Repromise.resolve());
     Repromise.resolve(isPromise(p));
   }),
 
   test("map is js promise", () => {
-    let p = Repromise.new_((_, _) => ()) |> Repromise.map(v => v);
+    let p =
+      Repromise.new_(ignore)
+      |> Repromise.map(v => v);
     Repromise.resolve(isPromise(p));
   }),
 
   test("catch is js promise", () => {
     let p =
-      Repromise.new_((_, _) => ())
-      |> Repromise.catch((_) => Repromise.resolve());
+      Repromise.new_(ignore)
+      |> Repromise.Rejectable.catch((_) => Repromise.resolve());
     Repromise.resolve(isPromise(p));
   }),
 
   test("js promise is repromise", () => {
-    let js_promise: Repromise.t(int, _) = [%bs.raw {|Promise.resolve(1)|}];
+    let js_promise: Repromise.t(int) = [%bs.raw {|Promise.resolve(1)|}];
     js_promise
     |> Repromise.then_(n => Repromise.resolve(n + 1))
     |> Repromise.then_(n => Repromise.resolve(n == 2));
@@ -68,8 +70,8 @@ let interopTests = Framework.suite("interop", [
 
   test("repromise as js argument", () => {
     module Then = {
-      [@bs.send.pipe: Repromise.t('a, 'e)]
-      external js_then: ('a => Repromise.t('b, 'e)) => Repromise.t('b, 'e) =
+      [@bs.send.pipe: Repromise.t('a)]
+      external js_then: ('a => Repromise.t('b)) => Repromise.t('b) =
         "then";
     };
     Repromise.resolve(1)
@@ -107,28 +109,29 @@ let isPromiseRejectedWith42 = p =>
     Repromise.resolve(false);
   }
   else {
-    p |> Repromise.catch(n => Repromise.resolve(n == 42));
+    p |> Repromise.Rejectable.catch(n => Repromise.resolve(n == 42));
   };
 
 let soundnessTests = Framework.suite("soundness", [
   test("new_: resolve, resolve", () => {
-    Repromise.new_((resolve, _) => resolve(Repromise.resolve(42)))
+    Repromise.new_(resolve => resolve(Repromise.resolve(42)))
     |> Repromise.then_(isPromiseResolvedWith42);
   }),
 
   test("new_: resolve, reject", () => {
-    Repromise.new_((_, reject) => reject(Repromise.resolve(42)))
-    |> Repromise.catch(isPromiseResolvedWith42);
+    Repromise.Rejectable.new_((_, reject) => reject(Repromise.resolve(42)))
+    |> Repromise.Rejectable.catch(isPromiseResolvedWith42);
   }),
 
   test("new_: reject, resolve", () => {
-    Repromise.new_((resolve, _) => resolve(Repromise.reject(42)))
+    Repromise.new_(resolve => resolve(Repromise.Rejectable.reject(42)))
     |> Repromise.then_(isPromiseRejectedWith42);
   }),
 
   test("new_: reject, reject", () => {
-    Repromise.new_((_, reject) => reject(Repromise.reject(42)))
-    |> Repromise.catch(isPromiseRejectedWith42);
+    Repromise.Rejectable.new_((_, reject) =>
+      reject(Repromise.Rejectable.reject(42)))
+    |> Repromise.Rejectable.catch(isPromiseRejectedWith42);
   }),
 
   test("resolve: resolve", () => {
@@ -137,18 +140,18 @@ let soundnessTests = Framework.suite("soundness", [
   }),
 
   test("resolve: reject", () => {
-    Repromise.resolve(Repromise.reject(42))
+    Repromise.resolve(Repromise.Rejectable.reject(42))
     |> Repromise.then_(isPromiseRejectedWith42);
   }),
 
   test("reject: resolve", () => {
-    Repromise.reject(Repromise.resolve(42))
-    |> Repromise.catch(isPromiseResolvedWith42);
+    Repromise.Rejectable.reject(Repromise.resolve(42))
+    |> Repromise.Rejectable.catch(isPromiseResolvedWith42);
   }),
 
   test("reject: reject", () => {
-    Repromise.reject(Repromise.reject(42))
-    |> Repromise.catch(isPromiseRejectedWith42);
+    Repromise.Rejectable.reject(Repromise.Rejectable.reject(42))
+    |> Repromise.Rejectable.catch(isPromiseRejectedWith42);
   }),
 
   test("then_: resolve", () => {
@@ -158,9 +161,10 @@ let soundnessTests = Framework.suite("soundness", [
   }),
 
   test("then_: reject", () => {
-    Repromise.resolve()
-    |> Repromise.then_(() => Repromise.reject(Repromise.reject(42)))
-    |> Repromise.catch(isPromiseRejectedWith42);
+    Repromise.Rejectable.resolve()
+    |> Repromise.Rejectable.then_(() =>
+      Repromise.Rejectable.reject(Repromise.Rejectable.reject(42)))
+    |> Repromise.Rejectable.catch(isPromiseRejectedWith42);
   }),
 
   test("map: resolve", () => {
@@ -171,24 +175,26 @@ let soundnessTests = Framework.suite("soundness", [
 
   test("map: reject", () => {
     Repromise.resolve()
-    |> Repromise.map(() => Repromise.reject(42))
+    |> Repromise.map(() => Repromise.Rejectable.reject(42))
     |> Repromise.then_(isPromiseRejectedWith42);
   }),
 
   test("catch: resolve", () => {
-    Repromise.reject()
-    |> Repromise.catch(() => Repromise.resolve(Repromise.resolve(42)))
+    Repromise.Rejectable.reject()
+    |> Repromise.Rejectable.catch(() =>
+      Repromise.resolve(Repromise.resolve(42)))
     |> Repromise.then_(isPromiseResolvedWith42);
   }),
 
   test("catch: reject", () => {
-    Repromise.reject()
-    |> Repromise.catch(() => Repromise.reject(Repromise.reject(42)))
-    |> Repromise.catch(isPromiseRejectedWith42);
+    Repromise.Rejectable.reject()
+    |> Repromise.Rejectable.catch(() =>
+      Repromise.Rejectable.reject(Repromise.Rejectable.reject(42)))
+    |> Repromise.Rejectable.catch(isPromiseRejectedWith42);
   }),
 
   test("new_: JS promise", () => {
-    Repromise.new_((resolve, _) => resolve(Js.Promise.resolve()))
+    Repromise.new_(resolve => resolve(Js.Promise.resolve()))
     |> Repromise.then_(p => Repromise.resolve(jsPromiseIsPromise(p)));
   }),
 
@@ -198,8 +204,9 @@ let soundnessTests = Framework.suite("soundness", [
   }),
 
   test("reject: JS promise", () => {
-    Repromise.reject(Js.Promise.resolve(42))
-    |> Repromise.catch(p => Repromise.resolve(jsPromiseIsPromise(p)));
+    Repromise.Rejectable.reject(Js.Promise.resolve(42))
+    |> Repromise.Rejectable.catch(p =>
+      Repromise.resolve(jsPromiseIsPromise(p)));
   }),
 
   test("resolve: Promise-like", () => {
@@ -214,7 +221,7 @@ let soundnessTests = Framework.suite("soundness", [
 
   test("all", () => {
     let resolveP1 = ref(ignore);
-    let p1 = Repromise.new_((resolve, _reject) => resolveP1 := resolve);
+    let p1 = Repromise.new_(resolve => resolveP1 := resolve);
     let p2 = Repromise.all([p1]);
     resolveP1^(Repromise.resolve(42));
     p2 |> Repromise.then_(results =>
@@ -226,17 +233,17 @@ let soundnessTests = Framework.suite("soundness", [
 
   test("all, rejection", () => {
     let rejectP1 = ref(ignore);
-    let p1 = Repromise.new_((_resolve, reject) => rejectP1 := reject);
-    let p2 = Repromise.all([p1]);
+    let p1 = Repromise.Rejectable.new_((_, reject) => rejectP1 := reject);
+    let p2 = Repromise.Rejectable.all([p1]);
     rejectP1^(Repromise.resolve(42));
     p2
-    |> Repromise.map((_) => false)
-    |> Repromise.catch(isPromiseResolvedWith42);
+    |> Repromise.Rejectable.map((_) => false)
+    |> Repromise.Rejectable.catch(isPromiseResolvedWith42);
   }),
 
   test("race", () => {
     let resolveP1 = ref(ignore);
-    let p1 = Repromise.new_((resolve, _reject) => resolveP1 := resolve);
+    let p1 = Repromise.new_(resolve => resolveP1 := resolve);
     let p2 = Repromise.race([p1]);
     resolveP1^(Repromise.resolve(42));
     p2 |> Repromise.then_(isPromiseResolvedWith42);
@@ -244,12 +251,12 @@ let soundnessTests = Framework.suite("soundness", [
 
   test("race, rejection", () => {
     let rejectP1 = ref(ignore);
-    let p1 = Repromise.new_((_resolve, reject) => rejectP1 := reject);
-    let p2 = Repromise.race([p1]);
+    let p1 = Repromise.Rejectable.new_((_, reject) => rejectP1 := reject);
+    let p2 = Repromise.Rejectable.race([p1]);
     rejectP1^(Repromise.resolve(42));
     p2
-    |> Repromise.map((_) => false)
-    |> Repromise.catch(isPromiseResolvedWith42);
+    |> Repromise.Rejectable.map((_) => false)
+    |> Repromise.Rejectable.catch(isPromiseResolvedWith42);
   }),
 ]);
 

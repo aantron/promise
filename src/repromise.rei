@@ -1,23 +1,48 @@
-type promise('a, 'e);
-type t('a, 'e) = promise('a, 'e);
-
+type rejectable('a, 'e);
 type never;
 
-let new_: (('a => unit) => ('e => unit) => unit) => promise('a, 'e);
+type promise('a) = rejectable('a, never);
+type t('a) = promise('a);
 
-let resolve: 'a => promise('a, _);
 
-let reject: 'e => promise(_, 'e);
 
-let then_: ('a => promise('b, 'e), promise('a, 'e)) => promise('b, 'e);
+let new_: (('a => unit) => unit) => promise('a);
 
-let map: ('a => 'b, promise('a, 'e)) => promise('b, 'e);
+let resolve: 'a => promise('a);
 
-let catch: ('e => promise('a, 'e2), promise('a, 'e)) => promise('a, 'e2);
+let then_: ('a => promise('b), promise('a)) => promise('b);
 
-let all: list(promise('a, 'e)) => promise(list('a), 'e);
+let map: ('a => 'b, promise('a)) => promise('b);
 
-let race: list(promise('a, 'e)) => promise('a, 'e);
+let all: list(promise('a)) => promise(list('a));
+
+let race: list(promise('a)) => promise('a);
+
+
+
+module Rejectable: {
+  type t('a, 'e) = rejectable('a, 'e);
+
+  let relax: promise('a) => rejectable('a, _);
+
+  let new_: (('a => unit, 'e => unit) => unit) => rejectable('a, 'e);
+
+  let resolve: 'a => rejectable('a, _);
+
+  let reject: 'e => rejectable(_, 'e);
+
+  let then_:
+    ('a => rejectable('b, 'e), rejectable('a, 'e)) => rejectable('b, 'e);
+
+  let map: ('a => 'b, rejectable('a, 'e)) => rejectable('b, 'e);
+
+  let catch:
+    ('e => rejectable('a, 'e2), rejectable('a, 'e)) => rejectable('a, 'e2);
+
+  let all: list(rejectable('a, 'e)) => rejectable(list('a), 'e);
+
+  let race: list(rejectable('a, 'e)) => rejectable('a, 'e);
+};
 
 
 

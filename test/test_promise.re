@@ -82,13 +82,13 @@ let basicTests = Framework.suite("basic", [
   }),
 
   test("new_", () => {
-    Repromise.new_((resolve, _) => resolve(true));
+    Repromise.new_(resolve => resolve(true));
   }),
 
   test("defer", () => {
     let resolve_p = ref(ignore);
     let p =
-      Repromise.new_((resolve, _) => resolve_p := resolve)
+      Repromise.new_(resolve => resolve_p := resolve)
       |> Repromise.then_(n => Repromise.resolve(n == 1));
     resolve_p^(1);
     p;
@@ -97,7 +97,7 @@ let basicTests = Framework.suite("basic", [
   test("await defer", () => {
     let resolve_p = ref(ignore);
     let p = {
-      let%await n = Repromise.new_((resolve, _) => resolve_p := resolve);
+      let%await n = Repromise.new_(resolve => resolve_p := resolve);
       Repromise.resolve(n == 1);
     };
     resolve_p^(1);
@@ -106,7 +106,7 @@ let basicTests = Framework.suite("basic", [
 
   test("double resolve", () => {
     let resolveP = ref(ignore);
-    let p = Repromise.new_((resolve, _reject) => resolveP := resolve);
+    let p = Repromise.new_(resolve => resolveP := resolve);
     resolveP^(42);
     p |> Repromise.then_(n => {
       resolveP^(43);
@@ -125,7 +125,7 @@ let basicTests = Framework.suite("basic", [
     let firstCallbackCalled = ref(false);
     let secondCallbackCalledSecond = ref(false);
     let resolveP = ref(ignore);
-    let p = Repromise.new_((resolve, _reejct) => resolveP := resolve);
+    let p = Repromise.new_(resolve => resolveP := resolve);
     p |> Repromise.map(() => firstCallbackCalled := true) |> ignore;
     p |> Repromise.map(() =>
       secondCallbackCalledSecond := firstCallbackCalled^) |> ignore;
@@ -138,54 +138,53 @@ let basicTests = Framework.suite("basic", [
 
 let rejectTests = Framework.suite("reject", [
   test("new_", () => {
-    Repromise.new_((_, reject) => reject(1))
-    |> Repromise.catch(n => Repromise.resolve(n == 1));
+    Repromise.Rejectable.new_((_, reject) => reject(1))
+    |> Repromise.Rejectable.catch(n => Repromise.resolve(n == 1));
   }),
 
   test("reject, catch", () => {
-    Repromise.reject("foo")
-    |> Repromise.catch(s => Repromise.resolve(s == "foo"));
+    Repromise.Rejectable.reject("foo")
+    |> Repromise.Rejectable.catch(s => Repromise.resolve(s == "foo"));
   }),
 
   test("catch chosen", () => {
-    Repromise.reject("foo")
-    |> Repromise.then_((_) => Repromise.resolve(false))
-    |> Repromise.catch(s => Repromise.resolve(s == "foo"));
+    Repromise.Rejectable.reject("foo")
+    |> Repromise.Rejectable.catch(s => Repromise.resolve(s == "foo"));
   }),
 
   test("then_, reject, catch", () => {
-    Repromise.resolve(1)
-    |> Repromise.then_(n => Repromise.reject(n + 1))
-    |> Repromise.catch(n => Repromise.resolve(n == 2));
+    Repromise.Rejectable.resolve(1)
+    |> Repromise.Rejectable.then_(n => Repromise.Rejectable.reject(n + 1))
+    |> Repromise.Rejectable.catch(n => Repromise.resolve(n == 2));
   }),
 
   test("reject, catch, then_", () => {
-    Repromise.reject(1)
-    |> Repromise.catch(n => Repromise.resolve(n + 1))
+    Repromise.Rejectable.reject(1)
+    |> Repromise.Rejectable.catch(n => Repromise.resolve(n + 1))
     |> Repromise.then_(n => Repromise.resolve(n == 2));
   }),
 
   test("no double catch", () => {
-    Repromise.reject("foo")
-    |> Repromise.catch(s => Repromise.resolve(s == "foo"))
-    |> Repromise.catch((_) => Repromise.resolve(false));
+    Repromise.Rejectable.reject("foo")
+    |> Repromise.Rejectable.catch(s => Repromise.resolve(s == "foo"))
+    |> Repromise.Rejectable.catch((_) => Repromise.resolve(false));
   }),
 
   test("catch chain", () => {
-    Repromise.reject(1)
-    |> Repromise.catch(n => Repromise.reject(n + 1))
-    |> Repromise.catch(n => Repromise.resolve(n == 2));
+    Repromise.Rejectable.reject(1)
+    |> Repromise.Rejectable.catch(n => Repromise.Rejectable.reject(n + 1))
+    |> Repromise.Rejectable.catch(n => Repromise.resolve(n == 2));
   }),
 
   test("no catching resolved", () => {
     Repromise.resolve(true)
-    |> Repromise.catch((_) => Repromise.resolve(false));
+    |> Repromise.Rejectable.catch((_) => Repromise.resolve(false));
   }),
 
   test("no catching resolved, after then_", () => {
     Repromise.resolve()
     |> Repromise.then_(() => Repromise.resolve(true))
-    |> Repromise.catch((_) => Repromise.resolve(false));
+    |> Repromise.Rejectable.catch((_) => Repromise.resolve(false));
   }),
 ]);
 
@@ -224,8 +223,8 @@ let allTests = Framework.suite("all", [
   test("resolved later", () => {
     let resolveP1 = ref(ignore);
     let resolveP2 = ref(ignore);
-    let p1 = Repromise.new_((resolve, _reject) => resolveP1 := resolve);
-    let p2 = Repromise.new_((resolve, _reject) => resolveP2 := resolve);
+    let p1 = Repromise.new_(resolve => resolveP1 := resolve);
+    let p2 = Repromise.new_(resolve => resolveP2 := resolve);
     let p3 = Repromise.all([p1, p2]);
     resolveP1^(42);
     resolveP2^(43);
@@ -234,8 +233,8 @@ let allTests = Framework.suite("all", [
 
   test("not all resolved", () => {
     let resolveP1 = ref(ignore);
-    let p1 = Repromise.new_((resolve, _reject) => resolveP1 := resolve);
-    let p2 = Repromise.new_((_, _) => ());
+    let p1 = Repromise.new_(resolve => resolveP1 := resolve);
+    let p2 = Repromise.new_(ignore);
     let p3 = Repromise.all([p1, p2]);
     resolveP1^(42);
     remainsPending(p3, []);
@@ -243,45 +242,45 @@ let allTests = Framework.suite("all", [
 
   test("simultaneous resolve", () => {
     let resolveP1 = ref(ignore);
-    let p1 = Repromise.new_((resolve, _reject) => resolveP1 := resolve);
+    let p1 = Repromise.new_(resolve => resolveP1 := resolve);
     let p2 = Repromise.all([p1, p1]);
     resolveP1^(42);
     p2 |> Repromise.map(results => results == [42, 42]);
   }),
 
   test("already rejected", () => {
-    let p1 = Repromise.new_((_, _) => ());
-    let p2 = Repromise.all([p1, Repromise.reject(43)]);
+    let p1 = Repromise.Rejectable.new_((_, _) => ());
+    let p2 = Repromise.Rejectable.all([p1, Repromise.Rejectable.reject(43)]);
     p2
-    |> Repromise.then_((_) => Repromise.resolve(false))
-    |> Repromise.catch(n => Repromise.resolve(n == 43));
+    |> Repromise.Rejectable.then_((_) => Repromise.Rejectable.resolve(false))
+    |> Repromise.Rejectable.catch(n => Repromise.resolve(n == 43));
   }),
 
   test("rejected later", () => {
     let rejectP1 = ref(ignore);
-    let p1 = Repromise.new_((_resolve, reject) => rejectP1 := reject);
-    let p2 = Repromise.new_((_, _) => ());
-    let p3 = Repromise.all([p1, p2]);
+    let p1 = Repromise.Rejectable.new_((_, reject) => rejectP1 := reject);
+    let p2 = Repromise.Rejectable.new_((_, _) => ());
+    let p3 = Repromise.Rejectable.all([p1, p2]);
     rejectP1^(42);
     p3
-    |> Repromise.then_((_) => Repromise.resolve(false))
-    |> Repromise.catch(n => Repromise.resolve(n == 42));
+    |> Repromise.Rejectable.then_((_) => Repromise.Rejectable.resolve(false))
+    |> Repromise.Rejectable.catch(n => Repromise.resolve(n == 42));
   }),
 
   test("remains rejected", () => {
     let rejectP1 = ref(ignore);
     let resolveP2 = ref(ignore);
-    let p1 = Repromise.new_((_resolve, reject) => rejectP1 := reject);
-    let p2 = Repromise.new_((resolve, _reject) => resolveP2 := resolve);
-    let p3 = Repromise.all([p1, p2]);
+    let p1 = Repromise.Rejectable.new_((_, reject) => rejectP1 := reject);
+    let p2 = Repromise.Rejectable.new_((resolve, _) => resolveP2 := resolve);
+    let p3 = Repromise.Rejectable.all([p1, p2]);
     rejectP1^(42);
     resolveP2^(43);
     p2
-    |> Repromise.catch((_) => assert false)
-    |> Repromise.then_((_) =>
+    |> Repromise.Rejectable.catch((_) => assert false)
+    |> Repromise.Rejectable.then_((_) =>
       p3
-      |> Repromise.then_((_) => Repromise.resolve(false))
-      |> Repromise.catch(n => Repromise.resolve(n == 42)));
+      |> Repromise.Rejectable.then_((_) => Repromise.Rejectable.resolve(false))
+      |> Repromise.Rejectable.catch(n => Repromise.resolve(n == 42)));
   }),
 
   test("empty", () => {
@@ -295,8 +294,8 @@ let allTests = Framework.suite("all", [
 let raceTests = Framework.suite("race", [
   test("first resolves", () => {
     let resolveP1 = ref(ignore);
-    let p1 = Repromise.new_((resolve, _reject) => resolveP1 := resolve);
-    let p2 = Repromise.new_((_resolve, _reject) => ());
+    let p1 = Repromise.new_(resolve => resolveP1 := resolve);
+    let p2 = Repromise.new_(ignore);
     let p3 = Repromise.race([p1, p2]);
     resolveP1^(42);
     p3 |> Repromise.map(n => n == 42);
@@ -304,8 +303,8 @@ let raceTests = Framework.suite("race", [
 
   test("second resolves", () => {
     let resolveP2 = ref(ignore);
-    let p1 = Repromise.new_((_resolve, _reject) => ());
-    let p2 = Repromise.new_((resolve, _reject) => resolveP2 := resolve);
+    let p1 = Repromise.new_(ignore);
+    let p2 = Repromise.new_(resolve => resolveP2 := resolve);
     let p3 = Repromise.race([p1, p2]);
     resolveP2^(43);
     p3 |> Repromise.map(n => n == 43);
@@ -314,8 +313,8 @@ let raceTests = Framework.suite("race", [
   test("first resolves first", () => {
     let resolveP1 = ref(ignore);
     let resolveP2 = ref(ignore);
-    let p1 = Repromise.new_((resolve, _reject) => resolveP1 := resolve);
-    let p2 = Repromise.new_((resolve, _reject) => resolveP2 := resolve);
+    let p1 = Repromise.new_(resolve => resolveP1 := resolve);
+    let p2 = Repromise.new_(resolve => resolveP2 := resolve);
     let p3 = Repromise.race([p1, p2]);
     resolveP1^(42);
     resolveP2^(43);
@@ -325,8 +324,8 @@ let raceTests = Framework.suite("race", [
   test("second resolves first", () => {
     let resolveP1 = ref(ignore);
     let resolveP2 = ref(ignore);
-    let p1 = Repromise.new_((resolve, _reject) => resolveP1 := resolve);
-    let p2 = Repromise.new_((resolve, _reject) => resolveP2 := resolve);
+    let p1 = Repromise.new_(resolve => resolveP1 := resolve);
+    let p2 = Repromise.new_(resolve => resolveP2 := resolve);
     let p3 = Repromise.race([p1, p2]);
     resolveP2^(43);
     resolveP1^(42);
@@ -335,25 +334,25 @@ let raceTests = Framework.suite("race", [
 
   test("rejection", () => {
     let rejectP1 = ref(ignore);
-    let p1 = Repromise.new_((_resolve, reject) => rejectP1 := reject);
-    let p2 = Repromise.new_((_resolve, _reject) => ());
-    let p3 = Repromise.race([p1, p2]);
+    let p1 = Repromise.Rejectable.new_((_, reject) => rejectP1 := reject);
+    let p2 = Repromise.Rejectable.new_((_, _) => ());
+    let p3 = Repromise.Rejectable.race([p1, p2]);
     rejectP1^(42);
-    p3 |> Repromise.catch(n => Repromise.resolve(n == 42));
+    p3 |> Repromise.Rejectable.catch(n => Repromise.resolve(n == 42));
   }),
 
   test("already resolved", () => {
-    let p1 = Repromise.new_((_resolve, _reject) => ());
+    let p1 = Repromise.new_(ignore);
     let p2 = Repromise.resolve(43);
     let p3 = Repromise.race([p1, p2]);
     p3 |> Repromise.map(n => n == 43);
   }),
 
   test("already rejected", () => {
-    let p1 = Repromise.new_((_resolve, _reject) => ());
-    let p2 = Repromise.reject(43);
-    let p3 = Repromise.race([p1, p2]);
-    p3 |> Repromise.catch(n => Repromise.resolve(n == 43));
+    let p1 = Repromise.Rejectable.new_((_, _) => ());
+    let p2 = Repromise.Rejectable.reject(43);
+    let p3 = Repromise.Rejectable.race([p1, p2]);
+    p3 |> Repromise.Rejectable.catch(n => Repromise.resolve(n == 43));
   }),
 
   test("two resolved", () => {
@@ -364,15 +363,15 @@ let raceTests = Framework.suite("race", [
   }),
 
   test("forever pending", () => {
-    let p1 = Repromise.new_((_resolve, _reject) => ());
-    let p2 = Repromise.new_((_resolve, _reject) => ());
+    let p1 = Repromise.new_(ignore);
+    let p2 = Repromise.new_(ignore);
     let p3 = Repromise.race([p1, p2]);
     remainsPending(p3, 43);
   }),
 
   test("simultaneous resolve", () => {
     let resolveP1 = ref(ignore);
-    let p1 = Repromise.new_((resolve, _reject) => resolveP1 := resolve);
+    let p1 = Repromise.new_(resolve => resolveP1 := resolve);
     let p2 = Repromise.race([p1, p1]);
     resolveP1^(42);
     p2 |> Repromise.map(n => n == 42);
@@ -391,7 +390,7 @@ let raceTests = Framework.suite("race", [
      p has to be involved in a call to race. */
   test("race, then callbacks moved", () => {
     let resolveP = ref(ignore);
-    let p = Repromise.new_((resolve, _reject) => resolveP := resolve);
+    let p = Repromise.new_(resolve => resolveP := resolve);
     let final = Repromise.race([p]);
 
     /* We are using this resolve() just so we can call then_ on it, guaranteeing
@@ -415,7 +414,7 @@ let raceTests = Framework.suite("race", [
      its callback list has been merged with the outer promise of then_. */
   test("callbacks moved, then race", () => {
     let resolveP = ref(ignore);
-    let p = Repromise.new_((resolve, _reject) => resolveP := resolve);
+    let p = Repromise.new_(resolve => resolveP := resolve);
 
     let delay = Repromise.resolve();
 

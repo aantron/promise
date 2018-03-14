@@ -1,13 +1,18 @@
-type promise('a, 'e);
-type t('a, 'e) = promise('a, 'e);
-
+type rejectable('a, 'e);
 type never;
+
+type promise('a) = rejectable('a, never);
+type t('a) = promise('a);
+
+
 
 let onUnhandledException = ref(exn => {
   prerr_endline("Unhandled exception in promise callback:");
   prerr_endline(Printexc.to_string(exn));
   exit(2);
 });
+
+
 
 [%%bs.raw {|
 function WrappedRepromise(p) {
@@ -70,33 +75,40 @@ function catch_(callback, promise) {
 }
 |}];
 
-[@bs.val]
-external new_: (('a => unit) => ('e => unit) => unit) => promise('a, 'e) = "";
+
+
+module Rejectable = {
+type t('a, 'e) = rejectable('a, 'e);
+
+external relax: promise('a) => rejectable('a, _) = "%identity";
 
 [@bs.val]
-external resolve: 'a => promise('a, _) = "";
+external new_: (('a => unit) => ('e => unit) => unit) => rejectable('a, 'e) = "";
+
+[@bs.val]
+external resolve: 'a => rejectable('a, _) = "";
 
 [@bs.val]
 external then_:
-  ('a => promise('b, 'e), promise('a, 'e)) => promise('b, 'e) = "then";
+  ('a => rejectable('b, 'e), rejectable('a, 'e)) => rejectable('b, 'e) = "then";
 
 let map = (callback, promise) =>
   promise |> then_(value => resolve(callback(value)));
 
 [@bs.scope "Promise"]
 [@bs.val]
-external reject: 'e => promise(_, 'e) = "";
+external reject: 'e => rejectable(_, 'e) = "";
 
 [@bs.val]
 external catch:
-  ('e => promise('a, 'e2), promise('a, 'e)) => promise('a, 'e2) = "catch_";
+  ('e => rejectable('a, 'e2), rejectable('a, 'e)) => rejectable('a, 'e2) = "catch_";
 
 [@bs.val]
 external unwrap: 'a => 'a = "";
 
 [@bs.scope "Promise"]
 [@bs.val]
-external jsAll: array(promise('a, 'e)) => promise(array('a), 'e) = "all";
+external jsAll: array(rejectable('a, 'e)) => rejectable(array('a), 'e) = "all";
 
 let all = promises =>
   promises
@@ -107,10 +119,21 @@ let all = promises =>
 
 [@bs.scope "Promise"]
 [@bs.val]
-external jsRace: array(promise('a, 'e)) => promise('a, 'e) = "race";
+external jsRace: array(rejectable('a, 'e)) => rejectable('a, 'e) = "race";
 
 let race = promises =>
   jsRace(Array.of_list(promises));
+};
+
+
+
+let new_ = executor =>
+  Rejectable.new_((resolve, _reject) => executor(resolve));
+let resolve = Rejectable.resolve;
+let then_ = Rejectable.then_;
+let map = Rejectable.map;
+let all = Rejectable.all;
+let race = Rejectable.race;
 
 
 

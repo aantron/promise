@@ -34,11 +34,8 @@
 type test;
 type suite;
 
-type never = Repromise.never;
-
 let test:
-  (string, ~only_if: unit => bool = ?, unit => Repromise.t(bool, never)) =>
-    test;
+  (string, ~only_if: unit => bool = ?, unit => Repromise.t(bool)) => test;
 /** Like [test_direct], but defines a test which runs a thread. */
 
 let suite: (string, ~only_if: unit => bool = ?, list(test)) => suite;

@@ -1,5 +1,3 @@
-type never = Repromise.never;
-
 let loop = Libuv_loop.default ();
 
 let rec run = () => {
@@ -58,12 +56,12 @@ let rec run = () => {
 type fd = int;
 
 let open_ = filename =>
-  Repromise.new_((resolve, _) =>
+  Repromise.new_(resolve =>
     Libuv_fs.Async.open_(loop, filename, ~flags = 0, ~mode = 0, resolve));
 
 let read = (~fd, ~length) => {
   let buffer = Bytes.create(length);
-  Repromise.new_((resolve, _) =>
+  Repromise.new_(resolve =>
     Libuv_fs.Async.read(loop, fd, buffer, bytes_read =>
       resolve(Bytes.sub_string(buffer, 0, bytes_read))))
 };
