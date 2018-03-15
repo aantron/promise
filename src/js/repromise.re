@@ -78,51 +78,55 @@ function catch_(callback, promise) {
 
 
 module Rejectable = {
-type t('a, 'e) = rejectable('a, 'e);
+  type t('a, 'e) = rejectable('a, 'e);
 
-external relax: promise('a) => rejectable('a, _) = "%identity";
+  external relax: promise('a) => rejectable('a, _) = "%identity";
 
-[@bs.val]
-external new_: (('a => unit) => ('e => unit) => unit) => rejectable('a, 'e) = "";
+  [@bs.val]
+  external new_:
+    (('a => unit) => ('e => unit) => unit) => rejectable('a, 'e) = "";
 
-[@bs.val]
-external resolve: 'a => rejectable('a, _) = "";
+  [@bs.val]
+  external resolve: 'a => rejectable('a, _) = "";
 
-[@bs.val]
-external then_:
-  ('a => rejectable('b, 'e), rejectable('a, 'e)) => rejectable('b, 'e) = "then";
+  [@bs.val]
+  external then_:
+    ('a => rejectable('b, 'e), rejectable('a, 'e)) => rejectable('b, 'e) =
+      "then";
 
-let map = (callback, promise) =>
-  promise |> then_(value => resolve(callback(value)));
+  let map = (callback, promise) =>
+    promise |> then_(value => resolve(callback(value)));
 
-[@bs.scope "Promise"]
-[@bs.val]
-external reject: 'e => rejectable(_, 'e) = "";
+  [@bs.scope "Promise"]
+  [@bs.val]
+  external reject: 'e => rejectable(_, 'e) = "";
 
-[@bs.val]
-external catch:
-  ('e => rejectable('a, 'e2), rejectable('a, 'e)) => rejectable('a, 'e2) = "catch_";
+  [@bs.val]
+  external catch:
+    ('e => rejectable('a, 'e2), rejectable('a, 'e)) => rejectable('a, 'e2) =
+      "catch_";
 
-[@bs.val]
-external unwrap: 'a => 'a = "";
+  [@bs.val]
+  external unwrap: 'a => 'a = "";
 
-[@bs.scope "Promise"]
-[@bs.val]
-external jsAll: array(rejectable('a, 'e)) => rejectable(array('a), 'e) = "all";
+  [@bs.scope "Promise"]
+  [@bs.val]
+  external jsAll:
+    array(rejectable('a, 'e)) => rejectable(array('a), 'e) = "all";
 
-let all = promises =>
-  promises
-  |> Array.of_list
-  |> jsAll
-  |> map (results =>
-    results |> Array.map(unwrap) |> Array.to_list);
+  let all = promises =>
+    promises
+    |> Array.of_list
+    |> jsAll
+    |> map (results =>
+      results |> Array.map(unwrap) |> Array.to_list);
 
-[@bs.scope "Promise"]
-[@bs.val]
-external jsRace: array(rejectable('a, 'e)) => rejectable('a, 'e) = "race";
+  [@bs.scope "Promise"]
+  [@bs.val]
+  external jsRace: array(rejectable('a, 'e)) => rejectable('a, 'e) = "race";
 
-let race = promises =>
-  jsRace(Array.of_list(promises));
+  let race = promises =>
+    jsRace(Array.of_list(promises));
 };
 
 
