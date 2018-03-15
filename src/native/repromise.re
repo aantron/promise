@@ -129,14 +129,6 @@ let rejectInternal = p => error =>
 
 
 
-let new_ = executor => {
-  let p = newInternal();
-  executor(resolveInternal(p), rejectInternal(p));
-  p
-};
-
-
-
 let resolve = value =>
   ref(`Fulfilled(value));
 
@@ -396,7 +388,13 @@ module Rejectable = {
 
   external relax: promise('a) => rejectable('a, _) = "%identity";
 
-  let new_ = new_;
+  let new_ = () => {
+    let p = newInternal();
+    let resolve = resolveInternal(p);
+    let reject = rejectInternal(p);
+    (p, resolve, reject);
+  };
+
   let resolve = resolve;
   let reject = reject;
   let then_ = then_;
@@ -408,5 +406,7 @@ module Rejectable = {
 
 
 
-let new_ = executor =>
-  new_((resolve, _) => executor(resolve));
+let new_ = () => {
+  let (p, resolve, _) = Rejectable.new_();
+  (p, resolve);
+}

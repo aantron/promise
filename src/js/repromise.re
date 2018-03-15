@@ -83,8 +83,19 @@ module Rejectable = {
   external relax: promise('a) => rejectable('a, _) = "%identity";
 
   [@bs.val]
-  external new_:
-    (('a => unit) => ('e => unit) => unit) => rejectable('a, 'e) = "";
+  external jsNew:
+    (('a => unit) => ('e => unit) => unit) => rejectable('a, 'e) = "new_";
+
+  let new_ = () => {
+    let resolve = ref(ignore);
+    let reject = ref(ignore);
+    let p =
+      jsNew((resolve', reject') => {
+        resolve := resolve';
+        reject := reject';
+      });
+    (p, resolve^, reject^);
+  };
 
   [@bs.val]
   external resolve: 'a => rejectable('a, _) = "";
@@ -131,8 +142,11 @@ module Rejectable = {
 
 
 
-let new_ = executor =>
-  Rejectable.new_((resolve, _reject) => executor(resolve));
+let new_ = () => {
+  let (p, resolve, _) = Rejectable.new_();
+  (p, resolve);
+};
+
 let resolve = Rejectable.resolve;
 let then_ = Rejectable.then_;
 let map = Rejectable.map;

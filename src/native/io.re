@@ -55,13 +55,16 @@ let rec run = () => {
 
 type fd = int;
 
-let open_ = filename =>
-  Repromise.new_(resolve =>
-    Libuv_fs.Async.open_(loop, filename, ~flags = 0, ~mode = 0, resolve));
+let open_ = filename => {
+  let (p, resolve) = Repromise.new_();
+  Libuv_fs.Async.open_(loop, filename, ~flags = 0, ~mode = 0, resolve);
+  p;
+};
 
 let read = (~fd, ~length) => {
   let buffer = Bytes.create(length);
-  Repromise.new_(resolve =>
-    Libuv_fs.Async.read(loop, fd, buffer, bytes_read =>
-      resolve(Bytes.sub_string(buffer, 0, bytes_read))))
+  let (p, resolve) = Repromise.new_();
+  Libuv_fs.Async.read(loop, fd, buffer, bytes_read =>
+    resolve(Bytes.sub_string(buffer, 0, bytes_read)));
+  p;
 };

@@ -99,7 +99,7 @@ let promiseLoopTests = Framework.suite("promise loop", [
      referenced by the user program can be garbage-collected. */
   test("promise tower memory leak", () => {
     let instrumentedPromiseTower = n => {
-      let foreverPendingPromise = Repromise.new_(ignore);
+      let (foreverPendingPromise, _) = Repromise.new_();
 
       let initialWords = countAllocatedWords();
 
@@ -137,8 +137,7 @@ let promiseLoopTests = Framework.suite("promise loop", [
 let raceTest = (name, body) =>
   test(name, () => {
     let instrumentedLoop = n => {
-      let foreverPendingPromise: Repromise.Rejectable.t(unit, unit) =
-        Repromise.Rejectable.new_((_, _) => ());
+      let (foreverPendingPromise, _, _) = Repromise.Rejectable.new_();
 
       let initialWords = countAllocatedWords();
 
@@ -179,14 +178,13 @@ let raceLoopTests = Framework.suite("race loop", [
      remove callbacks from p1  when p3, p3', etc. are resolved by race. This
      test checks for such an implementation. */
   raceTest("race loop memory leak", (foreverPendingPromise, nextIteration) => {
-    let resolveShortLivedPromise = ref(ignore);
-    let shortLivedPromise = Repromise.Rejectable.new_((resolve, _) =>
-      resolveShortLivedPromise := resolve);
+    let (shortLivedPromise, resolveShortLivedPromise, _) =
+      Repromise.Rejectable.new_();
 
     let racePromise =
       Repromise.Rejectable.race([foreverPendingPromise, shortLivedPromise]);
 
-    resolveShortLivedPromise^();
+    resolveShortLivedPromise();
 
     racePromise |> Repromise.Rejectable.then_(nextIteration);
   }),
@@ -203,14 +201,13 @@ let raceLoopTests = Framework.suite("race loop", [
 
   raceTest("race loop memory leak, with rejection",
       (foreverPendingPromise, nextIteration) => {
-    let rejectShortLivedPromise = ref(ignore);
-    let shortLivedPromise = Repromise.Rejectable.new_((_, reject) =>
-      rejectShortLivedPromise := reject);
+    let (shortLivedPromise, _, rejectShortLivedPromise) =
+      Repromise.Rejectable.new_();
 
     let racePromise =
       Repromise.Rejectable.race([foreverPendingPromise, shortLivedPromise]);
 
-    rejectShortLivedPromise^();
+    rejectShortLivedPromise();
 
     racePromise
     |> Repromise.Rejectable.then_(() => assert(false))
@@ -242,9 +239,8 @@ let raceLoopTests = Framework.suite("race loop", [
      lists. */
   raceTest("race loop memory leak with then_ merging",
       (foreverPendingPromise, nextIteration) => {
-    let resolveShortLivedPromise = ref(ignore);
-    let shortLivedPromise = Repromise.Rejectable.new_((resolve, _) =>
-      resolveShortLivedPromise := resolve);
+    let (shortLivedPromise, resolveShortLivedPromise, _) =
+      Repromise.Rejectable.new_();
 
     let racePromise =
       Repromise.Rejectable.race([foreverPendingPromise, shortLivedPromise]);
@@ -264,7 +260,7 @@ let raceLoopTests = Framework.suite("race loop", [
       /* Now, we resolve the short-lived promise. If that doesn't delete the
          callback that was merged away from foreverPendingPromise, then this is
          where we will accumulate the memory leak. */
-      resolveShortLivedPromise^();
+      resolveShortLivedPromise();
       racePromise |> Repromise.Rejectable.then_(nextIteration);
     });
   }),
@@ -281,14 +277,13 @@ let allLoopTests = Framework.suite("all loop", [
      We reuse the raceTest helper, because the tests are structurally the same.
      race remains the function with the most opportunities to leak memory. */
   raceTest("all loop memory leak", (foreverPendingPromise, nextIteration) => {
-    let rejectShortLivedPromise = ref(ignore);
-    let shortLivedPromise = Repromise.Rejectable.new_((_, reject) =>
-      rejectShortLivedPromise := reject);
+    let (shortLivedPromise, _, rejectShortLivedPromise) =
+      Repromise.Rejectable.new_();
 
     let allPromise =
       Repromise.Rejectable.all([foreverPendingPromise, shortLivedPromise]);
 
-    rejectShortLivedPromise^();
+    rejectShortLivedPromise();
 
     allPromise
     |> Repromise.Rejectable.then_((_) => assert false)
@@ -311,9 +306,8 @@ let allLoopTests = Framework.suite("all loop", [
      for race and then_ above. */
   raceTest("race loop memory leak with then_ merging",
       (foreverPendingPromise, nextIteration) => {
-    let rejectShortLivedPromise = ref(ignore);
-    let shortLivedPromise = Repromise.Rejectable.new_((_resolve, reject) =>
-      rejectShortLivedPromise := reject);
+    let (shortLivedPromise, _, rejectShortLivedPromise) =
+      Repromise.Rejectable.new_();
 
     let allPromise =
       Repromise.Rejectable.all([foreverPendingPromise, shortLivedPromise]);
@@ -328,7 +322,7 @@ let allLoopTests = Framework.suite("all loop", [
     delay
     |> Repromise.Rejectable.catch((_) => assert(false))
     |> Repromise.Rejectable.then_(() => {
-      rejectShortLivedPromise^();
+      rejectShortLivedPromise();
       allPromise
       |> Repromise.Rejectable.then_((_) => assert false)
       |> Repromise.Rejectable.catch(nextIteration);
@@ -349,9 +343,10 @@ let libuvTests = Framework.suite("libuv", [
   }),
 
   test("open_ async", () => {
-    Repromise.new_(resolve =>
-      Libuv_fs.Async.open_(loop, "test/test.re", ~flags = 0, ~mode = 0, fd =>
-        resolve(fd > 0)));
+    let (p, resolve) = Repromise.new_();
+    Libuv_fs.Async.open_(loop, "test/test.re", ~flags = 0, ~mode = 0, fd =>
+      resolve(fd > 0));
+    p;
   }),
 ]);
 

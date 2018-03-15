@@ -6,7 +6,7 @@ type t('a) = promise('a);
 
 
 
-let new_: (('a => unit) => unit) => promise('a);
+let new_: unit => (promise('a), 'a => unit);
 
 let resolve: 'a => promise('a);
 
@@ -25,7 +25,7 @@ module Rejectable: {
 
   let relax: promise('a) => rejectable('a, _);
 
-  let new_: (('a => unit, 'e => unit) => unit) => rejectable('a, 'e);
+  let new_: unit => (rejectable('a, 'e), 'a => unit, 'e => unit);
 
   let resolve: 'a => rejectable('a, _);
 
