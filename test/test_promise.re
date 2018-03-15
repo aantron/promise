@@ -130,6 +130,11 @@ let basicTests = Framework.suite("basic", [
     resolve();
     p |> Repromise.map(() => secondCallbackCalledSecond^);
   }),
+
+  test("relax", () => {
+    let p = Repromise.resolve();
+    Repromise.resolve(Repromise.Rejectable.relax(p) === p);
+  }),
 ]);
 
 
