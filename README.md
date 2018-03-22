@@ -1,12 +1,13 @@
-# Repromise
+# Repromise &nbsp;&nbsp; [![Travis status][travis-img]][travis]
 
-**Repromise** is a promise library that works on all platforms supported by
-Reason: the browser, Node.js, and native Linux, macOS, Windows:
+[**Repromise**][repromise] is a Reason promise library that works on all
+platforms: the browser, Node.js, and native Linux, macOS, Windows. For example,
+[the demo][demo],
 
 ```reason
 let () = {
   ignore({
-    let%await fd   = Io.open_("test/test.re");
+    let%await fd   = Io.open_("test/demo/demo.re");
     let%await data = Io.read (~fd, ~length = 1024);
     print_endline(data);
     Repromise.resolve();
@@ -16,24 +17,57 @@ let () = {
 };
 ```
 
-...the above works on both Node and native.
+...works on Node and native, and prints its own source code :)
 
-Interoperability is key: on JavaScript, `Repromise.t`s are exactly JavaScript's
-familiar `Promise`s. For targeting native code, Repromise provides an
-implementation with the same semantics.
+<br/>
 
-The `Io` module is powered by libuv when targeting native code, and Node.js on
+Interoperability is key. On JavaScript, `Repromise.t`s are the native
+JavaScript promises we are all used to. For targeting machine code, Repromise
+provides an [implementation][native] with equivalent semantics.
+
+A small [Reason PPX (preprocessor)][ppx] provides the `let%await` syntax, which
+is the Reason counterpart to `async`/`await`.
+
+The [`Io` module][io] is a proof-of-concept at this point. It is implemented
+using [libuv][libuv] when targeting machine code, and Node.js when targeting
 JavaScript. Either way, the underlying implementation is the same, because
-Node.js is *itself* powered by libuv.
-
-Repromise includes a small preprocessor so you can write the neat and familiar
-`let%await` syntax as in the example above.
+Node.js also uses libuv.
 
 
 
 <br/>
 
-## Trying it out
+## Participate!
+
+We don't really know the best way to bind JS promises in Reason yet, so the
+goal of Repromise is to iterate quickly, until we have something pretty good.
+
+Take a look in the [issue tracker][issues] for discussions, and join us in
+[ReasonML Discord][discord] for figuring this thing out. All feedback is very
+welcome :)
+
+
+
+<br/>
+
+## Trying the code
+
+Repromise doesn't have release packaging yet, but here is how you can run the
+code in the repo...
+
+#### With npm (JS):
+
+```
+opam switch 4.02.3+buckle-master
+eval `opam config env`
+opam pin add --dev-repo reason
+git clone https://github.com/aantron/repromise.git
+cd repromise
+npm install
+npm run build
+(cd test && npm install && npm run build)
+node ./test/lib/js/test.js
+```
 
 #### With esy (native):
 
@@ -55,63 +89,21 @@ opam pin add ppx_await .
 jbuilder exec test/test.exe
 ```
 
-#### With npm (JS):
-
-```
-git clone https://github.com/aantron/repromise.git
-cd repromise
-npm install
-npm run build
-(cd test && npm install && npm run build)
-node ./test/lib/js/test.js
-```
-
-#### Note for npm and opam:
-
-The Repromise `let%await` syntax depends on the latest development Reason
-toolchain, hopefully to be released soon as Reason 3.0.5. In the meantime, you
-need to have the development `refmt` installed and accessible through your
-`PATH`.
-
-The esy build already handles this. For npm and opam, one suggested way to get
-the latest `refmt` is to use opam to pin the `reason` package, which contains
-`refmt`, to its development repo:
-
-```
-opam switch 4.02.3+buckle-master
-eval `opam config env`
-opam pin add --dev-repo reason
-```
 
 
 
-<br/>
-
-## Why?
-
-Repromise is basically an effort to unify the Node API on JS and libuv with the
-native [Lwt][lwt] ecosystem. Among other things, we want to quickly study a new
-JavaScript-friendly Lwt core and new libuv-based event loop.
-
-[lwt]: https://github.com/ocsigen/lwt
-
-
-
-<br/>
-
-## Status
-
-This repository is in a **proof-of-concept** stage at the moment. We intend to
-expand it to a full implementation. However, for the time being, the repo is
-*very* rough: there is a functioning skeleton, but the packaging isn't there,
-the C FFI is rife with obvious memory leaks, etc.
-
-
+[repromise]: https://github.com/aantron/repromise
+[demo]: https://github.com/aantron/repromise/blob/5debf48c00f1b101de389d5aae015b9f0fa9a63b/test/demo/demo.re
+[native]: https://github.com/aantron/repromise/blob/5debf48c00f1b101de389d5aae015b9f0fa9a63b/src/native/repromise.re
+[ppx]: https://github.com/aantron/repromise/blob/5debf48c00f1b101de389d5aae015b9f0fa9a63b/src/ppx/bucklescript/ppx_await.re
+[io]: https://github.com/aantron/repromise/blob/5debf48c00f1b101de389d5aae015b9f0fa9a63b/src/io.rei
 [opam]: http://opam.ocaml.org/
 [node]: https://nodejs.org/en/
 [npm]: https://www.npmjs.com/
 [libuv]: http://libuv.org/
-[ctypes]: https://github.com/ocamllabs/ocaml-ctypes
 [bs]: https://github.com/BuckleScript/bucklescript
 [bsb-native]: https://github.com/bsansouci/bsb-native
+[issues]: https://github.com/aantron/repromise/issues?utf8=%E2%9C%93&q=label%3Adiscuss+
 [discord]: https://discordapp.com/invite/reasonml
+[travis]: https://travis-ci.org/aantron/repromise/branches
+[travis-img]: https://img.shields.io/travis/aantron/repromise/master.svg?label=travis
