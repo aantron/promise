@@ -69,6 +69,27 @@ npm run build
 node ./test/lib/js/test.js
 ```
 
+To add Repromise as a dependency in your project, add this to your
+`package.json`:
+
+```
+  "dependencies": {
+    "repromise": "github:aantron/repromise"
+  }
+```
+
+and this to `bsconfig.json`:
+
+```
+  "bs-dependencies": ["repromise"]
+```
+
+The `let%await` syntax is not as easy to pull in with NPM, because it requires
+building binaries, etc. We recommend waiting for it to be upstreamed into
+BuckleScript, or for proper release packaging to be announced later.
+
+<br/>
+
 #### With esy (native):
 
 ```
@@ -77,6 +98,8 @@ cd repromise
 esy install
 esy jbuilder exec test/test.exe
 ```
+
+<br/>
 
 #### With opam (native):
 
