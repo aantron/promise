@@ -137,7 +137,12 @@ module Rejectable = {
   external jsRace: array(rejectable('a, 'e)) => rejectable('a, 'e) = "race";
 
   let race = promises =>
-    jsRace(Array.of_list(promises));
+    if (promises == []) {
+      raise(Invalid_argument("Repromise.race([]) would be pending forever"));
+    }
+    else {
+      jsRace(Array.of_list(promises));
+    }
 };
 
 

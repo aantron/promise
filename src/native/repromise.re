@@ -337,6 +337,10 @@ let all = promises => {
 
 
 let race = promises => {
+  if (promises == []) {
+    raise(Invalid_argument("Repromise.race([]) would be pending forever"));
+  };
+
   let callbackRemovers = CallbackRemovers.empty();
 
   let finalPromise = newInternal();
