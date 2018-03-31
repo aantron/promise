@@ -69,22 +69,10 @@ npm run build
 node ./test/lib/js/test.js
 ```
 
-To add Repromise as a dependency in your project, add this to your
-`package.json`:
+See [aantron/repromise-example-bsb][example-bsb] for how to depend on Repromise
+in your project.
 
-```
-  "dependencies": {
-    "repromise": "github:aantron/repromise"
-  }
-```
-
-and this to `bsconfig.json`:
-
-```
-  "bs-dependencies": ["repromise"]
-```
-
-The `let%await` syntax is not as easy to pull in with NPM, because it requires
+The `let%await` syntax is not yet easy to pull in with NPM, because it requires
 building binaries, etc. We recommend waiting for it to be upstreamed into
 BuckleScript, or for proper release packaging to be announced later.
 
@@ -130,3 +118,4 @@ jbuilder exec test/test.exe
 [discord]: https://discordapp.com/invite/reasonml
 [travis]: https://travis-ci.org/aantron/repromise/branches
 [travis-img]: https://img.shields.io/travis/aantron/repromise/master.svg?label=travis
+[example-bsb]: https://github.com/aantron/repromise-example-bsb
