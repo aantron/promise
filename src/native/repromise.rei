@@ -1,1 +1,1 @@
-../repromise.rei
+../js/repromise.rei
