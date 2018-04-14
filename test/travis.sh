@@ -2,6 +2,12 @@ set -x
 
 
 
+install_libuv() {
+    sudo add-apt-repository -y ppa:acooks/libwebsockets6
+    sudo apt-get update -qq
+    sudo apt-get install libuv1-dev
+}
+
 install_opam () {
     sudo add-apt-repository -y ppa:avsm/ocaml42+opam12
     sudo apt-get update -qq
@@ -32,7 +38,7 @@ build_with_npm () {
 # repo.
 
 build_with_esy () {
-    sudo apt-get install libuv-dev
+    install_libuv
     npm install -g esy
 
     esy install
@@ -40,7 +46,7 @@ build_with_esy () {
 }
 
 build_with_opam () {
-    sudo apt-get install libuv-dev
+    install_libuv
     install_opam
     opam init -ya --compiler=4.06.1
     eval `opam config env`
@@ -51,7 +57,7 @@ build_with_opam () {
     opam install -y --deps-only repromise
     opam install -y --deps-only ppx_await
 
-    jbuilder exec test/test.exe || true
+    jbuilder exec test/test.exe
 }
 
 
