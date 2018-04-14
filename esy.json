@@ -38,7 +38,7 @@
       ["jbuilder", "build"]
     ],
     "install": [
-      ["esy-installer"]
+      ["esy-installer", "repromise.install"]
     ],
     "buildsInSource": "_build"
   }
