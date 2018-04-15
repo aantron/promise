@@ -87,6 +87,8 @@ esy install
 esy jbuilder exec test/test.exe
 ```
 
+See [aantron/repromise-example-esy][example-esy] for an example starter repo.
+
 <br/>
 
 #### With opam (native):
@@ -119,3 +121,4 @@ jbuilder exec test/test.exe
 [travis]: https://travis-ci.org/aantron/repromise/branches
 [travis-img]: https://img.shields.io/travis/aantron/repromise/master.svg?label=travis
 [example-bsb]: https://github.com/aantron/repromise-example-bsb
+[example-esy]: https://github.com/aantron/repromise-example-esy
