@@ -42,7 +42,7 @@ build_with_esy () {
     npm install -g esy
 
     esy install
-    esy jbuilder exec test/test.exe || true
+    esy jbuilder exec test/test.exe
 }
 
 build_with_opam () {

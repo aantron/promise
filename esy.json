@@ -32,6 +32,9 @@
     "@opam/merlin": "^3.0.5",
     "ocaml": "4.6.x"
   },
+  "resolutions": {
+    "**/@opam/lwt": "3.3.0"
+  },
 
   "esy": {
     "build": [
