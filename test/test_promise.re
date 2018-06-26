@@ -36,21 +36,10 @@ let basicTests = Framework.suite("basic", [
       |> Repromise.then_(r => r);
   }),
 
-  test("await", () => {
-    let%await n = Repromise.resolve(1);
-    Repromise.resolve(n == 1);
-  }),
-
   test("then_ chain", () => {
     Repromise.resolve(1)
     |> Repromise.then_ (n => Repromise.resolve (n + 1))
     |> Repromise.then_ (n => Repromise.resolve (n == 2));
-  }),
-
-  test("await chain", () => {
-    let%await n = Repromise.resolve(1);
-    let%await n = Repromise.resolve(n + 1);
-    Repromise.resolve(n == 2);
   }),
 
   test("then_ nested", () => {
@@ -59,14 +48,6 @@ let basicTests = Framework.suite("basic", [
       Repromise.resolve (n + 1)
       |> Repromise.then_ (n => Repromise.resolve (n + 1)))
     |> Repromise.then_ (n => Repromise.resolve (n == 3));
-  }),
-
-  test("await nested", () => {
-    let%await n = {
-      let%await n = Repromise.resolve(1);
-      Repromise.resolve(n + 1);
-    };
-    Repromise.resolve(n == 2);
   }),
 
   /* If promises are implemented on JS directly as ordinary JS promises,
@@ -90,16 +71,6 @@ let basicTests = Framework.suite("basic", [
   test("defer", () => {
     let (p, resolve) = Repromise.new_();
     let p' = p |> Repromise.then_(n => Repromise.resolve(n == 1));
-    resolve(1);
-    p';
-  }),
-
-  test("await defer", () => {
-    let (p, resolve) = Repromise.new_();
-    let p' = {
-      let%await n = p;
-      Repromise.resolve(n == 1);
-    };
     resolve(1);
     p';
   }),

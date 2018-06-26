@@ -15,6 +15,6 @@
   "scripts": {
     "build": "bsb -make-world",
     "watch": "bsb -w -make-world",
-    "clean": "bsb -clean-world && rm -rf _build/ lib/ && (cd src/ppx && bsb -clean-world && rm -rf _build/ lib/)"
+    "clean": "bsb -clean-world && rm -rf _build/ lib/"
   }
 }

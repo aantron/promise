@@ -2,5 +2,4 @@
 
 (executable
  ((name test)
-  (preprocess (pps (ppx_await)))
   (libraries (repromise test_ffi))))
