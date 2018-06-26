@@ -6,6 +6,7 @@ install_libuv() {
     sudo add-apt-repository -y ppa:acooks/libwebsockets6
     sudo apt-get update -qq
     sudo apt-get install libuv1-dev
+    sudo apt-get install texinfo
 }
 
 install_opam () {
