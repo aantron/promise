@@ -47,17 +47,13 @@ function resolve(value) {
 };
 
 function then(callback, promise) {
-    var safeCallback = function (value) {
+    return promise.then(function (value) {
         try {
-            return callback(value);
+            return callback(unwrap(value));
         }
         catch (exception) {
             onUnhandledException[0](exception);
         }
-    };
-
-    return promise.then(function (value) {
-        return safeCallback(unwrap(value));
     });
 };
 
