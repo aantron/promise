@@ -265,15 +265,4 @@ let soundnessTests = Framework.suite("soundness", [
 
 
 
-let nodeTests = Framework.suite("node", [
-  test("path.delimiter", () => {
-    switch Node_path.delimiter {
-    | ":" | ";" => Repromise.resolve(true)
-    | _ => Repromise.resolve(false)
-    };
-  }),
-]);
-
-
-
-let suites = [interopTests, soundnessTests, nodeTests];
+let suites = [interopTests, soundnessTests];

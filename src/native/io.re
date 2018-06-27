@@ -1,3 +1,17 @@
+let rec run = () => {
+  if (not(Repromise.ReadyCallbacks.callbacksPending())) {
+    ()
+  }
+  else {
+    let callbackSnapshot = Repromise.ReadyCallbacks.snapshot();
+    Repromise.ReadyCallbacks.call(callbackSnapshot);
+    run();
+  }
+};
+
+/* The code below is for integrating Repromise with a libuv binding. */
+
+/*
 let loop = Libuv_loop.default ();
 
 let rec run = () => {
@@ -52,19 +66,4 @@ let rec run = () => {
     }
   }
 };
-
-type fd = int;
-
-let open_ = filename => {
-  let (p, resolve) = Repromise.new_();
-  Libuv_fs.Async.open_(loop, filename, ~flags = 0, ~mode = 0, resolve);
-  p;
-};
-
-let read = (~fd, ~length) => {
-  let buffer = Bytes.create(length);
-  let (p, resolve) = Repromise.new_();
-  Libuv_fs.Async.read(loop, fd, buffer, bytes_read =>
-    resolve(Bytes.sub_string(buffer, 0, bytes_read)));
-  p;
-};
+*/

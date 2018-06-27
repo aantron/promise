@@ -332,24 +332,4 @@ let allLoopTests = Framework.suite("all loop", [
 
 
 
-let loop = Libuv_loop.default ();
-
-let libuvTests = Framework.suite("libuv", [
-  /* These are janky proof-of-concept tests. We are not even trying to close the
-     file. */
-  test("open_ sync", () => {
-    let fd = Libuv_fs.Sync.open_(loop, "test/test.re", ~flags = 0, ~mode = 0);
-    Repromise.resolve(fd > 0);
-  }),
-
-  test("open_ async", () => {
-    let (p, resolve) = Repromise.new_();
-    Libuv_fs.Async.open_(loop, "test/test.re", ~flags = 0, ~mode = 0, fd =>
-      resolve(fd > 0));
-    p;
-  }),
-]);
-
-
-
-let suites = [promiseLoopTests, raceLoopTests, allLoopTests, libuvTests];
+let suites = [promiseLoopTests, raceLoopTests, allLoopTests];

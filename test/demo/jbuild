@@ -1,4 +1,0 @@
-(executable
- ((name demo)
-  (preprocess (pps (ppx_await)))
-  (libraries (repromise))))
