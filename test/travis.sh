@@ -11,6 +11,7 @@ install_opam () {
 
 
 build_with_npm () {
+    npm install bs-platform
     npm install
     npm run build
     (cd test && npm install && npm run build)

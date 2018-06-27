@@ -1,20 +1,32 @@
 {
-  "name": "repromise",
-  "version": "0.1.0",
-  "description": "Node and native promises and I/O for Reason, OCaml",
+  "name": "reason-repromise",
+  "version": "1.0.0",
+  "description": "ReasonML promises with perfect JS interop",
+  "homepage": "https://github.com/aantron/repromise#readme",
   "license": "MIT",
-  "repository": "aantron/repromise",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aantron/repromise.git"
+  },
+  "bugs": {
+    "url": "https://github.com/aantron/repromise/issues"
+  },
   "author": {
     "name": "Anton Bachin",
     "email": "antonbachin@yahoo.com",
     "url": "https://github.com/aantron"
   },
-  "dependencies": {
-    "bs-platform": "^2.1.0"
+  "peerDependencies": {
+    "bs-platform": ">= 2.1.0"
   },
   "scripts": {
     "build": "bsb -make-world",
     "watch": "bsb -w -make-world",
-    "clean": "bsb -clean-world && rm -rf _build/ lib/"
-  }
+    "clean": "bsb -clean-world"
+  },
+  "files": [
+    "src/js/repromise.rei",
+    "src/js/repromise.re",
+    "bsconfig.json"
+  ]
 }

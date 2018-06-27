@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "bs-platform": "^2.1.0",
-    "repromise": "file:.."
+    "reason-repromise": "file:.."
   },
   "scripts": {
     "build": "bsb -make-world",

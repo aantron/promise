@@ -1,6 +1,6 @@
 {
   "name": "repromise-tests",
   "refmt": 3,
-  "bs-dependencies": ["repromise"],
+  "bs-dependencies": ["reason-repromise"],
   "sources": [".", "framework", "js"]
 }
