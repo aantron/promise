@@ -1,5 +1,5 @@
 {
-  "name": "reason-repromise",
+  "name": "@aantron/repromise",
   "refmt": 3,
   "sources": "src/js"
 }

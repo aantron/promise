@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "bs-platform": "^2.1.0",
-    "reason-repromise": "file:.."
+    "@aantron/repromise": "file:.."
   },
   "scripts": {
     "build": "bsb -make-world",

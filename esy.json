@@ -1,5 +1,5 @@
 {
-  "name": "repromise",
+  "name": "@aantron/repromise",
   "version": "0.1.0",
   "description": "Node and native promises and I/O for Reason, OCaml",
   "keywords": [

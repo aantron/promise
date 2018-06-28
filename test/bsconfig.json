@@ -1,6 +1,6 @@
 {
   "name": "repromise-tests",
   "refmt": 3,
-  "bs-dependencies": ["reason-repromise"],
+  "bs-dependencies": ["@aantron/repromise"],
   "sources": [".", "framework", "js"]
 }
