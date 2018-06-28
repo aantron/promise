@@ -1,0 +1,15 @@
+{
+  "docs": {
+    "Intro": [
+      "WhatWhy",
+      "QuickStart"
+    ],
+    "Reference": [
+      "API",
+      "Interop",
+      "RejectableAPI",
+      "DesignFAQ",
+      "Performance"
+    ]
+  }
+}

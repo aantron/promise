@@ -1,124 +1,114 @@
 # Repromise &nbsp;&nbsp; [![Travis status][travis-img]][travis]
 
-[**Repromise**][repromise] is a Reason promise library that works on all
-platforms: the browser, Node.js, and native Linux, macOS, Windows. For example,
-[the demo][demo],
-
-```reason
-let () = {
-  ignore({
-    let%await fd   = Io.open_("test/demo/demo.re");
-    let%await data = Io.read (~fd, ~length = 1024);
-    print_endline(data);
-    Repromise.resolve();
-  });
-
-  Io.run();
-};
-```
-
-...works on Node and native, and prints its own source code :)
-
-<br/>
-
-Interoperability is key. On JavaScript, `Repromise.t`s are the native
-JavaScript promises we are all used to. For targeting machine code, Repromise
-provides an [implementation][native] with equivalent semantics.
-
-A small [Reason PPX (preprocessor)][ppx] provides the `let%await` syntax, which
-is the Reason counterpart to `async`/`await`.
-
-The [`Io` module][io] is a proof-of-concept at this point. It is implemented
-using [libuv][libuv] when targeting machine code, and Node.js when targeting
-JavaScript. Either way, the underlying implementation is the same, because
-Node.js also uses libuv.
-
-
-
-<br/>
-
-## Participate!
-
-We don't really know the best way to bind JS promises in Reason yet, so the
-goal of Repromise is to iterate quickly, until we have something pretty good.
-
-Take a look in the [issue tracker][issues] for discussions, and join us in
-[ReasonML Discord][discord] for figuring this thing out. All feedback is very
-welcome :)
-
-
-
-<br/>
-
-## Trying the code
-
-Repromise doesn't have release packaging yet, but here is how you can run the
-code in the repo...
-
-#### With npm (JS):
-
-```
-opam switch 4.02.3+buckle-master
-eval `opam config env`
-opam pin add --dev-repo reason
-git clone https://github.com/aantron/repromise.git
-cd repromise
-npm install
-npm run build
-(cd test && npm install && npm run build)
-node ./test/lib/js/test.js
-```
-
-See [aantron/repromise-example-bsb][example-bsb] for how to depend on Repromise
-in your project.
-
-The `let%await` syntax is not yet easy to pull in with NPM, because it requires
-building binaries, etc. We recommend waiting for it to be upstreamed into
-BuckleScript, or for proper release packaging to be announced later.
-
-<br/>
-
-#### With esy (native):
-
-```
-git clone https://github.com/aantron/repromise.git
-cd repromise
-esy install
-esy jbuilder exec test/test.exe
-```
-
-See [aantron/repromise-example-esy][example-esy] for an example starter repo.
-
-<br/>
-
-#### With opam (native):
-
-```
-git clone https://github.com/aantron/repromise.git
-cd repromise
-opam pin add --dev-repo reason
-opam pin add repromise .
-opam pin add ppx_await .
-jbuilder exec test/test.exe
-```
-
-
-
-
-[repromise]: https://github.com/aantron/repromise
-[demo]: https://github.com/aantron/repromise/blob/5debf48c00f1b101de389d5aae015b9f0fa9a63b/test/demo/demo.re
-[native]: https://github.com/aantron/repromise/blob/5debf48c00f1b101de389d5aae015b9f0fa9a63b/src/native/repromise.re
-[ppx]: https://github.com/aantron/repromise/blob/5debf48c00f1b101de389d5aae015b9f0fa9a63b/src/ppx/bucklescript/ppx_await.re
-[io]: https://github.com/aantron/repromise/blob/5debf48c00f1b101de389d5aae015b9f0fa9a63b/src/io.rei
-[opam]: http://opam.ocaml.org/
-[node]: https://nodejs.org/en/
-[npm]: https://www.npmjs.com/
-[libuv]: http://libuv.org/
-[bs]: https://github.com/BuckleScript/bucklescript
-[bsb-native]: https://github.com/bsansouci/bsb-native
-[issues]: https://github.com/aantron/repromise/issues?utf8=%E2%9C%93&q=label%3Adiscuss+
-[discord]: https://discordapp.com/invite/reasonml
 [travis]: https://travis-ci.org/aantron/repromise/branches
 [travis-img]: https://img.shields.io/travis/aantron/repromise/master.svg?label=travis
+
+Repromise is a clean JS Promise API for ReasonML, with:
+
+- **Soundness** &mdash; Repromises nest, and don't "collapse" like JS promises.
+- **Explicit errors** &mdash; no baked-in `reject` or exception handling, so you can choose how to handle errors.
+- **Interop** &mdash; each Repromise is still a JS promise, so all JS APIs that return promises already return Repromises, and JS tooling should work!
+- **Type safety** &mdash; even though Repromises and JS promises are the same, they cannot be freely converted. So, when you are in Reason and using Repromise, everything is guaranteed to work predictably and safely.
+
+Basically, JS promise objects are good, but the functions (`Promise.resolve`, `Promise.then`, etc.) are [broken][broken]. Repromise uses the objects, but provides better functions.
+
+Repromise is lightweight: the compiled code compresses to about 1K.
+
+Repromise also has a native implementation, written in pure ReasonML. We haven't published this yet, though it is [in the repo][native].
+
+[native]: https://github.com/aantron/repromise/blob/master/src/native/repromise.re
+[broken]: https://aantron.github.io/repromise/docs/DesignFAQ#why-are-js-promises-not-type-safe
+
+<br/>
+
+## Installing
+
+```
+npm install bs-platform
+npm install @aantron/repromise
+```
+
+Add `reason-repromise` to your `bsconfig.json`:
+
+```json
+{
+  "bs-dependencies": [
+    "@aantron/repromise"
+  ]
+}
+```
+
+See the [sample project][example-bsb] for a minimal working setup.
+
+<br/>
+
+## Using
+
+The Repromise API is pretty similar to JS promises, but...
+
+- There is no `catch` or `reject`.
+- Instead of only `then`, there are [`Repromise.then_`][Repromise.then], [`Repromise.map`][Repromise.map], and [`Repromise.wait`][Repromise.wait], which all schedule a callback, but have slightly different types.
+
+Create new pending promises with [`Repromise.new_`][Repromise.new]:
+
+```ocaml
+let (p, resolve_p) = Repromise.new_();
+```
+
+[`Repromise.wait`][Repromise.wait] adds a callback, which will run when the promise resolves:
+
+```ocaml
+p |> Repromise.wait(text => print_endline(text));
+```
+
+Resolving `p` now will print `"Hello"`:
+
+```ocaml
+resolve_p("Hello");
+```
+
+Promises can be transformed using [`Repromise.map`][Repromise.map]:
+
+```ocaml
+let (p, resolve_p) = Repromise.new_();
+p
+|> Repromise.map(text => text ++ " world!")
+|> Repromise.wait(text => print_endline(text));
+resolve_p("Hello");
+```
+
+...and [`Repromise.then_`][Repromise.then] is for when your transformation returns another promise.
+
+See the [API docs][api] for the rest of the functions. Most of them have examples, which you can try out by pasting them into the [sample repo][example-bsb].
+
+[Repromise.new]: https://aantron.github.io/repromise/docs/API#new
+[Repromise.then]: https://aantron.github.io/repromise/docs/API#then
+[Repromise.map]: https://aantron.github.io/repromise/docs/API#map
+[Repromise.wait]: https://aantron.github.io/repromise/docs/API#wait
+[api]: https://aantron.github.io/repromise/docs/API
+
+<br/>
+
+## Interop
+
+Since Repromises are JS promises, you can declare that existing JS APIs return Repromise objects directly. For example, here is part of a binding to `node-fetch`:
+
+```ocaml
+[@bs.send]
+external text: response => Repromise.t(string) = "";
+```
+
+The full example is in the [binding sample repo][example-binding], and see the [interop docs][interop] for all the details.
+
+[interop]: https://aantron.github.io/repromise/docs/Interop
+
+<br/>
+
+## Roadmap
+
+- [ ] Release native implementation
+- [ ] Release `let%await` syntax (the PPX)
+- [ ] Helpers for converting `Repromise.Rejectable.t` to `Belt.Result.t`
+
 [example-bsb]: https://github.com/aantron/repromise-example-bsb
-[example-esy]: https://github.com/aantron/repromise-example-esy
+[example-binding]: https://github.com/aantron/repromise-example-binding
