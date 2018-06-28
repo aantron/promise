@@ -104,6 +104,9 @@ module Rejectable = {
   let map = (callback, promise) =>
     promise |> then_(value => resolve(callback(value)));
 
+  let wait = (callback, promise) =>
+    promise |> map(callback) |> ignore;
+
   [@bs.scope "Promise"]
   [@bs.val]
   external reject: 'e => rejectable(_, 'e) = "";
@@ -151,6 +154,7 @@ let new_ = () => {
 let resolve = Rejectable.resolve;
 let then_ = Rejectable.then_;
 let map = Rejectable.map;
+let wait = Rejectable.wait;
 let all = Rejectable.all;
 let race = Rejectable.race;
 

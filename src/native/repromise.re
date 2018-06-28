@@ -206,6 +206,9 @@ let then_ = (callback, promise) => {
 let map = (mapper, promise) =>
   then_(value => resolve(mapper(value)), promise);
 
+let wait = (callback, promise) =>
+  map(callback, promise) |> ignore;
+
 let catch = (callback, promise) => {
   let outerPromise = newInternal();
 
@@ -403,6 +406,7 @@ module Rejectable = {
   let reject = reject;
   let then_ = then_;
   let map = map;
+  let wait = wait;
   let catch = catch;
   let all = all;
   let race = race;

@@ -14,6 +14,8 @@ let then_: ('a => promise('b), promise('a)) => promise('b);
 
 let map: ('a => 'b, promise('a)) => promise('b);
 
+let wait: ('a => unit, promise('a)) => unit;
+
 let all: list(promise('a)) => promise(list('a));
 
 let race: list(promise('a)) => promise('a);
@@ -35,6 +37,8 @@ module Rejectable: {
     ('a => rejectable('b, 'e), rejectable('a, 'e)) => rejectable('b, 'e);
 
   let map: ('a => 'b, rejectable('a, 'e)) => rejectable('b, 'e);
+
+  let wait: ('a => unit, promise('a)) => unit;
 
   let catch:
     ('e => rejectable('a, 'e2), rejectable('a, 'e)) => rejectable('a, 'e2);
