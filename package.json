@@ -1,6 +1,6 @@
 {
   "name": "@aantron/repromise",
-  "version": "1.0.0",
+  "version": "0.5.0",
   "description": "ReasonML promises with perfect JS interop",
   "homepage": "https://github.com/aantron/repromise#readme",
   "license": "MIT",
