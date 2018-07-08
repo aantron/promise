@@ -38,7 +38,7 @@ module Rejectable: {
 
   let map: ('a => 'b, rejectable('a, 'e)) => rejectable('b, 'e);
 
-  let wait: ('a => unit, promise('a)) => unit;
+  let wait: ('a => unit, rejectable('a, _)) => unit;
 
   let catch:
     ('e => rejectable('a, 'e2), rejectable('a, 'e)) => rejectable('a, 'e2);
