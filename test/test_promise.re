@@ -11,6 +11,14 @@ let basicTests = Framework.suite("basic", [
     Repromise.resolve(true);
   }),
 
+  test("wait", () => {
+    let correct = ref(false);
+    Repromise.resolve(1)
+    |> Repromise.wait(n => correct := (n == 1));
+    Repromise.resolve()
+    |> Repromise.map(() => correct^)
+  }),
+
   test("then_", () => {
     Repromise.resolve(1)
     |> Repromise.then_ (n => Repromise.resolve (n == 1));
