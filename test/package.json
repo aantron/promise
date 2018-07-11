@@ -16,6 +16,7 @@
   "scripts": {
     "build": "bsb -make-world",
     "clean": "bsb -clean-world",
-    "tests": "node lib/js/test_main.js"
+    "tests": "node lib/js/test_main.js",
+    "benchmark": "node lib/js/js/benchmark.js"
   }
 }
