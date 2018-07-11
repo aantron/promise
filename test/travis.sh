@@ -14,15 +14,14 @@ build_with_npm () {
     npm install bs-platform
     npm install
     npm run build
-    (cd test && npm install && npm run build)
-    node ./test/lib/js/test.js
+    (cd test && npm install && npm run build && npm run tests)
 }
 
 build_with_esy () {
     npm install -g esy
 
     esy install
-    esy jbuilder exec test/test.exe
+    esy jbuilder exec test/test_main.exe
 }
 
 build_with_opam () {
@@ -33,7 +32,7 @@ build_with_opam () {
     opam pin add -y --no-action repromise .
     opam install -y --deps-only repromise
 
-    jbuilder exec test/test.exe
+    jbuilder exec test/test_main.exe
 }
 
 

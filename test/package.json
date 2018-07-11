@@ -15,7 +15,7 @@
   },
   "scripts": {
     "build": "bsb -make-world",
-    "watch": "bsb -w -make-world",
-    "clean": "bsb -clean-world"
+    "clean": "bsb -clean-world",
+    "tests": "node lib/js/test_main.js"
   }
 }

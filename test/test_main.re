@@ -1,5 +1,5 @@
 let tests =
-  Test_promise.suites
+  Test_repromise.suites
   @ Test_ffi.suites;
 
 let () =
