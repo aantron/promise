@@ -4,7 +4,9 @@ language: generic
 
 env:
   - BUILD_SYSTEM=npm
-  - BUILD_SYSTEM=esy
+ # Temporarily disabled because of
+ #   https://travis-ci.org/aantron/repromise/jobs/402821061#L482
+ #  - BUILD_SYSTEM=esy
   - BUILD_SYSTEM=opam
 
 script:
