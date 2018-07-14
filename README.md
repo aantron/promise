@@ -1,5 +1,7 @@
-# Repromise &nbsp;&nbsp; [![Travis status][travis-img]][travis]
+# Repromise &nbsp;&nbsp; [![Version 0.5.0][npm-img]][npm] [![Travis status][travis-img]][travis]
 
+[npm-img]: https://img.shields.io/npm/v/@aantron/repromise.svg
+[npm]: https://www.npmjs.com/package/@aantron/repromise
 [travis]: https://travis-ci.org/aantron/repromise/branches
 [travis-img]: https://img.shields.io/travis/aantron/repromise/master.svg?label=travis
 
