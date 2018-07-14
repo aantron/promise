@@ -34,3 +34,9 @@ JS `Promise` methods, such as `Promise.resolve`, have [behavior](DesignFAQ#why-a
 Since Repromise is changing the methods, we also have the opportunity to make some different design decisions, such as dropping rejection in favor of explicit error handling.
 
 <br/>
+
+## Native promises
+
+Repromise also has a [native implementation](https://github.com/aantron/repromise/blob/master/src/native/repromise.re), written in pure ReasonML, but it is not yet released.
+
+<br/>

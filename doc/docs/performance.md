@@ -3,7 +3,13 @@ id: Performance
 title: Performance
 ---
 
-The Repromise repo includes some [benchmarks](https://github.com/aantron/repromise/blob/master/test/js/benchmark.re) comparing Repromise to direct usage of JS promises. Running the benchmarks on Node.js on one machine gives results like this:
+The Repromise repo includes some [benchmarks](https://github.com/aantron/repromise/blob/master/test/js/benchmark.re) comparing Repromise to direct usage of JS promises. They can be run with
+
+```
+npm run benchmark
+```
+
+Running the benchmarks on Node.js on one machine gives results like this:
 
 ```
 TEST                              TIME/CALL
@@ -26,4 +32,4 @@ So,
 
 - When given a nested promise, [`Repromise.resolve`](API#resolve) is slower than `Js.Promise.resolve`. However, this is because `Js.Promise.resolve` is [not type-safe](DesignFAQ#why-are-js-promises-not-type-safe), and simply returns its argument as its result. `Repromise.resolve`, instead, allocates two new objects: a new JS promise, and a [wrapper object](Interop#representation) to prevent the outer and inner promises from collapsing into each other. These two allocations are probably the reason why `Repromise.resolve` is up to about twice as slow on nested promises, as on non-promise values.
 
-- [`Repromise.then_`](API#then) is about twice as slow as `Js.Promise.then`. This is due to dynamic checks for nested promises, and due to [setting up asynchronous exception handling](API#onunhandledexception). However, the difference is not significant. `then_` is almost always used around I/O, which takes much longer than tens of nanoseconds to complete.
+- [`Repromise.then_`](API#then) is about half as fast as `Js.Promise.then`. This is due to dynamic checks for nested promises, and due to [setting up asynchronous exception handling](API#onunhandledexception). However, the difference is not significant. `then_` is almost always used around I/O, which takes much longer than tens of nanoseconds to complete.

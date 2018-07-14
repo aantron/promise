@@ -53,7 +53,7 @@ Js.Promise.resolve(p) |> Js.log;
 
 This is because [`Promise.resolve` has a special check][Js.Promise.resolve], for whether its argument is a promise (or any "thenable", `p` in this case). If so, `Promise.resolve` takes the value **inside** `p` out, and puts only that value into the final promise. If not for this special check, `Promise.resolve` would put the **whole** promise `p` into the final promise.
 
-The Reason type system has no way to express this special case (most type systems don't), so the type
+The Reason type system has no way to express this special case (most type systems don't), so the type assigned by Reason,
 
 ```reason
 resolve: Js.Promise.t(int) => Js.Promise.t(Js.Promise.t(int))
@@ -61,7 +61,7 @@ resolve: Js.Promise.t(int) => Js.Promise.t(Js.Promise.t(int))
 
 is incorrect, because the return type says that `p` will be nested.
 
-This is why Repromise provides its own [`Repromise.resolve`](API#resolve), which basically prevents the check from running.
+This is why Repromise provides its own [`Repromise.resolve`](API#resolve), which basically prevents the check from running. The type of [`Repromise.resolve`](API#resolve) is correct even when nesting promises.s
 
 Repromise also has to provide [its own versions](API#then) of [`then`][Promise.then] and the other `Promise` functions, because they have to know how to deal with the workaround used by Repromise.
 
@@ -134,6 +134,29 @@ Repromise has a native implementation, which needs to compile on OCaml, and OCam
 The regular `new` is a keyword in Reason.
 
 `then` is not a keyword in Reason, but Reason is supposed to still parse when transformed to OCaml, and `then` is a keyword in OCaml.
+
+<br/>
+
+## Why is there Repromise, when there are already Lwt and Async?
+
+[Lwt](https://github.com/ocsigen/lwt) and [Async](https://github.com/janestreet/async) are two promise libraries from OCaml's native ecosystem.
+
+Their semantics are pretty different from JS promises, and they don't offer JS interop. This is why Repromise was created.
+
+The semantics of Lwt are relatively close to Repromise, however, so the native implementation of Repromise may eventually have interop with Lwt.
+
+<br/>
+
+## Is there an `async`/`await` syntax for Repromise?
+
+Yes. It is unreleased, but [sitting in the Repromise repo](https://github.com/aantron/repromise/tree/master/src/ppx). It looks like this:
+
+```reason
+let%await fd   = Io.open_("test/demo/demo.re");
+let%await data = Io.read (~fd, ~length = 1024);
+print_endline(data);
+Repromise.resolve();
+```
 
 <br/>
 

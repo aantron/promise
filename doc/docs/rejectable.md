@@ -7,7 +7,7 @@ title: Rejectable API
 
 In addition to the main API, [`Repromise`](API), Repromise also provides `Repromise.Rejectable`, which exposes the rejection support that is built into JS promises. This is mainly for writing bindings. Rejectable Repromises should be converted to normal Repromises as soon as possible using [`catch`](#catch).
 
-Most of the functions in `Repromise.Rejectable` are similar to the ones in [`Repromise`](API), but there are two new functions, [`reject`](#reject) and the already-mentioned [`catch`](#catch).
+Most of the functions in `Repromise.Rejectable` are similar to the ones in [`Repromise`](API), but there are two new important functions, [`reject`](#reject) and the already-mentioned [`catch`](#catch).
 
 <br/>
 

@@ -72,7 +72,7 @@ wait: (('a => unit), Repromise.t('a)) => unit
 
 Attaches a callback to the promise, which will be called after that promise is resolved:
 
-- If the promise is already resolved, the callback is called almost immediately:
+- If the promise is already resolved, the callback is called on the next tick (almost immediately):
 
     ```reason
     let p = Repromise.resolve("Hello");
@@ -80,7 +80,7 @@ Attaches a callback to the promise, which will be called after that promise is r
     /* Prints "Hello". */
     ```
 
-- If the promise is pending, but gets resolved later, the callback is called at that time:
+- If the promise is pending and gets resolved later, the callback is called at that time:
 
     ```reason
     let (p, resolve_p) = Repromise.new_();
@@ -93,7 +93,7 @@ Attaches a callback to the promise, which will be called after that promise is r
 
 - If the promise is pending, but never gets resolved, the callback is never called.
 
-Callbacks are always **queued** to be run later, even if the promise they are queued on is already resolved. For example, this code sets up a callback, but the callback doesn't get called right away:
+Callbacks are always asynchronous. Even if a callback is queued on a promise that is already resolved, it is run later, on the next tick. This can lead to surprising execution orders:
 
 ```reason
 Repromise.resolve()
@@ -102,7 +102,7 @@ Repromise.resolve()
 print_endline("printed first");
 ```
 
-Instead, the outer code goes on, and prints `"printed first"`. Only after that, Node.js or your browser runs the queued callback, and prints `"printed second"`.
+The `wait` call only schedules its callback to run later, on the next tick. The `print_endline` below `wait` is executed immediately, however.
 
 <br/>
 
