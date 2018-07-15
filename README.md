@@ -40,7 +40,7 @@ Add `reason-repromise` to your `bsconfig.json`:
 }
 ```
 
-See the [sample project][example-bsb] for a minimal working setup.
+See the [sample project][example-bsb] for a minimal working setup. There is also a minimal example of a [binding to an existing JS library][example-binding].
 
 <br/>
 

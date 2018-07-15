@@ -6,6 +6,8 @@ title: Performance
 The Repromise repo includes some [benchmarks](https://github.com/aantron/repromise/blob/master/test/js/benchmark.re) comparing Repromise to direct usage of JS promises. They can be run with
 
 ```
+cd test
+npm install
 npm run benchmark
 ```
 
