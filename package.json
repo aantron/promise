@@ -2,7 +2,7 @@
   "name": "@aantron/repromise",
   "version": "0.5.0",
   "description": "Type-safe JS promises for ReasonML",
-  "homepage": "https://github.com/aantron/repromise#readme",
+  "homepage": "https://aantron.github.io/repromise",
   "license": "MIT",
   "repository": {
     "type": "git",
