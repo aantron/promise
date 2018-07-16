@@ -10,7 +10,7 @@
     "url": "https://github.com/aantron"
   },
   "dependencies": {
-    "bs-platform": "^2.1.0",
+    "bs-platform": ">= 3.0.0",
     "@aantron/repromise": "file:.."
   },
   "scripts": {

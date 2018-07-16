@@ -17,7 +17,7 @@
     "url": "https://github.com/aantron"
   },
   "peerDependencies": {
-    "bs-platform": ">= 2.1.0"
+    "bs-platform": ">= 3.0.0"
   },
   "scripts": {
     "build": "bsb -make-world",
