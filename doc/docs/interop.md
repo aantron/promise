@@ -148,7 +148,7 @@ JS APIs should never ask for nested promises, because JS promises don't support 
 external foo: Repromise.t(Repromise.t(int)) => unit = "";
 ```
 
-However, there is the possibility of a JS API that can accept promises of any type:
+However, there is the [possibility](https://github.com/aantron/repromise/issues/8) of a JS API that can accept promises of any type:
 
 ```reason
 [@bs.val]
