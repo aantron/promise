@@ -81,7 +81,7 @@ To learn how to write bindings, we suggest starting with the [`node-fetch` proje
 
 ## Contact
 
-Please don't hesitate to [open an issue][issue], or come [bug us on Discord][discord]. All questions, feedback, and bikeshedding are welcome :)
+Please don't hesitate to [open an issue][issue], or come [bug us on Discord][discord]. All questions, feedback, and [bikeshedding][bikeshedding] are welcome :)
 
 Repromise is at a pretty early stage of development, and we can change just about everything.
 
@@ -100,3 +100,4 @@ Repromise is at a pretty early stage of development, and we can change just abou
 [discord]: https://discordapp.com/invite/reasonml
 [representation]: https://aantron.github.io/repromise/docs/Interop#representation
 [onUnhandledException]: https://aantron.github.io/repromise/docs/API#onunhandledexception
+[bikeshedding]: https://github.com/aantron/repromise/issues/22
