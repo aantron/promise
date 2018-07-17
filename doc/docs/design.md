@@ -5,7 +5,9 @@ title: Design FAQ
 
 ## Why are JS promises not type-safe?
 
-Consider [`Js.Promise.resolve`][Js.Promise.resolve], the BuckleScript binding to [`Promise.resolve`][Promise.resolve]. It takes a value, and creates a promise that contains that value:
+Functions like `Promise.resolve` have a [special check][Promise.resolve] for whether the value being put into a promise is another promise or not. It turns out that this check makes `Js.Promise.resolve` impossible to type in the ReasonML type system (and many other type systems).
+
+Here are the details. [`Js.Promise.resolve`][Js.Promise.resolve], the BuckleScript binding to [`Promise.resolve`][Promise.resolve], takes a value, and creates a promise that contains that value:
 
 ```reason
 Js.Promise.resolve(1) |> Js.log;
@@ -37,9 +39,9 @@ Js.Promise.resolve("foo") |> Js.log;
 Following this pattern, if we try to **nest** a child promise inside a promise, we would expect to get:
 
 ```reason
-let p = Js.Promise.resolve(1);
+let child = Js.Promise.resolve(1);
 
-Js.Promise.resolve(p) |> Js.log;
+Js.Promise.resolve(child) |> Js.log;
 /* Promise { Promise { 1 } } */
 /* resolve: Js.Promise.t(int) => Js.Promise.t(Js.Promise.t(int)) */
 ```
@@ -47,19 +49,19 @@ Js.Promise.resolve(p) |> Js.log;
 However, the actual output is
 
 ```reason
-Js.Promise.resolve(p) |> Js.log;
+Js.Promise.resolve(child) |> Js.log;
 /* Promise { 1 } */
 ```
 
-This is because [`Promise.resolve` has a special check][Js.Promise.resolve], for whether its argument is a promise (or any "thenable", `p` in this case). If so, `Promise.resolve` takes the value **inside** `p` out, and puts only that value into the final promise. If not for this special check, `Promise.resolve` would put the **whole** promise `p` into the final promise.
+This is because `Promise.resolve` [checks][Js.Promise.resolve] for whether its argument is a promise (or any "thenable", `child` in this case). If so, `Promise.resolve` takes the value **inside** `child` out, and puts only that value into the final promise. If not for this special check, `Promise.resolve` would put the **whole** promise `child` into the final promise.
 
-The Reason type system has no way to express this special case (most type systems don't), so the type assigned by Reason,
+The Reason type system has no way to express this special case, so the type assigned by Reason,
 
 ```reason
 resolve: Js.Promise.t(int) => Js.Promise.t(Js.Promise.t(int))
 ```
 
-is incorrect, because the return type says that `p` will be nested.
+is incorrect, because the return type says that `child` will be nested.
 
 This is why Repromise provides its own [`Repromise.resolve`](API#resolve), which basically prevents the check from running. The type of [`Repromise.resolve`](API#resolve) is correct even when nesting promises.s
 
