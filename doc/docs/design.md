@@ -129,6 +129,10 @@ In JavaScript, [`Promise.then`][Promise.then] behaves differently depending on t
 
 Repromise has a native implementation, which needs to compile on OCaml, and OCaml supports only `|>`.
 
+We may upstream `|.` to OCaml, and then change Repromise over to use it.
+
+See [this post](https://github.com/aantron/repromise/issues/22#issuecomment-405589951) and [this post](https://github.com/aantron/repromise/issues/22#issuecomment-405677694) for discussion.
+
 <br/>
 
 ## Why do `new_` and `then_` have underscores?
