@@ -24,8 +24,8 @@ let test = Framework.test;
 
 
 let interopTests = Framework.suite("interop", [
-  test("new_ is js promise", () => {
-    let (p, _) = Repromise.new_();
+  test("make is js promise", () => {
+    let (p, _) = Repromise.make();
     Repromise.resolve(isPromise(p));
   }),
 
@@ -42,7 +42,7 @@ let interopTests = Framework.suite("interop", [
 
   test("then_ is js promise", () => {
     let p =
-      Repromise.new_()
+      Repromise.make()
       |> fst
       |> Repromise.then_((_) => Repromise.resolve());
     Repromise.resolve(isPromise(p));
@@ -50,7 +50,7 @@ let interopTests = Framework.suite("interop", [
 
   test("map is js promise", () => {
     let p =
-      Repromise.new_()
+      Repromise.make()
       |> fst
       |> Repromise.map(v => v);
     Repromise.resolve(isPromise(p));
@@ -58,7 +58,7 @@ let interopTests = Framework.suite("interop", [
 
   test("catch is js promise", () => {
     let p =
-      Repromise.new_()
+      Repromise.make()
       |> fst
       |> Repromise.Rejectable.catch((_) => Repromise.resolve());
     Repromise.resolve(isPromise(p));
@@ -116,26 +116,26 @@ let isPromiseRejectedWith42 = p =>
   };
 
 let soundnessTests = Framework.suite("soundness", [
-  test("new_: resolve, resolve", () => {
-    let (p, resolve) = Repromise.new_();
+  test("make: resolve, resolve", () => {
+    let (p, resolve) = Repromise.make();
     resolve(Repromise.resolve(42));
     p |> Repromise.then_(isPromiseResolvedWith42);
   }),
 
-  test("new_: resolve, reject", () => {
-    let (p, _, reject) = Repromise.Rejectable.new_();
+  test("make: resolve, reject", () => {
+    let (p, _, reject) = Repromise.Rejectable.make();
     reject(Repromise.resolve(42));
     p |> Repromise.Rejectable.catch(isPromiseResolvedWith42);
   }),
 
-  test("new_: reject, resolve", () => {
-    let (p, resolve) = Repromise.new_();
+  test("make: reject, resolve", () => {
+    let (p, resolve) = Repromise.make();
     resolve(Repromise.Rejectable.reject(42));
     p |> Repromise.then_(isPromiseRejectedWith42);
   }),
 
-  test("new_: reject, reject", () => {
-    let (p, _, reject) = Repromise.Rejectable.new_();
+  test("make: reject, reject", () => {
+    let (p, _, reject) = Repromise.Rejectable.make();
     reject(Repromise.Rejectable.reject(42));
     p |> Repromise.Rejectable.catch(isPromiseRejectedWith42);
   }),
@@ -199,8 +199,8 @@ let soundnessTests = Framework.suite("soundness", [
     |> Repromise.Rejectable.catch(isPromiseRejectedWith42);
   }),
 
-  test("new_: JS promise", () => {
-    let (p, resolve) = Repromise.new_();
+  test("make: JS promise", () => {
+    let (p, resolve) = Repromise.make();
     resolve(Js.Promise.resolve());
     p |> Repromise.then_(p => Repromise.resolve(jsPromiseIsPromise(p)));
   }),
@@ -227,7 +227,7 @@ let soundnessTests = Framework.suite("soundness", [
   }),
 
   test("all", () => {
-    let (p1, resolve) = Repromise.new_();
+    let (p1, resolve) = Repromise.make();
     let p2 = Repromise.all([p1]);
     resolve(Repromise.resolve(42));
     p2 |> Repromise.then_(results =>
@@ -238,7 +238,7 @@ let soundnessTests = Framework.suite("soundness", [
   }),
 
   test("all, rejection", () => {
-    let (p1, _, reject) = Repromise.Rejectable.new_();
+    let (p1, _, reject) = Repromise.Rejectable.make();
     let p2 = Repromise.Rejectable.all([p1]);
     reject(Repromise.resolve(42));
     p2
@@ -247,14 +247,14 @@ let soundnessTests = Framework.suite("soundness", [
   }),
 
   test("race", () => {
-    let (p1, resolve) = Repromise.new_();
+    let (p1, resolve) = Repromise.make();
     let p2 = Repromise.race([p1]);
     resolve(Repromise.resolve(42));
     p2 |> Repromise.then_(isPromiseResolvedWith42);
   }),
 
   test("race, rejection", () => {
-    let (p1, _, reject) = Repromise.Rejectable.new_();
+    let (p1, _, reject) = Repromise.Rejectable.make();
     let p2 = Repromise.Rejectable.race([p1]);
     reject(Repromise.resolve(42));
     p2

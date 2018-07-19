@@ -19,16 +19,16 @@ The type of promises that can be resolved with values of type `'a`. For example,
 
 <br/>
 
-## `new_`
+## `make`
 
 ```reason
-new_: unit => (Repromise.t('a), ('a => unit))
+make: unit => (Repromise.t('a), ('a => unit))
 ```
 
 Returns a tuple of a new pending promise, and a function for resolving it:
 
 ```reason
-let (p, resolve_p) = Repromise.new_();
+let (p, resolve_p) = Repromise.make();
 ```
 
 `p` starts out pending. After calling `resolve_p`,
@@ -58,7 +58,7 @@ let p = Repromise.resolved("Hello");
 This is basically the same as
 
 ```reason
-let (p, resolve_p) = Repromise.new_();
+let (p, resolve_p) = Repromise.make();
 resolve_p("Hello");
 ```
 
@@ -83,7 +83,7 @@ Attaches a callback to the promise, which will be called after that promise is r
 - If the promise is pending and gets resolved later, the callback is called at that time:
 
     ```reason
-    let (p, resolve_p) = Repromise.new_();
+    let (p, resolve_p) = Repromise.make();
     p |> Repromise.wait(text => print_endline(text));
     /* Doesn't print anything yet! */
 
@@ -115,7 +115,7 @@ map: (('a => 'b), Repromise.t('a)) => Repromise.t('b)
 Transforms the value in a promise, once the promise is resolved:
 
 ```reason
-let (p, resolve_p) = Repromise.new_();
+let (p, resolve_p) = Repromise.make();
 
 p
 |> Repromise.map(text => text ++ ", world!")
@@ -137,14 +137,14 @@ then_: (('a => Repromise.t('b)), Repromise.t('a)) => Repromise.t('b)
 Like [`map`](#map), but the return value of the callback is another promise. This allows the callback to start an async operation:
 
 ```reason
-let (p1, resolve_p1) = Repromise.new_();
+let (p1, resolve_p1) = Repromise.make();
 Js.Global.setTimeout(() => resolve_p1(), 1000) |> ignore;
 
 p1
 |> Repromise.then_(() => {
   print_endline("Hello");
 
-  let (p2, resolve_p2) = Repromise.new_();
+  let (p2, resolve_p2) = Repromise.make();
   Js.Global.setTimeout(() => resolve_p2(), 1000) |> ignore;
   p2
 })
@@ -165,8 +165,8 @@ all: list(Repromise.t('a)) => Repromise.t(list('a))
 Creates a promise which resolves when **all** the given promises resolve:
 
 ```reason
-let (p1, resolve_p1) = Repromise.new_();
-let (p2, resolve_p2) = Repromise.new_();
+let (p1, resolve_p1) = Repromise.make();
+let (p2, resolve_p2) = Repromise.make();
 
 Repromise.all([p1, p2])
 |> Repromise.wait(texts =>
@@ -188,8 +188,8 @@ race: list(Repromise.t('a)) => promise('a)
 Creates a promise which resolves when **one** of the given promises resolves:
 
 ```reason
-let (p1, resolve_p1) = Repromise.new_();
-let (p2, resolve_p2) = Repromise.new_();
+let (p1, resolve_p1) = Repromise.make();
+let (p2, resolve_p2) = Repromise.make();
 
 Repromise.race([p1, p2])
 |> Repromise.wait(print_endline);

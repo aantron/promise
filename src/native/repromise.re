@@ -395,7 +395,7 @@ module Rejectable = {
 
   external relax: promise('a) => rejectable('a, _) = "%identity";
 
-  let new_ = () => {
+  let make = () => {
     let p = newInternal();
     let resolve = resolveInternal(p);
     let reject = rejectInternal(p);
@@ -414,7 +414,7 @@ module Rejectable = {
 
 
 
-let new_ = () => {
-  let (p, resolve, _) = Rejectable.new_();
+let make = () => {
+  let (p, resolve, _) = Rejectable.make();
   (p, resolve);
 }
