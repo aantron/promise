@@ -29,16 +29,16 @@ where `never` is a type that has no objects (cannot be constructed). This is imp
 
 <br/>
 
-## `new_`
+## `make`
 
 ```reason
-new_: unit => (Repromise.Rejectable.t('a, 'e), ('a => unit), ('e => unit))
+make: unit => (Repromise.Rejectable.t('a, 'e), ('a => unit), ('e => unit))
 ```
 
 Returns a tuple of a new pending promise, a function for resolving it, and a function for rejecting it:
 
 ```reason
-let (p, resolve_p, reject_p) = Repromise.Rejectable.new_();
+let (p, resolve_p, reject_p) = Repromise.Rejectable.make();
 reject_p(Failure("failed"));
 ```
 
@@ -59,7 +59,7 @@ let p = Repromise.Rejectable.resolved("Hello");
 This is equivalent to
 
 ```reason
-let (p, resolve_p, _) = Repromise.Rejectable.new_();
+let (p, resolve_p, _) = Repromise.Rejectable.make();
 resolve_p("Hello");
 ```
 
@@ -80,7 +80,7 @@ let p = Repromise.Rejectable.reject(Failure("failed"));
 This is equivalent to
 
 ```reason
-let (p, _, reject_p) = Repromise.Rejectable.new_();
+let (p, _, reject_p) = Repromise.Rejectable.make();
 reject_p(Failure("failed"));
 ```
 
@@ -101,9 +101,9 @@ relax: Repromise.Rejectable.t('a, never) => Repromise.Rejectable('a, _)
 This is useful, for instance, if you would like to pass a list of normal Repromises and rejectable ones to [`race`](#race). Doing so without `relax` will not typecheck, because the normal Repromise is rejectable with `never`, and the rejectable one is rejectable with `exn`:
 
 ```reason
-let ((p1: Repromise.t(int)), _) = Repromise.new_();
+let ((p1: Repromise.t(int)), _) = Repromise.make();
 let ((p2: Repromise.Rejectable.t(int, exn)), _, _) =
-  Repromise.Rejectable.new_();
+  Repromise.Rejectable.make();
 
 Repromise.Rejectable.race([p1, p2]);   /* Type error */
 ```
@@ -127,7 +127,7 @@ catch:
 Attaches a callback to the given promise. The callback is called after the promise is rejected:
 
 ```reason
-let (p, _, reject_p) = Repromise.Rejectable.new_();
+let (p, _, reject_p) = Repromise.Rejectable.make();
 p
 |> Repromise.Rejectable.catch(error => {
   prerr_endline(error);
@@ -144,7 +144,7 @@ In the above example, the final promise returned by `catch`, which we just `igno
 A typical pattern is to convert success values and errors into `result`s:
 
 ```reason
-let (p1, _, reject_p1) = Repromise.Rejectable.new_();
+let (p1, _, reject_p1) = Repromise.Rejectable.make();
 let p2 =
   p1
   |> Repromise.Rejectable.map(value => Ok(value))

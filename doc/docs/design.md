@@ -135,9 +135,7 @@ See [this post](https://github.com/aantron/repromise/issues/22#issuecomment-4055
 
 <br/>
 
-## Why do `new_` and `then_` have underscores?
-
-The regular `new` is a keyword in Reason.
+## Why does `then_` have an underscore?
 
 `then` is not a keyword in Reason, but Reason is supposed to still parse when transformed to OCaml, and `then` is a keyword in OCaml.
 

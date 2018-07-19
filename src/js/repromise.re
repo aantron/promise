@@ -33,7 +33,7 @@ function wrap(value) {
         return value;
 }
 
-function new_(executor) {
+function make(executor) {
     return new Promise(function (resolve, reject) {
         var wrappingResolve = function(value) {
             resolve(wrap(value));
@@ -80,9 +80,9 @@ module Rejectable = {
 
   [@bs.val]
   external jsNew:
-    (('a => unit) => ('e => unit) => unit) => rejectable('a, 'e) = "new_";
+    (('a => unit) => ('e => unit) => unit) => rejectable('a, 'e) = "make";
 
-  let new_ = () => {
+  let make = () => {
     let resolve = ref(ignore);
     let reject = ref(ignore);
     let p =
@@ -146,8 +146,8 @@ module Rejectable = {
 
 
 
-let new_ = () => {
-  let (p, resolve, _) = Rejectable.new_();
+let make = () => {
+  let (p, resolve, _) = Rejectable.make();
   (p, resolve);
 };
 

@@ -17,7 +17,7 @@ npm run test
 [`main.re`][main.re] contains the interesting code:
 
 ```reason
-let (p, resolve_p) = Repromise.new_();
+let (p, resolve_p) = Repromise.make();
 
 p
 |> Repromise.map(s => s ++ ", world!")
