@@ -158,3 +158,16 @@ external foo: Repromise.t('a) => unit = "";
 In this case, it will be possible to pass a nested Repromise to the JS API. Repromise can support this, but we ask that you please let us know if you run into such a JS API by an [opening an issue](https://github.com/aantron/repromise/issues). That way, we can design something appropriate for the case. What we suspect is that all such JS APIs will actually be promise-manipulation libraries, that will have to be reimplemented as helper libraries for Repromise, the same way Repromise is a reimplementation of JS `Promise` functions.
 
 <br/>
+
+## Converting between Repromise and `Js.Promise`
+
+[`Js.Promise`](https://bucklescript.github.io/bucklescript/api/Js.Promise.html) is BuckleScript's existing binding to JS promises.
+
+Some existing code uses `Js.Promise`. Repromise provides two functions for converting between `Js.Promise`s and Repromises: [`fromJsPromise`](RejectableAPI#fromJsPromise) and [`toJsPromise`](RejectableAPI#toJsPromise).
+
+The same considerations apply when converting Repromises to/from `Js.Promise`s, as when writing a binding directly to JS:
+
+- `fromJsPromise` [is always safe]((#creating-a-binding).
+- `toJsPromise` [should only be used when the nested value cannot be another promise](#passing-promises-to-js).
+
+<br/>

@@ -209,3 +209,25 @@ race: list(Repromise.Rejectable.t('a, 'e)) => Repromise.Rejectable('a, 'e)
 Like the normal [`Repromise.race`](API#race), but for rejectable Repromises. If one of the argument promises is rejected, the final promise returned by `race` is rejected immediately.
 
 <br/>
+
+## `fromJsPromise`
+
+```reason
+fromJsPromise: Js.Promise.t('a) => Repromise.Rejectable.t('a, Js.Promise.error)
+```
+
+Converts a BuckleScript [`Js.Promise`](https://bucklescript.github.io/bucklescript/api/Js.Promise.html) to a Repromise. Since `Js.Promise` is a binding to JS promises, and [Repromises have the same representation](https://aantron.github.io/repromise/docs/Interop#representation), this function just returns the argument you pass to it &mdash; but with a different type.
+
+<br/>
+
+## `toJsPromise`
+
+```reason
+toJsPromise: Repromise.Rejectable.t('a, _) => Js.Promise.t('a)
+```
+
+Converts a Repromise to a BuckleScript [`Js.Promise`](https://bucklescript.github.io/bucklescript/api/Js.Promise.html). Since `Js.Promise` is a binding to JS promises, the [same warnings](https://aantron.github.io/repromise/docs/Interop#passing-promises-to-js) apply when using `toJsPromise`, as when passing Repromises directly to JS. In short, it is important that the nested values (`'a`) are not promises.
+
+Otherwise, when `'a` is not a promise, Repromises and `Js.Promise`s have the same representation, so the function just returns the argument you pass to it.
+
+<br/>

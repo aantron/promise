@@ -81,6 +81,22 @@ let interopTests = Framework.suite("interop", [
     |> Then.js_then(n => Repromise.resolve(n + 1))
     |> Repromise.then_(n => Repromise.resolve(n == 2));
   }),
+
+  test("coerce from Js.Promise", () => {
+    Js.Promise.resolve(42)
+    |> Repromise.Rejectable.fromJsPromise
+    |> Repromise.Rejectable.catch(_ => assert(false))
+    |> Repromise.map(n => n == 42);
+  }),
+
+  test("coerce to Js.Promise", () => {
+    Repromise.resolve(42)
+    |> Repromise.Rejectable.toJsPromise
+    |> Js.Promise.then_(n => Js.Promise.resolve(n + 1))
+    |> Repromise.Rejectable.fromJsPromise
+    |> Repromise.Rejectable.catch(_ => assert(false))
+    |> Repromise.map(n => n == 43);
+  }),
 ]);
 
 

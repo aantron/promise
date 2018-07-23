@@ -46,6 +46,10 @@ module Rejectable: {
   let all: list(rejectable('a, 'e)) => rejectable(list('a), 'e);
 
   let race: list(rejectable('a, 'e)) => rejectable('a, 'e);
+
+  let fromJsPromise: Js.Promise.t('a) => rejectable('a, Js.Promise.error);
+
+  let toJsPromise: rejectable('a, _) => Js.Promise.t('a);
 };
 
 

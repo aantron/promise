@@ -72,9 +72,9 @@ Typically, `.rei` files (interfaces) are included in both the JS and native pack
 
 The important files and directories are:
 
-- [`src/js`](https://github.com/aantron/repromise/tree/master/src/js): Repromise for BuckleScript/JS. [`repromise.rei`][repromise.rei] also lives here, because NPM does not work well with symlinks.
+- [`src/js`](https://github.com/aantron/repromise/tree/master/src/js): Repromise for BuckleScript/JS.
 
-- [`src/native`](https://github.com/aantron/repromise/tree/master/src/native): Repromise for Dune/native. This has its own [`repromise.re`](https://github.com/aantron/repromise/blob/master/src/native/repromise.re), but [`repromise.rei`][repromise.rei] is symlinked to the one in `src/js`, to ensure that the interfaces remain in sync.
+- [`src/native`](https://github.com/aantron/repromise/tree/master/src/native): Repromise for Dune/native.
 
 - [`src/ppx/bucklescript`](https://github.com/aantron/repromise/tree/master/src/ppx/bucklescript): BuckleScript/JS-friendly implementation of the `async`/`await` syntax.
 

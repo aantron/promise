@@ -141,7 +141,12 @@ module Rejectable = {
     }
     else {
       jsRace(Array.of_list(promises));
-    }
+    };
+
+  external fromJsPromise:
+    Js.Promise.t('a) => rejectable('a, Js.Promise.error) = "%identity";
+
+  external toJsPromise: rejectable('a, _) => Js.Promise.t('a) = "%identity";
 };
 
 
