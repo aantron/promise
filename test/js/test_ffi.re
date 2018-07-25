@@ -92,7 +92,7 @@ let interopTests = Framework.suite("interop", [
   test("coerce to Js.Promise", () => {
     Repromise.resolve(42)
     |> Repromise.Rejectable.toJsPromise
-    |> Js.Promise.andThen(n => Js.Promise.resolve(n + 1))
+    |> Js.Promise.then_(n => Js.Promise.resolve(n + 1))
     |> Repromise.Rejectable.fromJsPromise
     |> Repromise.Rejectable.catch(_ => assert(false))
     |> Repromise.map(n => n == 43);

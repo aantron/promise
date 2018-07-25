@@ -96,12 +96,12 @@ let measure_then = (label, f) => {
 };
 
 let andThen = Framework.suite("andThen", [
-  test("Js.Promise.andThen", () => {
+  test("Js.Promise.then_", () => {
     let p = Js.Promise.resolve(1);
-    measure_then("Js.Promise.andThen", () =>
+    measure_then("Js.Promise.then_", () =>
       for (_ in 1 to then_repetitions) {
         p
-        |> Js.Promise.andThen(_ => Js.Promise.resolve())
+        |> Js.Promise.then_(_ => Js.Promise.resolve())
         |> ignore
       });
   }),
