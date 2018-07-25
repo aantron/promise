@@ -28,8 +28,5 @@
     "src/js/repromise.rei",
     "src/js/repromise.re",
     "bsconfig.json"
-  ],
-  "dependencies": {
-    "bs-platform": "^4.0.1"
-  }
+  ]
 }
