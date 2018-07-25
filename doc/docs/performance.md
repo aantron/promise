@@ -22,8 +22,8 @@ Repromise.resolved(1)             20.7ns
 Js.Promise.resolve(promise)        5.0ns
 Repromise.resolved(promise)       43.9ns
 
-Js.Promise.then                 2692.3ns
-Repromise.then                  5683.6ns
+Js.Promise.then_                2692.3ns
+Repromise.andThen               5683.6ns
 ```
 
 These timings have the costs of allocation and garbage collection factored in.
@@ -34,4 +34,4 @@ So,
 
 - When given a nested promise, [`Repromise.resolved`](API#resolved) is slower than `Js.Promise.resolve`. However, this is because `Js.Promise.resolve` is [not type-safe](DesignFAQ#why-are-js-promises-not-type-safe), and simply returns its argument as its result. `Repromise.resolved`, instead, allocates two new objects: a new JS promise, and a [wrapper object](Interop#representation) to prevent the outer and inner promises from collapsing into each other. These two allocations are probably the reason why `Repromise.resolved` is up to about twice as slow on nested promises, as on non-promise values.
 
-- [`Repromise.andThen`](API#then) is about half as fast as `Js.Promise.then`. This is due to dynamic checks for nested promises, and due to [setting up asynchronous exception handling](API#onunhandledexception). However, the difference is not significant. `andThen` is almost always used around I/O, which takes much longer than tens of nanoseconds to complete.
+- [`Repromise.andThen`](API#then) is about half as fast as `Js.Promise.then_`. This is due to dynamic checks for nested promises, and due to [setting up asynchronous exception handling](API#onunhandledexception). However, the difference is not significant. `andThen` is almost always used around I/O, which takes much longer than tens of nanoseconds to complete.
