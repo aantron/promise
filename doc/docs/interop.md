@@ -8,7 +8,7 @@ title: Interop
 Repromise is built for maximum interop with JS promises. In fact, Repromises are ordinary JS `Promise`s at runtime:
 
 ```reason
-Repromise.resolve(1) |> Js.log;
+Repromise.resolved(1) |> Js.log;
 /* Promise { 1 } */
 
 Js.Promise.resolve(1) |> Js.log;
@@ -25,7 +25,7 @@ Js.Promise.resolve(Js.Promise.resolve(1)) |> Js.log;
 If not for collapsing, we would expect two levels of `Promise` here: `Promise { Promise { 1 } }`. But the two `Promise`s have been flattened into one. This makes it impossible to give a sound typing to ordinary JS promises. So, to prevent collapse, Repromise inserts a wrapper object:
 
 ```reason
-Repromise.resolve(Repromise.resolve(1)) |> Js.log;
+Repromise.resolved(Repromise.resolved(1)) |> Js.log;
 /* Promise { WrappedRepromise { wrapped: Promise { 1 } } } */
 ```
 
@@ -122,7 +122,7 @@ let foo = () =>
   |> Repromise.Rejectable.map(value =>
     Belt.Result.Ok(value))
   |> Repromise.Rejectable.catch(error =>
-    Repromise.resolve(Belt.Result.Error(error)))
+    Repromise.resolved(Belt.Result.Error(error)))
 /* The final promise has type Repromise.t(Belt.Result.t(int, string)) */
 ```
 

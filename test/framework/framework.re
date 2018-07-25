@@ -50,16 +50,16 @@ let test = (test_name, ~only_if = () => true, run) =>
 
 let run_test = test =>
   if (test.skip_if_this_is_false() == false) {
-    Repromise.resolve(Skipped)
+    Repromise.resolved(Skipped)
   }
   else {
     test.run()
     |> Repromise.andThen(test_did_pass =>
       if (test_did_pass) {
-        Repromise.resolve(Passed)
+        Repromise.resolved(Passed)
       }
       else {
-        Repromise.resolve(Failed)
+        Repromise.resolved(Failed)
       })
   };
 
@@ -101,12 +101,12 @@ let run_test_suite: suite => Repromise.t(suite_outcomes) = suite =>
     |> print_string;
     Pervasives.flush(stdout);
 
-    Repromise.resolve(outcomes);
+    Repromise.resolved(outcomes);
   }
   else {
     let rec run_each_test(tests, reversed_outcomes) =
       switch tests {
-      | [] => Repromise.resolve(List.rev(reversed_outcomes))
+      | [] => Repromise.resolved(List.rev(reversed_outcomes))
       | [test, ...more_tests] =>
         run_test(test)
         |> Repromise.andThen(new_outcome => {
@@ -176,7 +176,7 @@ let run = (library_name, suites) => {
         "\nOk. %i tests ran, %i tests skipped\n",
         count_ran(aggregated_outcomes),
         count_skipped(aggregated_outcomes));
-      Repromise.resolve();
+      Repromise.resolved();
 
     | [suite, ...rest] =>
       run_test_suite(suite)

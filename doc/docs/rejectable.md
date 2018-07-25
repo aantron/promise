@@ -7,7 +7,7 @@ title: Rejectable API
 
 In addition to the main API, [`Repromise`](API), Repromise also provides `Repromise.Rejectable`, which exposes the rejection support that is built into JS promises. This is mainly for writing bindings. Rejectable Repromises should be converted to normal Repromises as soon as possible using [`catch`](#catch).
 
-Most of the functions in `Repromise.Rejectable` are similar to the ones in [`Repromise`](API), but there are two new important functions, [`reject`](#reject) and the already-mentioned [`catch`](#catch).
+Most of the functions in `Repromise.Rejectable` are similar to the ones in [`Repromise`](API), but there are two new important functions, [`rejected`](#rejected) and the already-mentioned [`catch`](#catch).
 
 <br/>
 
@@ -44,10 +44,10 @@ reject_p(Failure("failed"));
 
 <br/>
 
-## `resolve`
+## `resolved`
 
 ```reason
-resolve: 'a => Repromise.Rejectable.t('a, _)
+resolved: 'a => Repromise.Rejectable.t('a, _)
 ```
 
 Creates a promise that is already resolved with the given value:
@@ -65,16 +65,16 @@ resolve_p("Hello");
 
 <br/>
 
-## `reject`
+## `rejected`
 
 ```reason
-reject: 'e => Repromise.Rejectable.t(_, 'e)
+rejected: 'e => Repromise.Rejectable.t(_, 'e)
 ```
 
 Creates a promise that is already rejected with the given value:
 
 ```reason
-let p = Repromise.Rejectable.reject(Failure("failed"));
+let p = Repromise.Rejectable.rejected(Failure("failed"));
 ```
 
 This is equivalent to
@@ -131,7 +131,7 @@ let (p, _, reject_p) = Repromise.Rejectable.make();
 p
 |> Repromise.Rejectable.catch(error => {
   prerr_endline(error);
-  Repromise.resolve();
+  Repromise.resolved();
 })
 |> ignore;
 
@@ -139,7 +139,7 @@ p
 reject_p("failed");
 ```
 
-In the above example, the final promise returned by `catch`, which we just `ignore`, has type `Repromise.t(unit)`. So, this is how `catch` can convert a rejectable Repromise (`p`) to a normal one! Just finish the callback of `catch` with `Repromise.resolve(...)`, or otherwise return a normal Repromise from it.
+In the above example, the final promise returned by `catch`, which we just `ignore`, has type `Repromise.t(unit)`. So, this is how `catch` can convert a rejectable Repromise (`p`) to a normal one! Just finish the callback of `catch` with `Repromise.resolved(...)`, or otherwise return a normal Repromise from it.
 
 A typical pattern is to convert success values and errors into `result`s:
 

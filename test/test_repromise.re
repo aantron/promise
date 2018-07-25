@@ -3,71 +3,71 @@ let test = Framework.test;
 
 
 let basicTests = Framework.suite("basic", [
-  /* The basic [resolve]-[andThen] tests are a bit useless, because the testing
+  /* The basic [resolved]-[andThen] tests are a bit useless, because the testing
      framework itself already uses both [resolved] and [then], i.e. every test
      implicitly tests those. However, we include these for completeness, in case
      we become enlightened and rewrite the framework in CPS or something.  */
-  test("resolve", () => {
-    Repromise.resolve(true);
+  test("resolved", () => {
+    Repromise.resolved(true);
   }),
 
   test("wait", () => {
     let correct = ref(false);
-    Repromise.resolve(1)
+    Repromise.resolved(1)
     |> Repromise.wait(n => correct := (n == 1));
-    Repromise.resolve()
+    Repromise.resolved()
     |> Repromise.map(() => correct^)
   }),
 
   test("andThen", () => {
-    Repromise.resolve(1)
-    |> Repromise.andThen (n => Repromise.resolve (n == 1));
+    Repromise.resolved(1)
+    |> Repromise.andThen(n => Repromise.resolved(n == 1));
   }),
 
   test("map", () => {
-    let p = Repromise.resolve(6) |> Repromise.map(v => v * 7);
-    p |> Repromise.andThen(r => Repromise.resolve(r == 42));
+    let p = Repromise.resolved(6) |> Repromise.map(v => v * 7);
+    p |> Repromise.andThen(r => Repromise.resolved(r == 42));
   }),
 
   test("map chain", () => {
     let p =
-      Repromise.resolve(6)
+      Repromise.resolved(6)
       |> Repromise.map(v => v * 7)
       |> Repromise.map(r => r * 10);
-    p |> Repromise.andThen(r => Repromise.resolve(r == 420));
+    p |> Repromise.andThen(r => Repromise.resolved(r == 420));
   }),
 
   test("map soundness", () => {
-      Repromise.resolve(6)
+      Repromise.resolved(6)
       |> Repromise.map(v => v * 7)
-      |> Repromise.map(x => Repromise.resolve(x == 42))
+      |> Repromise.map(x => Repromise.resolved(x == 42))
       |> Repromise.andThen(r => r);
   }),
 
   test("andThen chain", () => {
-    Repromise.resolve(1)
-    |> Repromise.andThen (n => Repromise.resolve (n + 1))
-    |> Repromise.andThen (n => Repromise.resolve (n == 2));
+    Repromise.resolved(1)
+    |> Repromise.andThen(n => Repromise.resolved(n + 1))
+    |> Repromise.andThen(n => Repromise.resolved(n == 2));
   }),
 
   test("andThen nested", () => {
-    Repromise.resolve(1)
+    Repromise.resolved(1)
     |> Repromise.andThen (n =>
-      Repromise.resolve (n + 1)
-      |> Repromise.andThen (n => Repromise.resolve (n + 1)))
-    |> Repromise.andThen (n => Repromise.resolve (n == 3));
+      Repromise.resolved(n + 1)
+      |> Repromise.andThen (n => Repromise.resolved(n + 1)))
+    |> Repromise.andThen (n => Repromise.resolved(n == 3));
   }),
 
   /* If promises are implemented on JS directly as ordinary JS promises,
-     [resolve(resolve(42))] will collapse to just a [promise(int)], even though
-     the Reason type is [promise(promise(int))]. This causes a soundness bug,
-     because, due to the type, the callback of [andThen] will expect the nested
-     value to be a [promise(int)]. A correct implementation of Reason promises
-     on JS will avoid this bug. */
+     [resolved(resolved(42))] will collapse to just a [promise(int)], even
+     though the Reason type is [promise(promise(int))]. This causes a soundness
+     bug, because, due to the type, the callback of [andThen] will expect the
+     nested value to be a [promise(int)]. A correct implementation of Reason
+     promises on JS will avoid this bug. */
   test("no collapsing", () => {
-    Repromise.resolve(Repromise.resolve(1))
-    |> Repromise.andThen (p =>
-      p |> Repromise.andThen (n => Repromise.resolve (n == 1)));
+    Repromise.resolved(Repromise.resolved(1))
+    |> Repromise.andThen(p =>
+      p |> Repromise.andThen(n => Repromise.resolved(n == 1)));
   }),
 
   test("make", () => {
@@ -78,7 +78,7 @@ let basicTests = Framework.suite("basic", [
 
   test("defer", () => {
     let (p, resolve) = Repromise.make();
-    let p' = p |> Repromise.andThen(n => Repromise.resolve(n == 1));
+    let p' = p |> Repromise.andThen(n => Repromise.resolved(n == 1));
     resolve(1);
     p';
   }),
@@ -94,7 +94,7 @@ let basicTests = Framework.suite("basic", [
 
   test("callback order (already resolved)", () => {
     let firstCallbackCalled = ref(false);
-    let p = Repromise.resolve();
+    let p = Repromise.resolved();
     p |> Repromise.map(() => firstCallbackCalled := true) |> ignore;
     p |> Repromise.map(() => firstCallbackCalled^);
   }),
@@ -111,8 +111,8 @@ let basicTests = Framework.suite("basic", [
   }),
 
   test("relax", () => {
-    let p = Repromise.resolve();
-    Repromise.resolve(Repromise.Rejectable.relax(p) === p);
+    let p = Repromise.resolved();
+    Repromise.resolved(Repromise.Rejectable.relax(p) === p);
   }),
 ]);
 
@@ -122,52 +122,52 @@ let rejectTests = Framework.suite("reject", [
   test("make", () => {
     let (p, _, reject) = Repromise.Rejectable.make();
     reject(1);
-    p |> Repromise.Rejectable.catch(n => Repromise.resolve(n == 1));
+    p |> Repromise.Rejectable.catch(n => Repromise.resolved(n == 1));
   }),
 
   test("reject, catch", () => {
-    Repromise.Rejectable.reject("foo")
-    |> Repromise.Rejectable.catch(s => Repromise.resolve(s == "foo"));
+    Repromise.Rejectable.rejected("foo")
+    |> Repromise.Rejectable.catch(s => Repromise.resolved(s == "foo"));
   }),
 
   test("catch chosen", () => {
-    Repromise.Rejectable.reject("foo")
-    |> Repromise.Rejectable.catch(s => Repromise.resolve(s == "foo"));
+    Repromise.Rejectable.rejected("foo")
+    |> Repromise.Rejectable.catch(s => Repromise.resolved(s == "foo"));
   }),
 
   test("andThen, reject, catch", () => {
-    Repromise.Rejectable.resolve(1)
-    |> Repromise.Rejectable.andThen(n => Repromise.Rejectable.reject(n + 1))
-    |> Repromise.Rejectable.catch(n => Repromise.resolve(n == 2));
+    Repromise.Rejectable.resolved(1)
+    |> Repromise.Rejectable.andThen(n => Repromise.Rejectable.rejected(n + 1))
+    |> Repromise.Rejectable.catch(n => Repromise.resolved(n == 2));
   }),
 
   test("reject, catch, andThen", () => {
-    Repromise.Rejectable.reject(1)
-    |> Repromise.Rejectable.catch(n => Repromise.resolve(n + 1))
-    |> Repromise.andThen(n => Repromise.resolve(n == 2));
+    Repromise.Rejectable.rejected(1)
+    |> Repromise.Rejectable.catch(n => Repromise.resolved(n + 1))
+    |> Repromise.andThen(n => Repromise.resolved(n == 2));
   }),
 
   test("no double catch", () => {
-    Repromise.Rejectable.reject("foo")
-    |> Repromise.Rejectable.catch(s => Repromise.resolve(s == "foo"))
-    |> Repromise.Rejectable.catch((_) => Repromise.resolve(false));
+    Repromise.Rejectable.rejected("foo")
+    |> Repromise.Rejectable.catch(s => Repromise.resolved(s == "foo"))
+    |> Repromise.Rejectable.catch((_) => Repromise.resolved(false));
   }),
 
   test("catch chain", () => {
-    Repromise.Rejectable.reject(1)
-    |> Repromise.Rejectable.catch(n => Repromise.Rejectable.reject(n + 1))
-    |> Repromise.Rejectable.catch(n => Repromise.resolve(n == 2));
+    Repromise.Rejectable.rejected(1)
+    |> Repromise.Rejectable.catch(n => Repromise.Rejectable.rejected(n + 1))
+    |> Repromise.Rejectable.catch(n => Repromise.resolved(n == 2));
   }),
 
   test("no catching resolved", () => {
-    Repromise.resolve(true)
-    |> Repromise.Rejectable.catch((_) => Repromise.resolve(false));
+    Repromise.resolved(true)
+    |> Repromise.Rejectable.catch((_) => Repromise.resolved(false));
   }),
 
   test("no catching resolved, after andThen", () => {
-    Repromise.resolve()
-    |> Repromise.andThen(() => Repromise.resolve(true))
-    |> Repromise.Rejectable.catch((_) => Repromise.resolve(false));
+    Repromise.resolved()
+    |> Repromise.andThen(() => Repromise.resolved(true))
+    |> Repromise.Rejectable.catch((_) => Repromise.resolved(false));
   }),
 ]);
 
@@ -176,13 +176,13 @@ let rejectTests = Framework.suite("reject", [
 let remainsPending = (p, dummyValue) => {
   let rec repeat = (n, f) =>
     if (n == 0) {
-      Repromise.resolve(true);
+      Repromise.resolved(true);
     }
     else {
       f ()
       |> Repromise.andThen(result =>
         if (not(result)) {
-          Repromise.resolve(false);
+          Repromise.resolved(false);
         }
         else {
           repeat(n - 1, f);
@@ -190,16 +190,16 @@ let remainsPending = (p, dummyValue) => {
     };
 
   repeat(10, () =>
-    Repromise.race([p, Repromise.resolve(dummyValue)])
+    Repromise.race([p, Repromise.resolved(dummyValue)])
     |> Repromise.andThen(v1 =>
-      Repromise.race([Repromise.resolve(dummyValue), p])
+      Repromise.race([Repromise.resolved(dummyValue), p])
       |> Repromise.map(v2 =>
         v1 == dummyValue && v2 == dummyValue)));
 };
 
 let allTests = Framework.suite("all", [
   test("already resolved", () => {
-    Repromise.all([Repromise.resolve(42), Repromise.resolve(43)])
+    Repromise.all([Repromise.resolved(42), Repromise.resolved(43)])
     |> Repromise.map(results => results == [42, 43]);
   }),
 
@@ -229,10 +229,10 @@ let allTests = Framework.suite("all", [
 
   test("already rejected", () => {
     let (p1, _, _) = Repromise.Rejectable.make();
-    let p2 = Repromise.Rejectable.all([p1, Repromise.Rejectable.reject(43)]);
+    let p2 = Repromise.Rejectable.all([p1, Repromise.Rejectable.rejected(43)]);
     p2
-    |> Repromise.Rejectable.andThen((_) => Repromise.Rejectable.resolve(false))
-    |> Repromise.Rejectable.catch(n => Repromise.resolve(n == 43));
+    |> Repromise.Rejectable.andThen((_) => Repromise.Rejectable.resolved(false))
+    |> Repromise.Rejectable.catch(n => Repromise.resolved(n == 43));
   }),
 
   test("rejected later", () => {
@@ -241,8 +241,8 @@ let allTests = Framework.suite("all", [
     let p3 = Repromise.Rejectable.all([p1, p2]);
     rejectP1(42);
     p3
-    |> Repromise.Rejectable.andThen((_) => Repromise.Rejectable.resolve(false))
-    |> Repromise.Rejectable.catch(n => Repromise.resolve(n == 42));
+    |> Repromise.Rejectable.andThen((_) => Repromise.Rejectable.resolved(false))
+    |> Repromise.Rejectable.catch(n => Repromise.resolved(n == 42));
   }),
 
   test("remains rejected", () => {
@@ -255,8 +255,9 @@ let allTests = Framework.suite("all", [
     |> Repromise.Rejectable.catch((_) => assert false)
     |> Repromise.Rejectable.andThen((_) =>
       p3
-      |> Repromise.Rejectable.andThen((_) => Repromise.Rejectable.resolve(false))
-      |> Repromise.Rejectable.catch(n => Repromise.resolve(n == 42)));
+      |> Repromise.Rejectable.andThen((_) =>
+        Repromise.Rejectable.resolved(false))
+      |> Repromise.Rejectable.catch(n => Repromise.resolved(n == 42)));
   }),
 
   test("empty", () => {
@@ -307,26 +308,26 @@ let raceTests = Framework.suite("race", [
     let (p2, _, _) = Repromise.Rejectable.make();
     let p3 = Repromise.Rejectable.race([p1, p2]);
     rejectP1(42);
-    p3 |> Repromise.Rejectable.catch(n => Repromise.resolve(n == 42));
+    p3 |> Repromise.Rejectable.catch(n => Repromise.resolved(n == 42));
   }),
 
   test("already resolved", () => {
     let (p1, _) = Repromise.make();
-    let p2 = Repromise.resolve(43);
+    let p2 = Repromise.resolved(43);
     let p3 = Repromise.race([p1, p2]);
     p3 |> Repromise.map(n => n == 43);
   }),
 
   test("already rejected", () => {
     let (p1, _, _) = Repromise.Rejectable.make();
-    let p2 = Repromise.Rejectable.reject(43);
+    let p2 = Repromise.Rejectable.rejected(43);
     let p3 = Repromise.Rejectable.race([p1, p2]);
-    p3 |> Repromise.Rejectable.catch(n => Repromise.resolve(n == 43));
+    p3 |> Repromise.Rejectable.catch(n => Repromise.resolved(n == 43));
   }),
 
   test("two resolved", () => {
-    let p1 = Repromise.resolve(42);
-    let p2 = Repromise.resolve(43);
+    let p1 = Repromise.resolved(42);
+    let p2 = Repromise.resolved(43);
     let p3 = Repromise.race([p1, p2]);
     p3 |> Repromise.map(n => n == 42 || n == 43);
   }),
@@ -349,8 +350,8 @@ let raceTests = Framework.suite("race", [
        https://github.com/BuckleScript/bucklescript/issues/2692
 
   test("empty", () => {
-    try ({ ignore(Repromise.race([])); Repromise.resolve(false); }) {
-    | Invalid_argument(_) => Repromise.resolve(true);
+    try ({ ignore(Repromise.race([])); Repromise.resolved(false); }) {
+    | Invalid_argument(_) => Repromise.resolved(true);
     };
   }), */
 
@@ -366,7 +367,7 @@ let raceTests = Framework.suite("race", [
 
     /* We are using this resolve() just so we can call andThen on it, guaranteeing
        that the second time will run after the first time.. */
-    let delay = Repromise.resolve();
+    let delay = Repromise.resolved();
 
     delay
     |> Repromise.andThen(fun () => p)
@@ -386,7 +387,7 @@ let raceTests = Framework.suite("race", [
   test("callbacks moved, then race", () => {
     let (p, resolve) = Repromise.make();
 
-    let delay = Repromise.resolve();
+    let delay = Repromise.resolved();
 
     delay
     |> Repromise.andThen(fun () => p)

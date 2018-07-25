@@ -8,7 +8,7 @@ type t('a) = promise('a);
 
 let make: unit => (promise('a), 'a => unit);
 
-let resolve: 'a => promise('a);
+let resolved: 'a => promise('a);
 
 let andThen: ('a => promise('b), promise('a)) => promise('b);
 
@@ -29,9 +29,9 @@ module Rejectable: {
 
   let make: unit => (rejectable('a, 'e), 'a => unit, 'e => unit);
 
-  let resolve: 'a => rejectable('a, _);
+  let resolved: 'a => rejectable('a, _);
 
-  let reject: 'e => rejectable(_, 'e);
+  let rejected: 'e => rejectable(_, 'e);
 
   let andThen:
     ('a => rejectable('b, 'e), rejectable('a, 'e)) => rejectable('b, 'e);

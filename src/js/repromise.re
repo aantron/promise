@@ -42,7 +42,7 @@ function make(executor) {
     });
 };
 
-function resolve(value) {
+function resolved(value) {
     return Promise.resolve(wrap(value));
 };
 
@@ -94,7 +94,7 @@ module Rejectable = {
   };
 
   [@bs.val]
-  external resolve: 'a => rejectable('a, _) = "";
+  external resolved: 'a => rejectable('a, _) = "";
 
   [@bs.val]
   external andThen:
@@ -102,14 +102,14 @@ module Rejectable = {
       "then";
 
   let map = (callback, promise) =>
-    promise |> andThen(value => resolve(callback(value)));
+    promise |> andThen(value => resolved(callback(value)));
 
   let wait = (callback, promise) =>
     promise |> map(callback) |> ignore;
 
   [@bs.scope "Promise"]
   [@bs.val]
-  external reject: 'e => rejectable(_, 'e) = "";
+  external rejected: 'e => rejectable(_, 'e) = "reject";
 
   [@bs.val]
   external catch:
@@ -156,7 +156,7 @@ let make = () => {
   (p, resolve);
 };
 
-let resolve = Rejectable.resolve;
+let resolved = Rejectable.resolved;
 let andThen = Rejectable.andThen;
 let map = Rejectable.map;
 let wait = Rejectable.wait;

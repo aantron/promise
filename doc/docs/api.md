@@ -43,10 +43,10 @@ Each promise can only be resolved once, so calling `resolve_p` again has no effe
 
 <br/>
 
-## `resolve`
+## `resolved`
 
 ```reason
-resolve: 'a => Repromise.t('a)
+resolved: 'a => Repromise.t('a)
 ```
 
 Returns a promise that starts out resolved, with the given value:
@@ -75,7 +75,7 @@ Attaches a callback to the promise, which will be called after that promise is r
 - If the promise is already resolved, the callback is called on the next tick (almost immediately):
 
     ```reason
-    let p = Repromise.resolve("Hello");
+    let p = Repromise.resolved("Hello");
     p |> Repromise.wait(text => print_endline(text));
     /* Prints "Hello". */
     ```
@@ -96,7 +96,7 @@ Attaches a callback to the promise, which will be called after that promise is r
 Callbacks are always asynchronous. Even if a callback is queued on a promise that is already resolved, it is run later, on the next tick. This can lead to surprising execution orders:
 
 ```reason
-Repromise.resolve()
+Repromise.resolved()
 |> Repromise.wait(() => print_endline("printed second"));
 
 print_endline("printed first");

@@ -25,7 +25,7 @@ See [Interop](Interop) for details.
 
 ## Replacing `Promise` methods
 
-JS `Promise` methods, such as `Promise.resolve`, have [behavior](DesignFAQ#why-are-js-promises-not-type-safe) that is incompatible with ReasonML's type system (and almost any other type system). So, Repromise provides its own safe functions, such as [`Repromise.resolve`](API#resolve).
+JS `Promise` methods, such as `Promise.resolve`, have [behavior](DesignFAQ#why-are-js-promises-not-type-safe) that is incompatible with ReasonML's type system (and almost any other type system). So, Repromise provides its own safe functions, such as [`Repromise.resolved`](API#resolved).
 
 <br/>
 

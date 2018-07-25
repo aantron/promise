@@ -129,10 +129,10 @@ let rejectInternal = p => error =>
 
 
 
-let resolve = value =>
+let resolved = value =>
   ref(`Fulfilled(value));
 
-let reject = error =>
+let rejected = error =>
   ref(`Rejected(error));
 
 
@@ -204,7 +204,7 @@ let andThen = (callback, promise) => {
 };
 
 let map = (mapper, promise) =>
-  andThen(value => resolve(mapper(value)), promise);
+  andThen(value => resolved(mapper(value)), promise);
 
 let wait = (callback, promise) =>
   map(callback, promise) |> ignore;
@@ -402,8 +402,8 @@ module Rejectable = {
     (p, resolve, reject);
   };
 
-  let resolve = resolve;
-  let reject = reject;
+  let resolved = resolved;
+  let rejected = rejected;
   let andThen = andThen;
   let map = map;
   let wait = wait;

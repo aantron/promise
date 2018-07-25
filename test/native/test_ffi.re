@@ -32,7 +32,7 @@ let doesNotLeakMemory = (loop, baseIterations) =>
     |> Repromise.Rejectable.andThen(wordsAllocated' => {
 
       let ratio = float_of_int(wordsAllocated') /. float_of_int(wordsAllocated);
-      Repromise.Rejectable.resolve(ratio < 2.);
+      Repromise.Rejectable.resolved(ratio < 2.);
     }));
 
 
@@ -70,13 +70,13 @@ let promiseLoopTests = Framework.suite("promise loop", [
         |> Repromise.andThen(n => {
           if (n == 0) {
             let wordsAllocated = countAllocatedWords() - initialWords;
-            Repromise.resolve(wordsAllocated);
+            Repromise.resolved(wordsAllocated);
           }
           else {
-            promiseLoop(Repromise.resolve(n - 1))
+            promiseLoop(Repromise.resolved(n - 1))
           }});
 
-      promiseLoop(Repromise.resolve(n));
+      promiseLoop(Repromise.resolved(n));
     };
 
     doesNotLeakMemory(instrumentedPromiseLoop, 1000);
@@ -106,12 +106,12 @@ let promiseLoopTests = Framework.suite("promise loop", [
       let rec tryToBuildTower = n =>
         if (n == 0) {
           let wordsAllocated = countAllocatedWords() - initialWords;
-          Repromise.resolve(wordsAllocated);
+          Repromise.resolved(wordsAllocated);
         }
         else {
           /* The purpose of the delay promise is to make sure the second call to
              andThen runs after the first. */
-          let delay = Repromise.resolve();
+          let delay = Repromise.resolved();
 
           /* If union-find is not implemented, we will leak memory here. */
           delay
@@ -144,7 +144,7 @@ let raceTest = (name, body) =>
       let rec theLoop: int => Repromise.Rejectable.t(int, unit) = n =>
         if (n == 0) {
           let wordsAllocated = countAllocatedWords() - initialWords;
-          Repromise.Rejectable.resolve(wordsAllocated);
+          Repromise.Rejectable.resolved(wordsAllocated);
         }
         else {
           let nextIteration = () => theLoop(n - 1);
@@ -191,7 +191,7 @@ let raceLoopTests = Framework.suite("race loop", [
 
   raceTest("race loop memory leak, with already-resolved promises",
       (foreverPendingPromise, nextIteration) => {
-    let resolvedPromise = Repromise.Rejectable.resolve();
+    let resolvedPromise = Repromise.Rejectable.resolved();
 
     let racePromise =
       Repromise.Rejectable.race([foreverPendingPromise, resolvedPromise]);
@@ -216,7 +216,7 @@ let raceLoopTests = Framework.suite("race loop", [
 
   raceTest("race loop memory leak, with already-rejected promises",
       (foreverPendingPromise, nextIteration) => {
-    let rejectedPromise = Repromise.Rejectable.reject();
+    let rejectedPromise = Repromise.Rejectable.rejected();
 
     let racePromise =
       Repromise.Rejectable.race([foreverPendingPromise, rejectedPromise]);
@@ -249,7 +249,7 @@ let raceLoopTests = Framework.suite("race loop", [
        of its callbacks to be moved to the outer promise of the andThen (which we
        don't give a name to). The delay promise is just used to make the second
        call to andThen definitely run after the first. */
-    let delay = Repromise.Rejectable.resolve();
+    let delay = Repromise.Rejectable.resolved();
 
     delay
     |> Repromise.Rejectable.andThen(() => foreverPendingPromise)
@@ -292,7 +292,7 @@ let allLoopTests = Framework.suite("all loop", [
 
   raceTest("all loop memory leak, with already-rejected promises",
       (foreverPendingPromise, nextIteration) => {
-    let rejectedPromise = Repromise.Rejectable.reject();
+    let rejectedPromise = Repromise.Rejectable.rejected();
 
     let allPromise =
       Repromise.Rejectable.all([foreverPendingPromise, rejectedPromise]);
@@ -312,7 +312,7 @@ let allLoopTests = Framework.suite("all loop", [
     let allPromise =
       Repromise.Rejectable.all([foreverPendingPromise, shortLivedPromise]);
 
-    let delay = Repromise.Rejectable.resolve();
+    let delay = Repromise.Rejectable.resolved();
 
     delay
     |> Repromise.Rejectable.catch((_) => assert(false))

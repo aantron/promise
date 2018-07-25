@@ -63,7 +63,7 @@ resolve: Js.Promise.t(int) => Js.Promise.t(Js.Promise.t(int))
 
 is incorrect, because the return type says that `child` will be nested.
 
-This is why Repromise provides its own [`Repromise.resolve`](API#resolve), which basically prevents the check from running. The type of [`Repromise.resolve`](API#resolve) is correct even when nesting promises.s
+This is why Repromise provides its own [`Repromise.resolved`](API#resolved), which basically prevents the check from running. The type of [`Repromise.resolved`](API#resolved) is correct even when nesting promises.
 
 Repromise also has to provide [its own versions](API#then) of [`then`][Promise.then] and the other `Promise` functions, because they have to know how to deal with the workaround used by Repromise.
 
@@ -153,7 +153,7 @@ Yes. It is unreleased, but [sitting in the Repromise repo](https://github.com/aa
 let%await fd   = Io.open_("test/demo/demo.re");
 let%await data = Io.read (~fd, ~length = 1024);
 print_endline(data);
-Repromise.resolve();
+Repromise.resolved();
 ```
 
 <br/>
