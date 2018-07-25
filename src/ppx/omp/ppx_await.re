@@ -24,11 +24,11 @@ let mapper = {
 
         let open Ast_helper.Exp;
 
-        let then_ = ident(Location.mknoloc(Longident.parse("Repromise.then_")));
+        let andThen = ident(Location.mknoloc(Longident.parse("Repromise.andThen")));
         let x = binding.pvb_pat;
         let fun_ = fun_(Asttypes.Nolabel, None, x, e');
 
-        apply(then_, [(Asttypes.Nolabel, fun_), (Asttypes.Nolabel, e'')])
+        apply(andThen, [(Asttypes.Nolabel, fun_), (Asttypes.Nolabel, e'')])
 
       | _ =>
         default_mapper.expr(mapper, e)

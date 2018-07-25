@@ -37,7 +37,7 @@ let (p, resolve_p) = Repromise.make();
 resolve_p("Hello");
 ```
 
-`p` is resolved with `"Hello"`. Any callbacks that have been attached to `p` by [`wait`](#wait), [`map`](#map), [`then_`](#then), [`all`](#all), or [`race`](#race), get called, and receive `"Hello"` as their argument. See examples in the rest of the documentation below.
+`p` is resolved with `"Hello"`. Any callbacks that have been attached to `p` by [`wait`](#wait), [`map`](#map), [`andThen`](#andThen), [`all`](#all), or [`race`](#race), get called, and receive `"Hello"` as their argument. See examples in the rest of the documentation below.
 
 Each promise can only be resolved once, so calling `resolve_p` again has no effect.
 
@@ -128,10 +128,10 @@ resolve_p("Hello");
 
 <br/>
 
-## `then_`
+## `andThen`
 
 ```reason
-then_: (('a => Repromise.t('b)), Repromise.t('a)) => Repromise.t('b)
+andThen: (('a => Repromise.t('b)), Repromise.t('a)) => Repromise.t('b)
 ```
 
 Like [`map`](#map), but the return value of the callback is another promise. This allows the callback to start an async operation:
@@ -141,7 +141,7 @@ let (p1, resolve_p1) = Repromise.make();
 Js.Global.setTimeout(() => resolve_p1(), 1000) |> ignore;
 
 p1
-|> Repromise.then_(() => {
+|> Repromise.andThen(() => {
   print_endline("Hello");
 
   let (p2, resolve_p2) = Repromise.make();

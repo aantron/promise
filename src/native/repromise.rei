@@ -10,7 +10,7 @@ let make: unit => (promise('a), 'a => unit);
 
 let resolve: 'a => promise('a);
 
-let then_: ('a => promise('b), promise('a)) => promise('b);
+let andThen: ('a => promise('b), promise('a)) => promise('b);
 
 let map: ('a => 'b, promise('a)) => promise('b);
 
@@ -33,7 +33,7 @@ module Rejectable: {
 
   let reject: 'e => rejectable(_, 'e);
 
-  let then_:
+  let andThen:
     ('a => rejectable('b, 'e), rejectable('a, 'e)) => rejectable('b, 'e);
 
   let map: ('a => 'b, rejectable('a, 'e)) => rejectable('b, 'e);

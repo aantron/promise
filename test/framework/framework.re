@@ -54,7 +54,7 @@ let run_test = test =>
   }
   else {
     test.run()
-    |> Repromise.then_(test_did_pass =>
+    |> Repromise.andThen(test_did_pass =>
       if (test_did_pass) {
         Repromise.resolve(Passed)
       }
@@ -109,7 +109,7 @@ let run_test_suite: suite => Repromise.t(suite_outcomes) = suite =>
       | [] => Repromise.resolve(List.rev(reversed_outcomes))
       | [test, ...more_tests] =>
         run_test(test)
-        |> Repromise.then_(new_outcome => {
+        |> Repromise.andThen(new_outcome => {
           new_outcome |> outcome_to_character |> print_char;
           Pervasives.flush(stdout);
           let outcome_with_name = (test.test_name, new_outcome);
@@ -180,7 +180,7 @@ let run = (library_name, suites) => {
 
     | [suite, ...rest] =>
       run_test_suite(suite)
-      |> Repromise.then_(outcomes =>
+      |> Repromise.andThen(outcomes =>
         if (not(outcomes_all_ok(outcomes))) {
           print_newline();
           Pervasives.flush(stdout);

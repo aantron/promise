@@ -26,10 +26,10 @@ let countAllocatedWords = () => {
    loop will have returned and released all references that it is holding. */
 let doesNotLeakMemory = (loop, baseIterations) =>
   loop(baseIterations)
-  |> Repromise.Rejectable.then_(wordsAllocated =>
+  |> Repromise.Rejectable.andThen(wordsAllocated =>
 
     loop(baseIterations * 10)
-    |> Repromise.Rejectable.then_(wordsAllocated' => {
+    |> Repromise.Rejectable.andThen(wordsAllocated' => {
 
       let ratio = float_of_int(wordsAllocated') /. float_of_int(wordsAllocated);
       Repromise.Rejectable.resolve(ratio < 2.);
@@ -39,7 +39,7 @@ let doesNotLeakMemory = (loop, baseIterations) =>
 
 let promiseLoopTests = Framework.suite("promise loop", [
   /* A pretty simple promise loop. This is just a function that takes a promise,
-     and calls .then_ on it. The callback passed to .then_ calls the loop
+     and calls .andThen on it. The callback passed to .andThen calls the loop
      recursively, passing another promise to the next iteration. The interesting
      part is not the argument promise, but the result promise returned by each
      iteration.
@@ -47,18 +47,18 @@ let promiseLoopTests = Framework.suite("promise loop", [
      If Repromise is implemented naively, the iteration will result in a big
      chain of promises hanging in memory: a memory leak. Here is how:
 
-     - At the first iteration, .then_ creates an outer pending promise p0, and
+     - At the first iteration, .andThen creates an outer pending promise p0, and
        returns it immediately to the rest of the code.
-     - Later, the callback passed to .then_ runs. It again calls .then_,
+     - Later, the callback passed to .andThen runs. It again calls .andThen,
        creating another pending promise p1. The callback then returns p1. This
        means that resolving p1 should resolve p0, so a naive implementation
        will store a reference in p1 to p0.
-     - Later, the callback passed to p1's .then_ runs, doing the same thing:
+     - Later, the callback passed to p1's .andThen runs, doing the same thing:
        creating another pending promise p2, pointing to p1.
      - By iteration N, there is a chain of N pending promises set up, such that
        resolving the inner-most promise in the chain, created by the last
-       .then_, will resolve the outer-most promise p0, created by the first
-       .then_. This is the memory leak. */
+       .andThen, will resolve the outer-most promise p0, created by the first
+       .andThen. This is the memory leak. */
   test("promise loop memory leak", () => {
     let instrumentedPromiseLoop = n => {
       let initialWords = countAllocatedWords();
@@ -67,7 +67,7 @@ let promiseLoopTests = Framework.suite("promise loop", [
           previousPromise =>
 
         previousPromise
-        |> Repromise.then_(n => {
+        |> Repromise.andThen(n => {
           if (n == 0) {
             let wordsAllocated = countAllocatedWords() - initialWords;
             Repromise.resolve(wordsAllocated);
@@ -83,14 +83,14 @@ let promiseLoopTests = Framework.suite("promise loop", [
   }),
 
   /* The fix for the above memory leak carries a potential pitfall: the fix is
-     to merge the inner promise returned to then_ into then_'s outer promise.
+     to merge the inner promise returned to andThen into andThen's outer promise.
      After that, all operations on the inner promise reference are actually
      performed on the outer promise.
 
      This carries the danger that a tower of these merged promises can build
-     up. If a pending promise is repeatedly returned to then_, it will
+     up. If a pending promise is repeatedly returned to andThen, it will
      gradually become the head of a growing chain of forwarding promises, that
-     point to the outer promise created in the last call to then_.
+     point to the outer promise created in the last call to andThen.
 
      To avoid this, the implementation has to perform union-find: each time it
      traverses a chain of merged promises, it has to set the head promise to
@@ -110,16 +110,16 @@ let promiseLoopTests = Framework.suite("promise loop", [
         }
         else {
           /* The purpose of the delay promise is to make sure the second call to
-             then_ runs after the first. */
+             andThen runs after the first. */
           let delay = Repromise.resolve();
 
           /* If union-find is not implemented, we will leak memory here. */
           delay
-          |> Repromise.then_(() => foreverPendingPromise)
+          |> Repromise.andThen(() => foreverPendingPromise)
           |> ignore;
 
           delay
-          |> Repromise.then_(() => tryToBuildTower(n - 1));
+          |> Repromise.andThen(() => tryToBuildTower(n - 1));
         };
 
       tryToBuildTower(n);
@@ -186,7 +186,7 @@ let raceLoopTests = Framework.suite("race loop", [
 
     resolveShortLivedPromise();
 
-    racePromise |> Repromise.Rejectable.then_(nextIteration);
+    racePromise |> Repromise.Rejectable.andThen(nextIteration);
   }),
 
   raceTest("race loop memory leak, with already-resolved promises",
@@ -196,7 +196,7 @@ let raceLoopTests = Framework.suite("race loop", [
     let racePromise =
       Repromise.Rejectable.race([foreverPendingPromise, resolvedPromise]);
 
-    racePromise |> Repromise.Rejectable.then_(nextIteration);
+    racePromise |> Repromise.Rejectable.andThen(nextIteration);
   }),
 
   raceTest("race loop memory leak, with rejection",
@@ -210,7 +210,7 @@ let raceLoopTests = Framework.suite("race loop", [
     rejectShortLivedPromise();
 
     racePromise
-    |> Repromise.Rejectable.then_(() => assert(false))
+    |> Repromise.Rejectable.andThen(() => assert(false))
     |> Repromise.Rejectable.catch(nextIteration);
   }),
 
@@ -222,22 +222,22 @@ let raceLoopTests = Framework.suite("race loop", [
       Repromise.Rejectable.race([foreverPendingPromise, rejectedPromise]);
 
     racePromise
-    |> Repromise.Rejectable.then_(() => assert(false))
+    |> Repromise.Rejectable.andThen(() => assert(false))
     |> Repromise.Rejectable.catch(nextIteration);
   }),
 
   /* This test is like the first, but it tests for the interaction of the fixes
-     for the then_ and race loop memory leaks. The danger is:
+     for the andThen and race loop memory leaks. The danger is:
 
-     - The then_ fix "wants" to merge callback lists when an inner pending
-       promise is returned from the callback of then_.
+     - The andThen fix "wants" to merge callback lists when an inner pending
+       promise is returned from the callback of andThen.
      - The race fix "wants" to delete callbacks from a callback list, when a
        promise "loses" to another one that resolved sooner.
 
-     It is important that the callback list merging performed by then_ doesn't
+     It is important that the callback list merging performed by andThen doesn't
      prevent race from finding and deleting the correct callbacks in the merged
      lists. */
-  raceTest("race loop memory leak with then_ merging",
+  raceTest("race loop memory leak with andThen merging",
       (foreverPendingPromise, nextIteration) => {
     let (shortLivedPromise, resolveShortLivedPromise, _) =
       Repromise.Rejectable.make();
@@ -245,23 +245,23 @@ let raceLoopTests = Framework.suite("race loop", [
     let racePromise =
       Repromise.Rejectable.race([foreverPendingPromise, shortLivedPromise]);
 
-    /* Return foreverPendingPromise from the callback of then_. This causes all
-       of its callbacks to be moved to the outer promise of the then_ (which we
+    /* Return foreverPendingPromise from the callback of andThen. This causes all
+       of its callbacks to be moved to the outer promise of the andThen (which we
        don't give a name to). The delay promise is just used to make the second
-       call to then_ definitely run after the first. */
+       call to andThen definitely run after the first. */
     let delay = Repromise.Rejectable.resolve();
 
     delay
-    |> Repromise.Rejectable.then_(() => foreverPendingPromise)
+    |> Repromise.Rejectable.andThen(() => foreverPendingPromise)
     |> ignore;
 
     delay
-    |> Repromise.Rejectable.then_(() => {
+    |> Repromise.Rejectable.andThen(() => {
       /* Now, we resolve the short-lived promise. If that doesn't delete the
          callback that was merged away from foreverPendingPromise, then this is
          where we will accumulate the memory leak. */
       resolveShortLivedPromise();
-      racePromise |> Repromise.Rejectable.then_(nextIteration);
+      racePromise |> Repromise.Rejectable.andThen(nextIteration);
     });
   }),
 ]);
@@ -286,7 +286,7 @@ let allLoopTests = Framework.suite("all loop", [
     rejectShortLivedPromise();
 
     allPromise
-    |> Repromise.Rejectable.then_((_) => assert false)
+    |> Repromise.Rejectable.andThen((_) => assert false)
     |> Repromise.Rejectable.catch(nextIteration);
   }),
 
@@ -298,13 +298,13 @@ let allLoopTests = Framework.suite("all loop", [
       Repromise.Rejectable.all([foreverPendingPromise, rejectedPromise]);
 
     allPromise
-    |> Repromise.Rejectable.then_((_) => assert false)
+    |> Repromise.Rejectable.andThen((_) => assert false)
     |> Repromise.Rejectable.catch(nextIteration);
   }),
 
-  /* Tests the interaction of the memory-leak fixes in all and then_, as tested
-     for race and then_ above. */
-  raceTest("race loop memory leak with then_ merging",
+  /* Tests the interaction of the memory-leak fixes in all and andThen, as tested
+     for race and andThen above. */
+  raceTest("race loop memory leak with andThen merging",
       (foreverPendingPromise, nextIteration) => {
     let (shortLivedPromise, _, rejectShortLivedPromise) =
       Repromise.Rejectable.make();
@@ -316,15 +316,15 @@ let allLoopTests = Framework.suite("all loop", [
 
     delay
     |> Repromise.Rejectable.catch((_) => assert(false))
-    |> Repromise.Rejectable.then_(() => foreverPendingPromise)
+    |> Repromise.Rejectable.andThen(() => foreverPendingPromise)
     |> ignore;
 
     delay
     |> Repromise.Rejectable.catch((_) => assert(false))
-    |> Repromise.Rejectable.then_(() => {
+    |> Repromise.Rejectable.andThen(() => {
       rejectShortLivedPromise();
       allPromise
-      |> Repromise.Rejectable.then_((_) => assert false)
+      |> Repromise.Rejectable.andThen((_) => assert false)
       |> Repromise.Rejectable.catch(nextIteration);
     });
   }),

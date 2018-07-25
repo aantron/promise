@@ -29,7 +29,7 @@ Repromise.resolve(Repromise.resolve(1)) |> Js.log;
 /* Promise { WrappedRepromise { wrapped: Promise { 1 } } } */
 ```
 
-Repromise functions (such as [`wait`](API#wait) and [`then_`](API#then)) silently insert and remove this wrapper object, as needed.
+Repromise functions (such as [`wait`](API#wait) and [`andThen`](API#andThen)) silently insert and remove this wrapper object, as needed.
 
 ### Takeaway
 
@@ -62,7 +62,7 @@ let url =
 
 let () =
   fetch(url)
-  |> Repromise.then_(text)
+  |> Repromise.andThen(text)
   |> Repromise.wait(Js.log);
 ```
 

@@ -69,9 +69,9 @@ Repromise also has to provide [its own versions](API#then) of [`then`][Promise.t
 
 <br/>
 
-## Why does JS have only `then`, but Repromise has `then_`, `map`, and `wait`?
+## Why does JS have only `then`, but Repromise has `andThen`, `map`, and `wait`?
 
-In JavaScript, [`Promise.then`][Promise.then] behaves differently depending on the (dynamic) type of the value returned by its callback. These different behaviors can't be assigned one type, so `then` is split into `then_`, `map`, and `wait`.
+In JavaScript, [`Promise.then`][Promise.then] behaves differently depending on the (dynamic) type of the value returned by its callback. These different behaviors can't be assigned one type, so `then` is split into `andThen`, `map`, and `wait`.
 
 1. The most general behavior occurs when the callback returns another promise. This allows chaining asynchronous operations:
 
@@ -90,7 +90,7 @@ In JavaScript, [`Promise.then`][Promise.then] behaves differently depending on t
 
     The first `.then` is the important one. Its callback returns a new promise, and the chain of asynchronous operations continues by waiting for that promise.
 
-    This corresponds to [`Repromise.then_`](API#then), whose callback returns a promise.
+    This corresponds to [`Repromise.andThen`](API#andThen), whose callback returns a promise.
 
 2. JS promises support another behavior, which occurs when the callback of `.then` returns a non-promise value. In this case, the value is directly passed to the next `.then` in the chain:
 
@@ -106,7 +106,7 @@ In JavaScript, [`Promise.then`][Promise.then] behaves differently depending on t
 
     Again, the first `.then` is the important one. Since its callback does not return a promise, the chain doesn't have to wait. It continues (almost) immediately into the second `.then`, which prints `43`.
 
-    [`Repromise.then_`](API#then) can't be used for this `.then`, because the callback of [`Repromise.then_`](API#then) must return a promise. Reason's type system won't allow returning a non-promise value.
+    [`Repromise.andThen`](API#andThen) can't be used for this `.then`, because the callback of [`Repromise.andThen`](API#andThen) must return a promise. Reason's type system won't allow returning a non-promise value.
 
     So, for this case, Repromise provides [`Repromise.map`](API#map), whose callback can return a non-promise value.
 
@@ -132,12 +132,6 @@ Repromise has a native implementation, which needs to compile on OCaml, and OCam
 We may upstream `|.` to OCaml, and then change Repromise over to use it.
 
 See [this post](https://github.com/aantron/repromise/issues/22#issuecomment-405589951) and [this post](https://github.com/aantron/repromise/issues/22#issuecomment-405677694) for discussion.
-
-<br/>
-
-## Why does `then_` have an underscore?
-
-`then` is not a keyword in Reason, but Reason is supposed to still parse when transformed to OCaml, and `then` is a keyword in OCaml.
 
 <br/>
 

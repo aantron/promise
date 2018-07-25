@@ -177,15 +177,15 @@ Like the normal [`Repromise.map`](API#map), but works on rejectable Repromises. 
 
 <br/>
 
-## `then_`
+## `andThen`
 
 ```reason
-then_:
+andThen:
   (('a => Repromise.Rejectable.t('b, 'e)), Repromise.Rejectable.t('a, 'e)) =>
     Repromise.Rejectable.t('b, 'e)
 ```
 
-Like the normal [`Repromise.then_`](API#then), but works on rejectable Repromises. If the Repromise gets rejected (instead of resolved), the callback is not called, and the error is propagated to the final promise returned by `then_`.
+Like the normal [`Repromise.andThen`](API#then), but works on rejectable Repromises. If the Repromise gets rejected (instead of resolved), the callback is not called, and the error is propagated to the final promise returned by `andThen`.
 
 <br/>
 
