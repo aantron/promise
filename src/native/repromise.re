@@ -21,7 +21,7 @@ type t('a) = promise('a);
 
 
 /* The `Merged constructor and this function, underlying, are used to avoid a
-   memory leak that arises when then_ is called on promises in a loop. See the
+   memory leak that arises when andThen is called on promises in a loop. See the
    description in the associated test "promise loop memory leak". The rest of
    this comment is based on that description.
 
@@ -152,7 +152,7 @@ let makePromiseBehaveAs = (outerPromise, nestedPromise) => {
     | `Fulfilled(_)
     | `Rejected(_) =>
       /* These two cases are impossible, because if makePromiseBehaveAs is
-         called, then_ or catch_ called the callback that was passed to it, so
+         called, andThen or catch_ called the callback that was passed to it, so
          the outer promise is still pending. It is this function which resolves
          the outer promise. */
       assert(false);
@@ -173,7 +173,7 @@ let makePromiseBehaveAs = (outerPromise, nestedPromise) => {
   };
 };
 
-let then_ = (callback, promise) => {
+let andThen = (callback, promise) => {
   let outerPromise = newInternal();
 
   let onResolve = value =>
@@ -204,7 +204,7 @@ let then_ = (callback, promise) => {
 };
 
 let map = (mapper, promise) =>
-  then_(value => resolve(mapper(value)), promise);
+  andThen(value => resolve(mapper(value)), promise);
 
 let wait = (callback, promise) =>
   map(callback, promise) |> ignore;
@@ -404,7 +404,7 @@ module Rejectable = {
 
   let resolve = resolve;
   let reject = reject;
-  let then_ = then_;
+  let andThen = andThen;
   let map = map;
   let wait = wait;
   let catch = catch;

@@ -97,12 +97,12 @@ module Rejectable = {
   external resolve: 'a => rejectable('a, _) = "";
 
   [@bs.val]
-  external then_:
+  external andThen:
     ('a => rejectable('b, 'e), rejectable('a, 'e)) => rejectable('b, 'e) =
       "then";
 
   let map = (callback, promise) =>
-    promise |> then_(value => resolve(callback(value)));
+    promise |> andThen(value => resolve(callback(value)));
 
   let wait = (callback, promise) =>
     promise |> map(callback) |> ignore;
@@ -157,7 +157,7 @@ let make = () => {
 };
 
 let resolve = Rejectable.resolve;
-let then_ = Rejectable.then_;
+let andThen = Rejectable.andThen;
 let map = Rejectable.map;
 let wait = Rejectable.wait;
 let all = Rejectable.all;

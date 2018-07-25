@@ -78,7 +78,7 @@ let measure_then = (label, f) => {
       /* The callback will be called on the next event loop iteration, after any
          callbacks scheduled by f(). */
       Repromise.resolve()
-      |> Repromise.then_(() => iteration(iterations_remaining - 1));
+      |> Repromise.andThen(() => iteration(iterations_remaining - 1));
     }
     else {
       let elapsed = hrtime() -. start_time;
@@ -95,7 +95,7 @@ let measure_then = (label, f) => {
   iteration(then_ticks);
 };
 
-let then_ = Framework.suite("then_", [
+let andThen = Framework.suite("andThen", [
   test("Js.Promise.then_", () => {
     let p = Js.Promise.resolve(1);
     measure_then("Js.Promise.then_", () =>
@@ -106,12 +106,12 @@ let then_ = Framework.suite("then_", [
       });
   }),
 
-  test("Repromise.then_", () => {
+  test("Repromise.andThen", () => {
     let p = Repromise.resolve(1);
-    measure_then("Repromise.then_", () =>
+    measure_then("Repromise.andThen", () =>
       for (_ in 1 to then_repetitions) {
         p
-        |> Repromise.then_(_ => Repromise.resolve())
+        |> Repromise.andThen(_ => Repromise.resolve())
         |> ignore
       });
   }),
@@ -119,7 +119,7 @@ let then_ = Framework.suite("then_", [
 
 
 
-let suites = [resolve, then_];
+let suites = [resolve, andThen];
 
 let () =
   Framework.run("benchmark", suites);

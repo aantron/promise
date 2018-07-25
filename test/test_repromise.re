@@ -3,7 +3,7 @@ let test = Framework.test;
 
 
 let basicTests = Framework.suite("basic", [
-  /* The basic [resolve]-[then_] tests are a bit useless, because the testing
+  /* The basic [resolve]-[andThen] tests are a bit useless, because the testing
      framework itself already uses both [resolved] and [then], i.e. every test
      implicitly tests those. However, we include these for completeness, in case
      we become enlightened and rewrite the framework in CPS or something.  */
@@ -19,14 +19,14 @@ let basicTests = Framework.suite("basic", [
     |> Repromise.map(() => correct^)
   }),
 
-  test("then_", () => {
+  test("andThen", () => {
     Repromise.resolve(1)
-    |> Repromise.then_ (n => Repromise.resolve (n == 1));
+    |> Repromise.andThen (n => Repromise.resolve (n == 1));
   }),
 
   test("map", () => {
     let p = Repromise.resolve(6) |> Repromise.map(v => v * 7);
-    p |> Repromise.then_(r => Repromise.resolve(r == 42));
+    p |> Repromise.andThen(r => Repromise.resolve(r == 42));
   }),
 
   test("map chain", () => {
@@ -34,40 +34,40 @@ let basicTests = Framework.suite("basic", [
       Repromise.resolve(6)
       |> Repromise.map(v => v * 7)
       |> Repromise.map(r => r * 10);
-    p |> Repromise.then_(r => Repromise.resolve(r == 420));
+    p |> Repromise.andThen(r => Repromise.resolve(r == 420));
   }),
 
   test("map soundness", () => {
       Repromise.resolve(6)
       |> Repromise.map(v => v * 7)
       |> Repromise.map(x => Repromise.resolve(x == 42))
-      |> Repromise.then_(r => r);
+      |> Repromise.andThen(r => r);
   }),
 
-  test("then_ chain", () => {
+  test("andThen chain", () => {
     Repromise.resolve(1)
-    |> Repromise.then_ (n => Repromise.resolve (n + 1))
-    |> Repromise.then_ (n => Repromise.resolve (n == 2));
+    |> Repromise.andThen (n => Repromise.resolve (n + 1))
+    |> Repromise.andThen (n => Repromise.resolve (n == 2));
   }),
 
-  test("then_ nested", () => {
+  test("andThen nested", () => {
     Repromise.resolve(1)
-    |> Repromise.then_ (n =>
+    |> Repromise.andThen (n =>
       Repromise.resolve (n + 1)
-      |> Repromise.then_ (n => Repromise.resolve (n + 1)))
-    |> Repromise.then_ (n => Repromise.resolve (n == 3));
+      |> Repromise.andThen (n => Repromise.resolve (n + 1)))
+    |> Repromise.andThen (n => Repromise.resolve (n == 3));
   }),
 
   /* If promises are implemented on JS directly as ordinary JS promises,
      [resolve(resolve(42))] will collapse to just a [promise(int)], even though
      the Reason type is [promise(promise(int))]. This causes a soundness bug,
-     because, due to the type, the callback of [then_] will expect the nested
+     because, due to the type, the callback of [andThen] will expect the nested
      value to be a [promise(int)]. A correct implementation of Reason promises
      on JS will avoid this bug. */
   test("no collapsing", () => {
     Repromise.resolve(Repromise.resolve(1))
-    |> Repromise.then_ (p =>
-      p |> Repromise.then_ (n => Repromise.resolve (n == 1)));
+    |> Repromise.andThen (p =>
+      p |> Repromise.andThen (n => Repromise.resolve (n == 1)));
   }),
 
   test("make", () => {
@@ -78,7 +78,7 @@ let basicTests = Framework.suite("basic", [
 
   test("defer", () => {
     let (p, resolve) = Repromise.make();
-    let p' = p |> Repromise.then_(n => Repromise.resolve(n == 1));
+    let p' = p |> Repromise.andThen(n => Repromise.resolve(n == 1));
     resolve(1);
     p';
   }),
@@ -86,7 +86,7 @@ let basicTests = Framework.suite("basic", [
   test("double resolve", () => {
     let (p, resolve) = Repromise.make();
     resolve(42);
-    p |> Repromise.then_(n => {
+    p |> Repromise.andThen(n => {
       resolve(43);
       p |> Repromise.map(n' =>
         n == 42 && n' == 42)});
@@ -135,16 +135,16 @@ let rejectTests = Framework.suite("reject", [
     |> Repromise.Rejectable.catch(s => Repromise.resolve(s == "foo"));
   }),
 
-  test("then_, reject, catch", () => {
+  test("andThen, reject, catch", () => {
     Repromise.Rejectable.resolve(1)
-    |> Repromise.Rejectable.then_(n => Repromise.Rejectable.reject(n + 1))
+    |> Repromise.Rejectable.andThen(n => Repromise.Rejectable.reject(n + 1))
     |> Repromise.Rejectable.catch(n => Repromise.resolve(n == 2));
   }),
 
-  test("reject, catch, then_", () => {
+  test("reject, catch, andThen", () => {
     Repromise.Rejectable.reject(1)
     |> Repromise.Rejectable.catch(n => Repromise.resolve(n + 1))
-    |> Repromise.then_(n => Repromise.resolve(n == 2));
+    |> Repromise.andThen(n => Repromise.resolve(n == 2));
   }),
 
   test("no double catch", () => {
@@ -164,9 +164,9 @@ let rejectTests = Framework.suite("reject", [
     |> Repromise.Rejectable.catch((_) => Repromise.resolve(false));
   }),
 
-  test("no catching resolved, after then_", () => {
+  test("no catching resolved, after andThen", () => {
     Repromise.resolve()
-    |> Repromise.then_(() => Repromise.resolve(true))
+    |> Repromise.andThen(() => Repromise.resolve(true))
     |> Repromise.Rejectable.catch((_) => Repromise.resolve(false));
   }),
 ]);
@@ -180,7 +180,7 @@ let remainsPending = (p, dummyValue) => {
     }
     else {
       f ()
-      |> Repromise.then_(result =>
+      |> Repromise.andThen(result =>
         if (not(result)) {
           Repromise.resolve(false);
         }
@@ -191,7 +191,7 @@ let remainsPending = (p, dummyValue) => {
 
   repeat(10, () =>
     Repromise.race([p, Repromise.resolve(dummyValue)])
-    |> Repromise.then_(v1 =>
+    |> Repromise.andThen(v1 =>
       Repromise.race([Repromise.resolve(dummyValue), p])
       |> Repromise.map(v2 =>
         v1 == dummyValue && v2 == dummyValue)));
@@ -231,7 +231,7 @@ let allTests = Framework.suite("all", [
     let (p1, _, _) = Repromise.Rejectable.make();
     let p2 = Repromise.Rejectable.all([p1, Repromise.Rejectable.reject(43)]);
     p2
-    |> Repromise.Rejectable.then_((_) => Repromise.Rejectable.resolve(false))
+    |> Repromise.Rejectable.andThen((_) => Repromise.Rejectable.resolve(false))
     |> Repromise.Rejectable.catch(n => Repromise.resolve(n == 43));
   }),
 
@@ -241,7 +241,7 @@ let allTests = Framework.suite("all", [
     let p3 = Repromise.Rejectable.all([p1, p2]);
     rejectP1(42);
     p3
-    |> Repromise.Rejectable.then_((_) => Repromise.Rejectable.resolve(false))
+    |> Repromise.Rejectable.andThen((_) => Repromise.Rejectable.resolve(false))
     |> Repromise.Rejectable.catch(n => Repromise.resolve(n == 42));
   }),
 
@@ -253,9 +253,9 @@ let allTests = Framework.suite("all", [
     resolveP2(43);
     p2
     |> Repromise.Rejectable.catch((_) => assert false)
-    |> Repromise.Rejectable.then_((_) =>
+    |> Repromise.Rejectable.andThen((_) =>
       p3
-      |> Repromise.Rejectable.then_((_) => Repromise.Rejectable.resolve(false))
+      |> Repromise.Rejectable.andThen((_) => Repromise.Rejectable.resolve(false))
       |> Repromise.Rejectable.catch(n => Repromise.resolve(n == 42)));
   }),
 
@@ -355,45 +355,45 @@ let raceTests = Framework.suite("race", [
   }), */
 
   /* This test is for an implementation detail. When a pending promise p is
-     returned by the callback of then_, the native implementation (and
+     returned by the callback of andThen, the native implementation (and
      non-memory-leaking JavaScript implementations) will move the callbacks
-     attached to p into the list attached to the outer promise of then_. We want
+     attached to p into the list attached to the outer promise of andThen. We want
      to make sure that callbacks attached by race survive this moving. For that,
      p has to be involved in a call to race. */
   test("race, then callbacks moved", () => {
     let (p, resolve) = Repromise.make();
     let final = Repromise.race([p]);
 
-    /* We are using this resolve() just so we can call then_ on it, guaranteeing
+    /* We are using this resolve() just so we can call andThen on it, guaranteeing
        that the second time will run after the first time.. */
     let delay = Repromise.resolve();
 
     delay
-    |> Repromise.then_(fun () => p)
+    |> Repromise.andThen(fun () => p)
     |> ignore;
 
     delay
-    |> Repromise.then_(fun () => {
+    |> Repromise.andThen(fun () => {
       resolve(42);
       /* This tests now succeeds only if resolving p resolved final^, despite
-         the fact that p was returned to then_ while still a pending promise. */
+         the fact that p was returned to andThen while still a pending promise. */
       final |> Repromise.map(n => n == 42);
     });
   }),
 
   /* Similar to the preceding test, but the race callback is attached to p after
-     its callback list has been merged with the outer promise of then_. */
+     its callback list has been merged with the outer promise of andThen. */
   test("callbacks moved, then race", () => {
     let (p, resolve) = Repromise.make();
 
     let delay = Repromise.resolve();
 
     delay
-    |> Repromise.then_(fun () => p)
+    |> Repromise.andThen(fun () => p)
     |> ignore;
 
     delay
-    |> Repromise.then_(fun () => {
+    |> Repromise.andThen(fun () => {
       let final = Repromise.race([p]);
       resolve(42);
       final |> Repromise.map(n => n == 42);
