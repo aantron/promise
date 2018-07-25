@@ -84,7 +84,7 @@ let measure_then = (label, f) => {
       let elapsed = hrtime() -. start_time;
       let nanoseconds =
         elapsed
-        /. float_of_int(resolved_repetitions)
+        /. float_of_int(then_repetitions)
         /. float_of_int(then_ticks)
         *. 1e9;
       Printf.printf("%s   %f\n", label, nanoseconds);

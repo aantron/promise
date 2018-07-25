@@ -22,8 +22,8 @@ Repromise.resolved(1)             20.7ns
 Js.Promise.resolve(promise)        5.0ns
 Repromise.resolved(promise)       43.9ns
 
-Js.Promise.then                   23.1ns
-Repromise.then                    56.6ns
+Js.Promise.then                 2692.3ns
+Repromise.then                  5683.6ns
 ```
 
 These timings have the costs of allocation and garbage collection factored in.
