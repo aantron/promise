@@ -11,7 +11,7 @@ maintainer: "Anton Bachin <antonbachin@yahoo.com>"
 dev-repo: "https://github.com/aantron/repromise.git"
 
 depends: [
-  "jbuilder" {build & >= "1.0+beta17"}
+  "dune" {build}
   "reason" {build & >= "3.0.0"}
 ]
 

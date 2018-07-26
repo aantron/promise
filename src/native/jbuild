@@ -1,7 +1,0 @@
-(jbuild_version 1)
-
-(library
- ((name repromise)
-  (public_name repromise)
-  (wrapped false)
-  (flags (:standard -w +A))))
