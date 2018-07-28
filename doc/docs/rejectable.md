@@ -144,14 +144,17 @@ In the above example, the final promise returned by `catch`, which we just `igno
 A typical pattern is to convert success values and errors into `result`s:
 
 ```reason
-let (p1, _, reject_p1) = Repromise.Rejectable.make();
+open Belt.Result;  /* Not necessary on native. */
+
+let p1 = Repromise.Rejectable.rejected("failed");
 let p2 =
   p1
   |> Repromise.Rejectable.map(value => Ok(value))
-  |> Repromise.Rejectable.catch(error => Error(error));
+  |> Repromise.Rejectable.catch(error => Repromise.resolved(Error(error)));
 
-/* Causes p2 to be *resolved* with Error("failed") */
-reject_p1("failed");
+p2 |> Repromise.wait(fun
+  | Ok(v) => print_endline("Ok(" ++ v ++ ")")
+  | Error(e) => print_endline("Error(" ++ e ++ ")"));
 ```
 
 <br/>
