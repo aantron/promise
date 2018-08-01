@@ -207,7 +207,7 @@ resolve_p2("world!");
 onUnhandledException: ref(exn => never)
 ```
 
-When a callback called by Repromise (such as what you pass to [`wait`](#wait)) raises an exception, the exception is passed to `Repromise.onUnhaldedException^`.
+When a callback called by Repromise (such as what you pass to [`wait`](#wait)) raises an exception, the exception is passed to `Repromise.onUnhandledException^`.
 
 When your program starts, `Repromise.onUnhandledException` contains a function which prints the exception, and terminates the program. Replace the reference to change this behavior.
 
