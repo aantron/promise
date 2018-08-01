@@ -101,7 +101,7 @@ let andThen = Framework.suite("andThen", [
     measure_then("Js.Promise.then_", () =>
       for (_ in 1 to then_repetitions) {
         p
-        |> Js.Promise.then_(_ => Js.Promise.resolve())
+        |> Js.Promise.then_(_ => p)
         |> ignore
       });
   }),
@@ -111,7 +111,7 @@ let andThen = Framework.suite("andThen", [
     measure_then("Repromise.andThen", () =>
       for (_ in 1 to then_repetitions) {
         p
-        |> Repromise.andThen(_ => Repromise.resolved())
+        |> Repromise.andThen(_ => p)
         |> ignore
       });
   }),
