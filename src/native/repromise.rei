@@ -50,7 +50,7 @@ module Rejectable: {
 
 
 
-let onUnhandledException: ref(exn => never);
+let onUnhandledException: ref(exn => unit);
 
 
 

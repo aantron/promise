@@ -9,7 +9,6 @@ type t('a) = promise('a);
 let onUnhandledException = ref(exn => {
   prerr_endline("Unhandled exception in promise callback:");
   prerr_endline(Printexc.to_string(exn));
-  exit(2);
 });
 
 

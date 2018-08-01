@@ -57,7 +57,6 @@ let onUnhandledException = ref(exn => {
   prerr_endline("Unhandled exception in promise callback:");
   prerr_endline(Printexc.to_string(exn));
   Printexc.print_backtrace(stderr);
-  exit(2);
 });
 
 

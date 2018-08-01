@@ -209,8 +209,8 @@ onUnhandledException: ref(exn => never)
 
 When a callback called by Repromise (such as what you pass to [`wait`](#wait)) raises an exception, the exception is passed to `Repromise.onUnhandledException^`.
 
-When your program starts, `Repromise.onUnhandledException` contains a function which prints the exception, and terminates the program. Replace the reference to change this behavior.
+When your program starts, `Repromise.onUnhandledException` contains a function which prints the exception to the error log (on JavaScript) or STDERR (on native). Replace the reference to change this behavior.
 
-In the future, we will want to design a wiser approach to asynchronous exception handling. See https://github.com/aantron/repromise/issues/16 for a discussion.
+In the future, we may want to design a wiser approach to asynchronous exception handling. See https://github.com/aantron/repromise/issues/16 for a discussion.
 
 <br/>
