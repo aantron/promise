@@ -1,7 +1,7 @@
 node_modules/
 lib/
 package-lock.json
-_build/
+_build
 .merlin
 *.install
 esy.lock
