@@ -20,8 +20,9 @@ build_with_npm () {
 build_with_esy () {
     npm install -g esy
 
+    rm -f esy.lock.json
     esy install
-    esy jbuilder exec test/test_main.exe
+    esy dune exec test/test_main.exe
 }
 
 build_with_opam () {
@@ -32,7 +33,7 @@ build_with_opam () {
     opam pin add -y --no-action repromise .
     opam install -y --deps-only repromise
 
-    jbuilder exec test/test_main.exe
+    dune exec test/test_main.exe
 }
 
 
