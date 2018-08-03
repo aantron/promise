@@ -9,35 +9,23 @@
     "promise"
   ],
   "license": "MIT",
-
   "repository": "aantron/repromise",
   "author": {
     "name": "Anton Bachin",
     "email": "antonbachin@yahoo.com",
     "url": "github.com/aantron"
   },
-
   "dependencies": {
-    "@esy-ocaml/esy-installer": "^0.0.0",
-    "@opam/jbuilder": "^1.0.0-beta17",
+    "@opam/dune": "*",
     "@opam/ocaml-migrate-parsetree": "^1.0.0",
-    "@opam/reason": "facebook/reason#6abc3c31c18a9e4acd8bfbe90faf4d8304791b33"
-  },
-  "peerDependencies": {
-    "ocaml": "4.6.x"
+    "@esy-ocaml/reason": "*"
   },
   "devDependencies": {
     "@opam/merlin": "^3.0.5",
     "ocaml": "4.6.x"
   },
-
   "esy": {
-    "build": [
-      ["jbuilder", "build"]
-    ],
-    "install": [
-      ["esy-installer", "repromise.install"]
-    ],
-    "buildsInSource": "_build"
+    "build": "dune build -p repromise",
+    "install": "esy-installer repromise.install"
   }
 }
