@@ -16,3 +16,8 @@ notifications:
       - antonbachin@yahoo.com
     on_success: always
     on_failure: always
+
+cache:
+  timeout: 360
+  directories:
+  - "$HOME/.esy/"
