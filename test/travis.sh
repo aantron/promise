@@ -24,7 +24,7 @@ build_with_esy () {
     esy install
     # The separate build command is a workaround. See
     #   https://github.com/aantron/repromise/commit/c2f5aa7dd7e7bc5f521a6ab8c8275687f5fc8639#commitcomment-29955448.
-    esy dune build test/test_main.exe
+    esy build dune build test/test_main.exe
     esy dune exec test/test_main.exe
 }
 
