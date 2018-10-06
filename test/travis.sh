@@ -29,7 +29,7 @@ build_with_esy () {
 
 build_with_opam () {
     install_opam
-    opam init -ya --compiler=4.06.1 --disable-sandboxing
+    opam init -ya --compiler=4.07.1 --disable-sandboxing
     eval `opam env`
 
     opam pin add -y --no-action repromise .
