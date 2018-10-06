@@ -3,9 +3,9 @@ set -x
 
 
 install_opam () {
-    sudo add-apt-repository -y ppa:avsm/ocaml42+opam12
-    sudo apt-get update -qq
-    sudo apt-get install opam
+    wget https://github.com/ocaml/opam/releases/download/2.0.5/opam-2.0.5-x86_64-linux
+    sudo mv opam-2.0.5-x86_64-linux /usr/local/bin/opam
+    sudo chmod a+x /usr/local/bin/opam
 }
 
 
@@ -29,8 +29,8 @@ build_with_esy () {
 
 build_with_opam () {
     install_opam
-    opam init -ya --compiler=4.06.1
-    eval `opam config env`
+    opam init -ya --compiler=4.06.1 --disable-sandboxing
+    eval `opam env`
 
     opam pin add -y --no-action repromise .
     opam install -y --deps-only repromise
