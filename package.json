@@ -2,6 +2,7 @@
   "name": "@aantron/repromise",
   "version": "0.6.0",
   "description": "Type-safe JS promises for ReasonML",
+  "keywords": ["BuckleScript", "reason", "promise", "async"],
   "homepage": "https://aantron.github.io/repromise",
   "license": "MIT",
   "repository": {
