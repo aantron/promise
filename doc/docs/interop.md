@@ -167,7 +167,7 @@ Some existing code uses `Js.Promise`. Repromise provides two functions for conve
 
 The same considerations apply when converting Repromises to/from `Js.Promise`s, as when writing a binding directly to JS:
 
-- `fromJsPromise` [is always safe]((#creating-a-binding).
+- `fromJsPromise` [is always safe](#creating-a-binding).
 - `toJsPromise` [should only be used when the nested value cannot be another promise](#passing-promises-to-js).
 
 <br/>
