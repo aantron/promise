@@ -116,7 +116,7 @@ let makeAlmostPromiseLike = v =>
   {"_then": v};
 
 let isPromiseResolvedWith42 = p =>
-  if (not(isPromise(p))) {
+  if (!isPromise(p)) {
     Repromise.resolved(false);
   }
   else {
@@ -124,7 +124,7 @@ let isPromiseResolvedWith42 = p =>
   };
 
 let isPromiseRejectedWith42 = p =>
-  if (not(isPromise(p))) {
+  if (!isPromise(p)) {
     Repromise.resolved(false);
   }
   else {

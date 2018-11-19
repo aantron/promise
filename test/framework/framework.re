@@ -181,7 +181,7 @@ let run = (library_name, suites) => {
     | [suite, ...rest] =>
       run_test_suite(suite)
       |> Repromise.andThen(outcomes =>
-        if (not(outcomes_all_ok(outcomes))) {
+        if (!outcomes_all_ok(outcomes)) {
           print_newline();
           Pervasives.flush(stdout);
           Printf.eprintf("Failures in test suite '%s':\n", suite.suite_name);

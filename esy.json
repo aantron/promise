@@ -18,7 +18,7 @@
   "dependencies": {
     "@opam/dune": "*",
     "@opam/ocaml-migrate-parsetree": "^1.0.0",
-    "@esy-ocaml/reason": "*"
+    "@esy-ocaml/reason": "^3.0.0"
   },
   "devDependencies": {
     "@opam/merlin": "^3.0.5",

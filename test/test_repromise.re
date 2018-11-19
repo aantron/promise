@@ -181,7 +181,7 @@ let remainsPending = (p, dummyValue) => {
     else {
       f ()
       |> Repromise.andThen(result =>
-        if (not(result)) {
+        if (!result) {
           Repromise.resolved(false);
         }
         else {

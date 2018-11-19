@@ -1,5 +1,5 @@
 let rec run = () => {
-  if (not(Repromise.ReadyCallbacks.callbacksPending())) {
+  if (!Repromise.ReadyCallbacks.callbacksPending()) {
     ()
   }
   else {

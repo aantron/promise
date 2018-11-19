@@ -66,7 +66,7 @@ module ReadyCallbacks = {
     ref(MutableList.create());
 
   let callbacksPending = () =>
-    not(MutableList.isEmpty(callbacks^));
+    !MutableList.isEmpty(callbacks^);
 
   let defer = (callback, value) =>
     MutableList.append(callbacks^, () => callback(value)) |> ignore;
