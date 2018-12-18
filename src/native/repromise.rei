@@ -18,6 +18,27 @@ let wait: ('a => unit, promise('a)) => unit;
 
 let all: list(promise('a)) => promise(list('a));
 
+let all2: (promise('a), promise('b)) => promise(('a, 'b));
+
+let all3: (promise('a), promise('b), promise('c)) => promise(('a, 'b, 'c));
+
+let all4:
+  (promise('a), promise('b), promise('c), promise('d)) =>
+    promise(('a, 'b, 'c, 'd));
+
+let all5:
+  (promise('a), promise('b), promise('c), promise('d), promise('e)) =>
+    promise(('a, 'b, 'c, 'd, 'e));
+
+let all6:
+  (promise('a),
+   promise('b),
+   promise('c),
+   promise('d),
+   promise('e),
+   promise('f)) =>
+      promise(('a, 'b, 'c, 'd, 'e, 'f));
+
 let race: list(promise('a)) => promise('a);
 
 

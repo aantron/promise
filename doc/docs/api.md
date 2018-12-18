@@ -179,6 +179,18 @@ resolve_p2("world!");
 
 <br/>
 
+## `all2` &mdash; `all6`
+
+```reason
+all2: (Repromise.t('a), Repromise.t('b)) => Repromise.t(('a, 'b))
+/* etc. */
+```
+
+These work the same way as [`all`](#all), but the argument promises can be
+resolved with different types.
+
+<br/>
+
 ## `race`
 
 ```reason

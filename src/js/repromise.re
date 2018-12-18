@@ -120,8 +120,7 @@ module Rejectable = {
 
   [@bs.scope "Promise"]
   [@bs.val]
-  external jsAll:
-    array(rejectable('a, 'e)) => rejectable(array('a), 'e) = "all";
+  external jsAll: 'a => 'b = "all";
 
   let all = promises =>
     promises
@@ -129,6 +128,21 @@ module Rejectable = {
     |> jsAll
     |> map (results =>
       results |> Array.map(unwrap) |> Array.to_list);
+
+  let all2 = (p1, p2) =>
+    jsAll((p1, p2));
+
+  let all3 = (p1, p2, p3) =>
+    jsAll((p1, p2, p3));
+
+  let all4 = (p1, p2, p3, p4) =>
+    jsAll((p1, p2, p3, p4));
+
+  let all5 = (p1, p2, p3, p4, p5) =>
+    jsAll((p1, p2, p3, p4, p5));
+
+  let all6 = (p1, p2, p3, p4, p5, p6) =>
+    jsAll((p1, p2, p3, p4, p5, p6));
 
   [@bs.scope "Promise"]
   [@bs.val]
@@ -160,6 +174,11 @@ let andThen = Rejectable.andThen;
 let map = Rejectable.map;
 let wait = Rejectable.wait;
 let all = Rejectable.all;
+let all2 = Rejectable.all2;
+let all3 = Rejectable.all3;
+let all4 = Rejectable.all4;
+let all5 = Rejectable.all5;
+let all6 = Rejectable.all6;
 let race = Rejectable.race;
 
 

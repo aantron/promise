@@ -336,6 +336,65 @@ let all = promises => {
   finalPromise;
 };
 
+/* Not a "legitimate" implementation. To get a legitimate one, the tricky parts
+   of "all," above, should be factoed out. */
+let all2 = (p1, p2) => {
+  [Obj.magic(p1), Obj.magic(p2)]
+  |> all
+  |> map (fun
+  | [v1, v2] => (Obj.magic(v1), Obj.magic(v2))
+  | _ => assert(false))
+};
+
+let all3 = (p1, p2, p3) => {
+  [Obj.magic(p1), Obj.magic(p2), Obj.magic(p3)]
+  |> all
+  |> map (fun
+  | [v1, v2, v3] => (Obj.magic(v1), Obj.magic(v2), Obj.magic(v3))
+  | _ => assert(false))
+};
+
+let all4 = (p1, p2, p3, p4) => {
+  [Obj.magic(p1), Obj.magic(p2), Obj.magic(p3), Obj.magic(p4)]
+  |> all
+  |> map (fun
+  | [v1, v2, v3, v4] =>
+    (Obj.magic(v1), Obj.magic(v2), Obj.magic(v3), Obj.magic(v4))
+  | _ => assert(false))
+};
+
+let all5 = (p1, p2, p3, p4, p5) => {
+  [Obj.magic(p1), Obj.magic(p2), Obj.magic(p3), Obj.magic(p4), Obj.magic(p5)]
+  |> all
+  |> map (fun
+  | [v1, v2, v3, v4, v5] =>
+    (Obj.magic(v1), Obj.magic(v2), Obj.magic(v3), Obj.magic(v4), Obj.magic(v5))
+  | _ => assert(false))
+};
+
+let all6 = (p1, p2, p3, p4, p5, p6) => {
+  [
+    Obj.magic(p1),
+    Obj.magic(p2),
+    Obj.magic(p3),
+    Obj.magic(p4),
+    Obj.magic(p5),
+    Obj.magic(p6)
+  ]
+  |> all
+  |> map (fun
+  | [v1, v2, v3, v4, v5, v6] =>
+    (
+      Obj.magic(v1),
+      Obj.magic(v2),
+      Obj.magic(v3),
+      Obj.magic(v4),
+      Obj.magic(v5),
+      Obj.magic(v6)
+    )
+  | _ => assert(false))
+};
+
 
 
 let race = promises => {

@@ -264,6 +264,84 @@ let allTests = Framework.suite("all", [
     let p = Repromise.all([]);
     remainsPending(p, []);
   }),
+
+  test("all2", () => {
+    let (p1, resolveP1) = Repromise.make();
+    let (p2, resolveP2) = Repromise.make();
+    let result =
+      Repromise.all2(p1, p2)
+      |> Repromise.map(((x, y)) => x == 42 && y == 43);
+    resolveP1(42);
+    resolveP2(43);
+    result;
+  }),
+
+  test("all3", () => {
+    let (p1, resolveP1) = Repromise.make();
+    let (p2, resolveP2) = Repromise.make();
+    let (p3, resolveP3) = Repromise.make();
+    let result =
+      Repromise.all3(p1, p2, p3)
+      |> Repromise.map(((x, y, z)) => x == 42 && y == 43 && z == 44);
+    resolveP1(42);
+    resolveP2(43);
+    resolveP3(44);
+    result;
+  }),
+
+  test("all4", () => {
+    let (p1, resolveP1) = Repromise.make();
+    let (p2, resolveP2) = Repromise.make();
+    let (p3, resolveP3) = Repromise.make();
+    let (p4, resolveP4) = Repromise.make();
+    let result =
+      Repromise.all4(p1, p2, p3, p4)
+      |> Repromise.map(((x, y, z, u)) =>
+        x == 42 && y == 43 && z == 44 && u == 45);
+    resolveP1(42);
+    resolveP2(43);
+    resolveP3(44);
+    resolveP4(45);
+    result;
+  }),
+
+  test("all5", () => {
+    let (p1, resolveP1) = Repromise.make();
+    let (p2, resolveP2) = Repromise.make();
+    let (p3, resolveP3) = Repromise.make();
+    let (p4, resolveP4) = Repromise.make();
+    let (p5, resolveP5) = Repromise.make();
+    let result =
+      Repromise.all5(p1, p2, p3, p4, p5)
+      |> Repromise.map(((x, y, z, u, v)) =>
+        x == 42 && y == 43 && z == 44 && u == 45 && v == 46);
+    resolveP1(42);
+    resolveP2(43);
+    resolveP3(44);
+    resolveP4(45);
+    resolveP5(46);
+    result;
+  }),
+
+  test("all6", () => {
+    let (p1, resolveP1) = Repromise.make();
+    let (p2, resolveP2) = Repromise.make();
+    let (p3, resolveP3) = Repromise.make();
+    let (p4, resolveP4) = Repromise.make();
+    let (p5, resolveP5) = Repromise.make();
+    let (p6, resolveP6) = Repromise.make();
+    let result =
+      Repromise.all6(p1, p2, p3, p4, p5, p6)
+      |> Repromise.map(((x, y, z, u, v, w)) =>
+        x == 42 && y == 43 && z == 44 && u == 45 && v == 46 && w == 47);
+    resolveP1(42);
+    resolveP2(43);
+    resolveP3(44);
+    resolveP4(45);
+    resolveP5(46);
+    resolveP6(47);
+    result;
+  }),
 ]);
 
 
