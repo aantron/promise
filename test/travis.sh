@@ -11,10 +11,10 @@ install_opam () {
 
 
 build_with_npm () {
-    npm install bs-platform
     npm install
     npm run build
-    (cd test && npm install && npm run build && npm run tests)
+    npm run test
+    npm run benchmark
 }
 
 build_with_esy () {

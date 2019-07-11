@@ -12,48 +12,30 @@ Only (1) is released, so all the instructions here are for working on (1). As th
 
 <br/>
 
-#### Table of contents
-
-- [Quick start: `repromise.re`](#QuickStart)
-- [Running tests](#RunningTests)
-- [Project structure](#ProjectStructure)
-
-<br/>
-
 <a id="QuickStart"></a>
 ## Quick start: `repromise.re`
 
-On BuckleScript, Repromise consists of only two files (boilerplate aside): [`repromise.re`][repromise.re], and its interface [`repromise.rei`][repromise.rei]. So, the minimal workflow is:
+On BuckleScript, Repromise consists of only two source files:
+[`repromise.re`][repromise.re], and its interface
+[`repromise.rei`][repromise.rei]. So, the minimal workflow is:
 
 1. Clone Repromise and set up for development:
 
     ```
     git clone https://github.com/aantron/repromise.git
     cd repromise
-    npm install bs-platform
+    npm install
     ```
 
 2. Open [`src/js/repromise.re`][repromise.re] and edit away!
 
-3. Send a PR to the Repromise repo.
+3. Run tests as necessary:
 
-<br/>
+    ```
+    npm run test
+    ```
 
-<a id="RunningTests"></a>
-## Running tests
-
-The tests are in a separate local NPM package in [`test/`](https://github.com/aantron/repromise/tree/master/test). To run them, first do this once:
-
-```
-cd test
-npm install
-```
-
-Then, each time you want to run the tests,
-
-```
-npm run tests
-```
+4. Send a PR to the Repromise repo.
 
 <br/>
 

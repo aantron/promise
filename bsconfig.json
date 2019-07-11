@@ -1,5 +1,12 @@
 {
   "name": "@aantron/repromise",
   "refmt": 3,
-  "sources": "src/js"
+  "sources": [
+    "src/js",
+    {
+      "dir": "test",
+      "subdirs": ["framework", "js"],
+      "type": "dev"
+    }
+  ]
 }

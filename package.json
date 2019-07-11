@@ -2,7 +2,12 @@
   "name": "@aantron/repromise",
   "version": "0.6.0",
   "description": "Type-safe JS promises for ReasonML",
-  "keywords": ["BuckleScript", "reason", "promise", "async"],
+  "keywords": [
+    "BuckleScript",
+    "reason",
+    "promise",
+    "async"
+  ],
   "homepage": "https://aantron.github.io/repromise",
   "license": "MIT",
   "repository": {
@@ -20,10 +25,15 @@
   "peerDependencies": {
     "bs-platform": ">= 3.0.0"
   },
+  "devDependencies": {
+    "bs-platform": ">= 3.0.0"
+  },
   "scripts": {
     "build": "bsb -make-world",
     "watch": "bsb -w -make-world",
-    "clean": "bsb -clean-world"
+    "clean": "bsb -clean-world",
+    "test": "bsb -make-world && node lib/js/test/test_main.js",
+    "benchmark": "bsb -make-world && node lib/js/test/js/benchmark.js"
   },
   "files": [
     "src/js/repromise.rei",
