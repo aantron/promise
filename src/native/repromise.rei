@@ -39,6 +39,8 @@ let all6:
    promise('f)) =>
       promise(('a, 'b, 'c, 'd, 'e, 'f));
 
+let arrayAll: array(promise('a)) => promise(array('a));
+
 let race: list(promise('a)) => promise('a);
 
 

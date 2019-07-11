@@ -342,6 +342,19 @@ let allTests = Framework.suite("all", [
     resolveP6(47);
     result;
   }),
+
+  test("arrayAll", () => {
+    let (p1, resolveP1) = Repromise.make();
+    let (p2, resolveP2) = Repromise.make();
+    let result =
+      Repromise.arrayAll([|p1, p2|])
+      |> Repromise.map(fun
+        | [|x, y|] => x == 42 && y == 43
+        | _ => false);
+    resolveP1(42);
+    resolveP2(43);
+    result;
+  }),
 ]);
 
 

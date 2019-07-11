@@ -191,6 +191,16 @@ resolved with different types.
 
 <br/>
 
+## `arrayAll`
+
+```reason
+arrayAll: array(Repromise.t('a)) => Repromise.t(array('a))
+```
+
+Same as [`all`](#all), but works with arrays instead of lists.
+
+<br/>
+
 ## `race`
 
 ```reason

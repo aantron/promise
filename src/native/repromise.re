@@ -336,6 +336,12 @@ let all = promises => {
   finalPromise;
 };
 
+let arrayAll = promises =>
+  promises
+  |> Array.to_list
+  |> all
+  |> map(Array.of_list)
+
 /* Not a "legitimate" implementation. To get a legitimate one, the tricky parts
    of "all," above, should be factoed out. */
 let all2 = (p1, p2) => {

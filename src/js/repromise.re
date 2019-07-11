@@ -122,12 +122,17 @@ module Rejectable = {
   [@bs.val]
   external jsAll: 'a => 'b = "all";
 
+  let arrayAll = promises =>
+    promises
+    |> jsAll
+    |> map (Array.map(unwrap))
+
   let all = promises =>
     promises
     |> Array.of_list
-    |> jsAll
+    |> arrayAll
     |> map (results =>
-      results |> Array.map(unwrap) |> Array.to_list);
+      results |> Array.to_list);
 
   let all2 = (p1, p2) =>
     jsAll((p1, p2));
@@ -179,4 +184,5 @@ let all3 = Rejectable.all3;
 let all4 = Rejectable.all4;
 let all5 = Rejectable.all5;
 let all6 = Rejectable.all6;
+let arrayAll = Rejectable.arrayAll;
 let race = Rejectable.race;
