@@ -147,7 +147,7 @@ The semantics of Lwt are relatively close to Repromise, however, so the native i
 
 ## Is there an `async`/`await` syntax for Repromise?
 
-Yes. It is unreleased, but [sitting in the Repromise repo](https://github.com/aantron/repromise/tree/master/src/ppx). It looks like this:
+Yes. It is unreleased, but [sitting in the Repromise repo](https://github.com/aantron/repromise/tree/3253553dfc2c20990a8dce057353d4b96f3b2cf0/src/ppx). It looks like this:
 
 ```reason
 let%await fd   = Io.open_("test/demo/demo.re");

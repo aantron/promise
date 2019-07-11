@@ -12,7 +12,6 @@ Repromise is a binding to JS promises, with:
 - **Explicit errors** &mdash; no baked-in `reject` or exception handling, so you can choose how to handle errors.
 - **Minimal code** &mdash; the compiled `repromise.js` compresses to about 1K.
 - **Native support** &mdash; Repromise also has a [pure-Reason implementation][native], which compiles to native code.
-- **`async`/`await` syntax** &mdash; this is unreleased, but see a preview [here][await].
 
 <br/>
 
@@ -73,7 +72,6 @@ To learn how to write bindings, we suggest starting with the [`node-fetch` proje
 ## Roadmap
 
 - [ ] Release [native implementation][native].
-- [ ] Release [`let%await` syntax][await] (the PPX).
 - [ ] Helpers for converting `Repromise.Rejectable.t` to `Belt.Result.t`.
 - [ ] Smarter [async exception handling][onUnhandledException].
 
@@ -89,7 +87,6 @@ Repromise is at a pretty early stage of development, and we can change just abou
 [example-binding]: https://github.com/aantron/repromise-example-binding#readme
 [native]: https://github.com/aantron/repromise/blob/master/src/native/repromise.re
 [broken]: https://aantron.github.io/repromise/docs/DesignFAQ#why-are-js-promises-not-type-safe
-[await]: https://aantron.github.io/repromise/docs/DesignFAQ#is-there-an-async-await-syntax-for-repromise
 [rejectable]: https://aantron.github.io/repromise/docs/RejectableAPI
 [design]: https://aantron.github.io/repromise/docs/DesignFAQ
 [Repromise.wait]: https://aantron.github.io/repromise/docs/API#wait
