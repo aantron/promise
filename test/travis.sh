@@ -32,6 +32,7 @@ build_with_opam () {
     opam init -ya --compiler=4.07.1 --disable-sandboxing
     eval `opam env`
 
+    opam lint
     opam pin add -y --no-action repromise .
     opam install -y --deps-only repromise
 
