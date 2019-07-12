@@ -437,14 +437,11 @@ let raceTests = Framework.suite("race", [
     p2 |> Repromise.map(n => n == 42);
   }),
 
-  /* This test is temporarily disabled due to
-       https://github.com/BuckleScript/bucklescript/issues/2692
-
   test("empty", () => {
     try ({ ignore(Repromise.race([])); Repromise.resolved(false); }) {
     | Invalid_argument(_) => Repromise.resolved(true);
     };
-  }), */
+  }),
 
   /* This test is for an implementation detail. When a pending promise p is
      returned by the callback of andThen, the native implementation (and
