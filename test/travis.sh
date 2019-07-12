@@ -14,7 +14,6 @@ build_with_npm () {
     npm install
     npm run build
     npm run test
-    npm run benchmark
 }
 
 build_with_esy () {
