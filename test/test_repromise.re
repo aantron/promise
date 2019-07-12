@@ -446,15 +446,15 @@ let raceTests = Framework.suite("race", [
   /* This test is for an implementation detail. When a pending promise p is
      returned by the callback of andThen, the native implementation (and
      non-memory-leaking JavaScript implementations) will move the callbacks
-     attached to p into the list attached to the outer promise of andThen. We want
-     to make sure that callbacks attached by race survive this moving. For that,
-     p has to be involved in a call to race. */
+     attached to p into the list attached to the outer promise of andThen. We
+     want to make sure that callbacks attached by race survive this moving. For
+     that, p has to be involved in a call to race. */
   test("race, then callbacks moved", () => {
     let (p, resolve) = Repromise.make();
     let final = Repromise.race([p]);
 
-    /* We are using this resolve() just so we can call andThen on it, guaranteeing
-       that the second time will run after the first time.. */
+    /* We are using this resolve() just so we can call andThen on it,
+       guaranteeing that the second time will run after the first time.. */
     let delay = Repromise.resolved();
 
     delay
@@ -465,7 +465,8 @@ let raceTests = Framework.suite("race", [
     |> Repromise.andThen(fun () => {
       resolve(42);
       /* This tests now succeeds only if resolving p resolved final^, despite
-         the fact that p was returned to andThen while still a pending promise. */
+         the fact that p was returned to andThen while still a pending
+         promise. */
       final |> Repromise.map(n => n == 42);
     });
   }),
