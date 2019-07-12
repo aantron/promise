@@ -18,6 +18,9 @@ notifications:
     on_failure: always
 
 cache:
-  timeout: 360
   directories:
-  - "$HOME/.esy/"
+    - "$HOME/.esy"
+    - "$HOME/.opam"
+    - ./_build/default
+    - ./_opam
+    - ./node_modules
