@@ -37,3 +37,7 @@
 .mainContainer.landing > .container {
     padding-top: 1em;
 }
+
+.hljs {
+    overflow: initial !important;
+}
