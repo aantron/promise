@@ -22,5 +22,4 @@ cache:
     - "$HOME/.esy"
     - "$HOME/.opam"
     - ./_build/default
-    - ./_opam
     - ./node_modules
