@@ -1,14 +1,16 @@
-opam-version: "1.2"
+opam-version: "2.0"
+
+synopsis: "Type-safe promises for JavaScript and native code"
 
 version: "dev"
+license: "MIT"
 homepage: "https://github.com/aantron/repromise"
 doc: "https://github.com/aantron/repromise"
 bug-reports: "https://github.com/aantron/repromise/issues"
-license: "MIT"
 
 authors: "Anton Bachin <antonbachin@yahoo.com>"
 maintainer: "Anton Bachin <antonbachin@yahoo.com>"
-dev-repo: "https://github.com/aantron/repromise.git"
+dev-repo: "git+https://github.com/aantron/repromise.git"
 
 depends: [
   "dune" {build}
