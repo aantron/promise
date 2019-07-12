@@ -93,7 +93,7 @@ module Rejectable = {
   };
 
   [@bs.val]
-  external resolved: 'a => rejectable('a, _) = "";
+  external resolved: 'a => rejectable('a, _) = "resolved";
 
   [@bs.val]
   external andThen:
@@ -116,7 +116,7 @@ module Rejectable = {
       "catch_";
 
   [@bs.val]
-  external unwrap: 'a => 'a = "";
+  external unwrap: 'a => 'a = "unwrap";
 
   [@bs.scope "Promise"]
   [@bs.val]

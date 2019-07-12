@@ -9,7 +9,7 @@ function isPromiseLike(v) {
 |}];
 
 [@bs.val]
-external isPromise: Repromise.Rejectable.t(_, _) => bool = "";
+external isPromise: Repromise.Rejectable.t(_, _) => bool = "isPromise";
 
 [@bs.val]
 external jsPromiseIsPromise: Js.Promise.t(_) => bool = "isPromise";
