@@ -76,24 +76,3 @@ module Rejectable: {
 
 
 let onUnhandledException: ref(exn => unit);
-
-
-
-/* This shouldn't really be visible in the API. It is used by the native Io to
-   drive the native promise callbacks. It is not used on JavaScript, because
-   Node and browsers call callbacks themselves. */
-
-module ReadyCallbacks: {
-  let callbacksPending: unit => bool;
-
-  /* When about to iterate over the ready callbacks, Repromise first takes a
-     snapshot of them, and iterates over the snapshot. This is to prevent new
-     ready callbacks, that may be created by the processing of the current ones,
-     from being processed immediately. That could lead to I/O loop starvation
-     and other problems. */
-  type snapshot;
-
-  let snapshot: unit => snapshot;
-  let isEmpty: snapshot => bool;
-  let call: snapshot => unit;
-};

@@ -75,9 +75,8 @@ let onUnhandledException: ref(exn => unit);
 
 
 
-/* This shouldn't really be visible in the API. It is used by the native Io to
-   drive the native promise callbacks. It is not used on JavaScript, because
-   Node and browsers call callbacks themselves. */
+/* This is not part of the public API. It is used by I/O libraries to drive
+   native promise callbacks on each tick. */
 
 module ReadyCallbacks: {
   let callbacksPending: unit => bool;

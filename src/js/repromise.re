@@ -180,21 +180,3 @@ let all4 = Rejectable.all4;
 let all5 = Rejectable.all5;
 let all6 = Rejectable.all6;
 let race = Rejectable.race;
-
-
-
-module ReadyCallbacks = {
-  let callbacksPending = () =>
-    failwith("unnecessary on JS");
-
-  type snapshot;
-
-  let snapshot = () =>
-    failwith("unnecessary on JS");
-
-  let isEmpty = _snapshot =>
-    failwith("unnecessary on JS");
-
-  let call = _snapshot =>
-    failwith("unnecessary on JS");
-};

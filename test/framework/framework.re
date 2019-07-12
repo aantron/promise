@@ -196,5 +196,5 @@ let run = (library_name, suites) => {
 
   loop_over_suites([], suites) |> ignore;
 
-  Io.run();
+  Run.main_loop();
 };
