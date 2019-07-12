@@ -1,6 +1,6 @@
 {
   "name": "@aantron/repromise",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "description": "Type-safe JS promises for ReasonML, native version",
   "keywords": [
     "BuckleScript",

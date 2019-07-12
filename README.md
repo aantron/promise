@@ -1,4 +1,4 @@
-# Repromise &nbsp;&nbsp; [![Version 0.6.0][npm-img]][npm] [![Travis status][travis-img]][travis]
+# Repromise &nbsp;&nbsp; [![Version 0.6.1][npm-img]][npm] [![Travis status][travis-img]][travis]
 
 [npm-img]: https://img.shields.io/npm/v/@aantron/repromise.svg
 [npm]: https://www.npmjs.com/package/@aantron/repromise
