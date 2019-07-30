@@ -13,7 +13,7 @@ maintainer: "Anton Bachin <antonbachin@yahoo.com>"
 dev-repo: "git+https://github.com/aantron/repromise.git"
 
 depends: [
-  "dune" {build}
+  "dune"
   "reason" {build & >= "3.0.0"}
 ]
 
