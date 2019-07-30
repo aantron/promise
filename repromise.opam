@@ -14,6 +14,7 @@ dev-repo: "git+https://github.com/aantron/repromise.git"
 
 depends: [
   "dune"
+  "ocaml"
   "reason" {build & >= "3.0.0"}
 ]
 
