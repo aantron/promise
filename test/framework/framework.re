@@ -99,7 +99,7 @@ let run_test_suite: suite => Repromise.t(suite_outcomes) = suite =>
     outcome_to_character(Skipped)
     |> String.make(List.length(outcomes))
     |> print_string;
-    Pervasives.flush(stdout);
+    flush(stdout);
 
     Repromise.resolved(outcomes);
   }
@@ -111,7 +111,7 @@ let run_test_suite: suite => Repromise.t(suite_outcomes) = suite =>
         run_test(test)
         |> Repromise.andThen(new_outcome => {
           new_outcome |> outcome_to_character |> print_char;
-          Pervasives.flush(stdout);
+          flush(stdout);
           let outcome_with_name = (test.test_name, new_outcome);
           run_each_test(more_tests, [outcome_with_name, ...reversed_outcomes]);
         })
@@ -183,10 +183,10 @@ let run = (library_name, suites) => {
       |> Repromise.andThen(outcomes =>
         if (!outcomes_all_ok(outcomes)) {
           print_newline();
-          Pervasives.flush(stdout);
+          flush(stdout);
           Printf.eprintf("Failures in test suite '%s':\n", suite.suite_name);
           show_failures(outcomes);
-          Pervasives.exit(1);
+          exit(1);
         }
         else {
           loop_over_suites(

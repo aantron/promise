@@ -21,7 +21,7 @@
   },
   "devDependencies": {
     "@opam/merlin": "^3.0.5",
-    "ocaml": "4.6.x"
+    "ocaml": "*"
   },
   "esy": {
     "build": "dune build -p repromise",

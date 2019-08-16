@@ -28,12 +28,12 @@ build_with_esy () {
 
 build_with_opam () {
     install_opam
-    opam init -ya --compiler=4.07.1 --disable-sandboxing
+    opam init -ya --compiler=4.08.1 --disable-sandboxing
     eval `opam env`
+    ocaml -version
 
     opam lint
-    opam pin add -y --no-action repromise .
-    opam install -y --deps-only repromise
+    opam install -y --deps-only .
 
     dune exec test/test_main.exe
 }
