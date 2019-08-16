@@ -21,5 +21,3 @@ cache:
   directories:
     - "$HOME/.esy"
     - "$HOME/.opam"
-    - ./_build/default
-    - ./node_modules
