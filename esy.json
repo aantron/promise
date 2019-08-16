@@ -20,8 +20,9 @@
     "@esy-ocaml/reason": "^3.0.0"
   },
   "devDependencies": {
+    "@aantron/bisect_ppx": "git+https://github.com/aantron/bisect_ppx.git",
     "@opam/merlin": "^3.0.5",
-    "ocaml": "*"
+    "ocaml": "~4.6.0"
   },
   "esy": {
     "build": "dune build -p repromise",

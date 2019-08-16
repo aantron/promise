@@ -26,7 +26,8 @@
     "bs-platform": ">= 3.0.0"
   },
   "devDependencies": {
-    "bs-platform": ">= 3.0.0"
+    "@aantron/bisect_ppx": "git+https://github.com/aantron/bisect_ppx.git",
+    "bs-platform": ">= 6.0.0"
   },
   "scripts": {
     "build": "bsb -make-world",

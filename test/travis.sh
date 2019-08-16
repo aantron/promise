@@ -8,12 +8,23 @@ install_opam () {
     sudo chmod a+x /usr/local/bin/opam
 }
 
+submit_coverage_report () {
+    $1 \
+      --coveralls coverage.json \
+      --service-name travis-ci \
+      --service-job-id $TRAVIS_JOB_ID \
+      `find . -name 'bisect*.out'`
+    curl -L -F json_file=@./coverage.json https://coveralls.io/api/v1/jobs
+}
+
 
 
 build_with_npm () {
+    npm install -g esy
     npm install
-    npm run build
-    npm run test
+
+    make bucklescript-coverage
+    submit_coverage_report ./node_modules/.bin/bisect-ppx-report.exe
 }
 
 build_with_esy () {
@@ -22,7 +33,7 @@ build_with_esy () {
     esy install
     # The separate build command is a workaround. See
     #   https://github.com/aantron/repromise/commit/c2f5aa7dd7e7bc5f521a6ab8c8275687f5fc8639#commitcomment-29955448.
-    esy build dune build test/test_main.exe
+    esy dune build test/test_main.exe
     esy dune exec test/test_main.exe
 }
 
@@ -35,7 +46,8 @@ build_with_opam () {
     opam lint
     opam install -y --deps-only .
 
-    dune exec test/test_main.exe
+    make native-coverage
+    submit_coverage_report bisect-ppx-report
 }
 
 

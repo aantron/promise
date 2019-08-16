@@ -198,3 +198,5 @@ let run = (library_name, suites) => {
 
   Run.main_loop();
 };
+
+[@coverage exclude(file)]
