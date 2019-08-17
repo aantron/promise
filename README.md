@@ -17,7 +17,7 @@ Repromise is a binding to JS promises, with:
 
 <br/>
 
-```ocaml
+```reason
 let (p, resolve_p) = Repromise.make();
 
 p
