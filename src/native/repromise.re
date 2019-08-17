@@ -1,3 +1,9 @@
+/* This file is part of Repromise, released under the MIT license. See
+   LICENSE.md for details, or visit
+   https://github.com/aantron/repromise/blob/master/LICENSE.md. */
+
+
+
 type callbacks('a, 'e) = {
   onResolve: MutableList.list('a => unit),
   onReject: MutableList.list('e => unit),

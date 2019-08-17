@@ -1,3 +1,9 @@
+/* This file is part of Repromise, released under the MIT license. See
+   LICENSE.md for details, or visit
+   https://github.com/aantron/repromise/blob/master/LICENSE.md. */
+
+
+
 /* Mutable doubly-linked lists, like in a typical imperative language. These are
    used for callback lists, because Repromise needs fast append and fast
    deletion of any node in the list, when the reference to the target node is
