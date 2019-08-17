@@ -2,4 +2,4 @@
    application, such as the browser or Node. */
 let main_loop = ignore;
 
-[@coverage exclude(file)]
+[@coverage exclude_file]

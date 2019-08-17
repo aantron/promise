@@ -288,4 +288,4 @@ let soundnessTests = Framework.suite("soundness", [
 
 let suites = [interopTests, soundnessTests];
 
-[@coverage exclude(file)]
+[@coverage exclude_file]

@@ -495,4 +495,4 @@ let raceTests = Framework.suite("race", [
 
 let suites = [basicTests, rejectTests, allTests, raceTests];
 
-[@coverage exclude(file)]
+[@coverage exclude_file]

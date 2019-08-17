@@ -5,4 +5,4 @@ let tests =
 let () =
   Framework.run("repromise", tests);
 
-[@coverage exclude(file)]
+[@coverage exclude_file]
