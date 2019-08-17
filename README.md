@@ -1,9 +1,11 @@
-# Repromise &nbsp;&nbsp; [![Version 0.6.1][npm-img]][npm] [![Travis status][travis-img]][travis]
+# Repromise &nbsp;&nbsp; [![Version 0.6.1][npm-img]][npm] [![Travis status][travis-img]][travis] [![Coverage][coveralls-img]][coveralls]
 
 [npm-img]: https://img.shields.io/npm/v/@aantron/repromise.svg
 [npm]: https://www.npmjs.com/package/@aantron/repromise
 [travis]: https://travis-ci.org/aantron/repromise/branches
 [travis-img]: https://img.shields.io/travis/aantron/repromise/master.svg?label=travis
+[coveralls]: https://coveralls.io/github/aantron/repromise?branch=master
+[coveralls-img]: https://img.shields.io/coveralls/aantron/repromise/master.svg
 
 Repromise is a binding to JS promises, with:
 
