@@ -5,7 +5,7 @@ default :
 
 .PHONY : coverage
 coverage : clean-coverage native-coverage bucklescript-coverage
-	bisect-ppx-report --html _coverage/ bisect*.out
+	bisect-ppx-report html --expect src/
 
 .PHONY : native-coverage
 native-coverage :
@@ -19,4 +19,4 @@ bucklescript-coverage :
 
 .PHONY : clean-coverage
 clean-coverage :
-	rm -rf *.out _coverage
+	rm -rf *.coverage _coverage

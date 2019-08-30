@@ -9,6 +9,6 @@ ppx_await
 scratch/
 .vscode/
 _opam/
-*.out
+*.coverage
 _coverage/
 _esy/

@@ -8,15 +8,6 @@ install_opam () {
     sudo chmod a+x /usr/local/bin/opam
 }
 
-submit_coverage_report () {
-    $1 \
-      --coveralls coverage.json \
-      --service-name travis-ci \
-      --service-job-id $TRAVIS_JOB_ID \
-      `find . -name 'bisect*.out'`
-    curl -L -F json_file=@./coverage.json https://coveralls.io/api/v1/jobs
-}
-
 
 
 build_with_npm () {
@@ -24,7 +15,7 @@ build_with_npm () {
     npm install
 
     make bucklescript-coverage
-    submit_coverage_report ./node_modules/.bin/bisect-ppx-report.exe
+    ./node_modules/.bin/bisect-ppx-report.exe send-to Coveralls
 }
 
 build_with_esy () {
@@ -47,7 +38,7 @@ build_with_opam () {
     opam install -y --deps-only .
 
     make native-coverage
-    submit_coverage_report bisect-ppx-report
+    bisect-ppx-report send-to Coveralls
 }
 
 
