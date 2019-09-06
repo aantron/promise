@@ -12,8 +12,6 @@ script:
 
 notifications:
   email:
-    recipients:
-      - antonbachin@yahoo.com
     on_success: always
     on_failure: always
 
