@@ -1,3 +1,4 @@
+set -e
 set -x
 
 
@@ -18,7 +19,9 @@ build_with_npm () {
 build_with_esy () {
     date
 
-    npm install -g esy
+    npm install --no-save esy
+    WD=`pwd`
+    export PATH="$WD/node_modules/.bin:$PATH"
 
     date
 
