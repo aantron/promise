@@ -3,7 +3,6 @@ set -x
 
 
 build_with_npm () {
-    npm install -g esy
     npm install
 
     make bucklescript-coverage
