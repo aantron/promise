@@ -2,14 +2,6 @@ set -x
 
 
 
-install_opam () {
-    wget https://github.com/ocaml/opam/releases/download/2.0.5/opam-2.0.5-x86_64-linux
-    sudo mv opam-2.0.5-x86_64-linux /usr/local/bin/opam
-    sudo chmod a+x /usr/local/bin/opam
-}
-
-
-
 build_with_npm () {
     npm install -g esy
     npm install
@@ -29,7 +21,10 @@ build_with_esy () {
 }
 
 build_with_opam () {
-    install_opam
+    wget https://github.com/ocaml/opam/releases/download/2.0.5/opam-2.0.5-x86_64-linux
+    sudo mv opam-2.0.5-x86_64-linux /usr/local/bin/opam
+    sudo chmod a+x /usr/local/bin/opam
+
     opam init -ya --compiler=4.08.1 --disable-sandboxing
     eval `opam env`
     ocaml -version
