@@ -39,6 +39,8 @@ build_with_opam () {
 
     make native-coverage
     bisect-ppx-report send-to Coveralls
+
+    opam clean
 }
 
 
