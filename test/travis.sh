@@ -19,13 +19,19 @@ build_with_npm () {
 build_with_esy () {
     date
 
-    npm install --no-save esy
+    if [ ! -f ./node_modules/.bin/esy ]
+    then
+        npm install --no-save esy
+        SKIP_REPOSITORY_UPDATE=
+    else
+        SKIP_REPOSITORY_UPDATE=--skip-repository-update
+    fi
     WD=`pwd`
     export PATH="$WD/node_modules/.bin:$PATH"
 
     date
 
-    esy install
+    esy install $SKIP_REPOSITORY_UPDATE
 
     date
 
