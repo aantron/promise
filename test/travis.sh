@@ -3,6 +3,15 @@ set -x
 
 
 
+if [ "$TRAVIS_EVENT_TYPE" == cron ]
+then
+    rm -rf ~/.esy
+    rm -rf ~/.opam
+    rm -rf ./node_modules
+fi
+
+
+
 build_with_npm () {
     date
 
