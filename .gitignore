@@ -5,7 +5,6 @@ _build
 .merlin
 *.install
 esy.lock
-ppx_await
 scratch/
 .vscode/
 _opam/

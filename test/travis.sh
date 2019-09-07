@@ -15,7 +15,7 @@ build_with_npm () {
     npm install
 
     make bucklescript-coverage
-    ./node_modules/.bin/bisect-ppx-report.exe send-to Coveralls
+    ./node_modules/.bin/bisect-ppx-report send-to Coveralls
 }
 
 build_with_esy () {

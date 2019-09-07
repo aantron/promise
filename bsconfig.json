@@ -2,10 +2,10 @@
   "name": "@aantron/repromise",
   "refmt": 3,
   "bs-dependencies": [
-    "@aantron/bisect_ppx"
+    "bisect_ppx"
   ],
   "ppx-flags": [
-    "@aantron/bisect_ppx/ppx.exe"
+    "bisect_ppx/ppx"
   ],
   "sources": [
     "src/js",
