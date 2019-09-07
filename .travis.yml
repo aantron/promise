@@ -10,13 +10,19 @@ env:
 script:
   bash test/travis.sh
 
-notifications:
-  email:
-    on_success: always
-    on_failure: always
+before_cache:
+  - opam clean || true
+  - ./node_modules/.bin/bsb -clean-world || true
+  - npm cache clean --force || true
+  - rm -rf node_modules/.cache/_esy
 
 cache:
   directories:
     - "$HOME/.esy"
     - "$HOME/.opam"
     - ./node_modules
+
+notifications:
+  email:
+    on_success: always
+    on_failure: always

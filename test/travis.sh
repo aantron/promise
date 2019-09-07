@@ -64,10 +64,6 @@ build_with_opam () {
     bisect-ppx-report send-to Coveralls
 
     date
-
-    opam clean
-
-    date
 }
 
 
