@@ -22,9 +22,10 @@ jobs:
       before_install:
         - '[ "$TRAVIS_EVENT_TYPE" != cron ] || rm -rf ./node_modules'
       install:
-        - npm install
+        - '[ -d node_modules ] || npm install'
       script:
         - make bucklescript-coverage
+        - make bundle-size-test
       before_cache:
         - ./node_modules/.bin/bsb -clean-world
         - npm cache clean --force

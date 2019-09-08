@@ -26,8 +26,9 @@
     "bs-platform": ">= 3.0.0"
   },
   "devDependencies": {
-    "bisect_ppx": "aantron/bisect_ppx#binaries",
-    "bs-platform": ">= 6.0.0"
+    "bs-platform": ">= 6.0.0",
+    "webpack": "*",
+    "webpack-cli": "*"
   },
   "scripts": {
     "build": "bsb -make-world",

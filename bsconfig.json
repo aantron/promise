@@ -5,7 +5,7 @@
     "src/js",
     {
       "dir": "test",
-      "subdirs": ["framework/js", "framework", "js"],
+      "subdirs": ["framework/js", "framework", "js", "bundle"],
       "type": "dev"
     }
   ]

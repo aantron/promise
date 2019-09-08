@@ -20,3 +20,17 @@ bucklescript-coverage :
 .PHONY : clean-coverage
 clean-coverage :
 	rm -rf *.coverage _coverage
+
+WEBPACK := npx webpack --display none --mode production --optimize-minimize
+
+.PHONY : bundle-size-test
+bundle-size-test :
+	@npm run build
+	@$(WEBPACK) \
+	  --entry ./test/bundle/main_control.js \
+	  --output ./test/bundle/bundle_control.js
+	@$(WEBPACK) \
+	  --entry ./test/bundle/main_repromise.js \
+	  --output ./test/bundle/bundle_repromise.js
+	@ls -l lib/js/src/js/repromise.js
+	@ls -l test/bundle/bundle*.js
