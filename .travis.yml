@@ -1,25 +1,56 @@
-sudo: required
-
 language: generic
 
-env:
-  - BUILD_SYSTEM=npm
-  - BUILD_SYSTEM=esy
-  - BUILD_SYSTEM=opam
+jobs:
+  include:
+    - env: BUILD_SYSTEM=esy
+      install:
+        - '[ "$TRAVIS_EVENT_TYPE" != cron ] || rm -rf ./node_modules ~/.esy'
+        - '[ ! -f ./node_modules/.bin/esy ] || ESY_CACHED=yes'
+        - '[ "$ESY_CACHED" == yes ] || npm install --no-save esy'
+        - '[ "$ESY_CACHED" != yes ] || SKIP_UPDATE=--skip-repository-update'
+        - export PATH="$(pwd)/node_modules/.bin:$PATH"
+        - esy install $SKIP_UPDATE
+      script:
+        - esy dune build test/test_main.exe
+        - esy dune exec test/test_main.exe
+      before_cache:
+        - npm cache clean --force
+        - rm -rf node_modules/.cache/_esy
 
-script:
-  bash test/travis.sh
+    - env: BUILD_SYSTEM=npm
+      install:
+        - '[ "$TRAVIS_EVENT_TYPE" != cron ] || rm -rf ./node_modules'
+        - npm install
+      script:
+        - make bucklescript-coverage
+        - ./node_modules/.bin/bisect-ppx-report send-to Coveralls
+      before_cache:
+        - ./node_modules/.bin/bsb -clean-world
+        - npm cache clean --force
 
-before_cache:
-  - opam clean || true
-  - ./node_modules/.bin/bsb -clean-world || true
-  - npm cache clean --force || true
-  - rm -rf node_modules/.cache/_esy
+    - env: BUILD_SYSTEM=opam
+      install:
+        - '[ "$TRAVIS_EVENT_TYPE" != cron ] || rm -rf ~/.opam'
+        - VERSION=2.0.5
+        - OPAM=opam-$VERSION-x86_64-linux
+        - wget https://github.com/ocaml/opam/releases/download/$VERSION/$OPAM
+        - sudo mv $OPAM /usr/local/bin/opam
+        - sudo chmod a+x /usr/local/bin/opam
+        - opam init -ya --compiler=4.08.1 --disable-sandboxing
+        - eval `opam env`
+        - ocaml -version
+        - opam install -y --deps-only .
+      script:
+        - make native-coverage
+        - bisect-ppx-report send-to Coveralls
+        - opam lint
+      before_cache:
+        - opam clean
 
 cache:
   directories:
-    - "$HOME/.esy"
-    - "$HOME/.opam"
+    - $HOME/.esy
+    - $HOME/.opam
     - ./node_modules
 
 notifications:
