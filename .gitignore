@@ -11,3 +11,6 @@ _opam/
 *.coverage
 _coverage/
 _esy/
+.DS_Store
+doc/website/build
+doc/website/i18n/*
