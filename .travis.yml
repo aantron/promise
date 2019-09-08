@@ -25,7 +25,6 @@ jobs:
         - npm install
       script:
         - make bucklescript-coverage
-        - ./node_modules/.bin/bisect-ppx-report send-to Coveralls
       before_cache:
         - ./node_modules/.bin/bsb -clean-world
         - npm cache clean --force

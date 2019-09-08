@@ -4,11 +4,6 @@
 
 
 
-let () =
-  Bisect.Runtime.write_coverage_data_on_exit();
-
-
-
 [%%bs.raw {|
 function isPromise (p) {
     return (p instanceof Promise);
@@ -293,5 +288,3 @@ let soundnessTests = Framework.suite("soundness", [
 
 
 let suites = [interopTests, soundnessTests];
-
-[@coverage exclude_file]

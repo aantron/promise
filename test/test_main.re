@@ -10,5 +10,3 @@ let tests =
 
 let () =
   Framework.run("repromise", tests);
-
-[@coverage exclude_file]
