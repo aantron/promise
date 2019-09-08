@@ -3,8 +3,9 @@ language: generic
 jobs:
   include:
     - env: BUILD_SYSTEM=esy
-      install:
+      before_install:
         - '[ "$TRAVIS_EVENT_TYPE" != cron ] || rm -rf ./node_modules ~/.esy'
+      install:
         - '[ ! -f ./node_modules/.bin/esy ] || ESY_CACHED=yes'
         - '[ "$ESY_CACHED" == yes ] || npm install --no-save esy'
         - '[ "$ESY_CACHED" != yes ] || SKIP_UPDATE=--skip-repository-update'
@@ -18,8 +19,9 @@ jobs:
         - rm -rf node_modules/.cache/_esy
 
     - env: BUILD_SYSTEM=npm
-      install:
+      before_install:
         - '[ "$TRAVIS_EVENT_TYPE" != cron ] || rm -rf ./node_modules'
+      install:
         - npm install
       script:
         - make bucklescript-coverage
@@ -29,8 +31,9 @@ jobs:
         - npm cache clean --force
 
     - env: BUILD_SYSTEM=opam
-      install:
+      before_install:
         - '[ "$TRAVIS_EVENT_TYPE" != cron ] || rm -rf ~/.opam'
+      install:
         - VERSION=2.0.5
         - OPAM=opam-$VERSION-x86_64-linux
         - wget https://github.com/ocaml/opam/releases/download/$VERSION/$OPAM
@@ -47,11 +50,49 @@ jobs:
       before_cache:
         - opam clean
 
+    - env: BUILD_SYSTEM=docusaurus
+      before_install:
+        - '[ "$TRAVIS_BRANCH" == master ] || exit 0'
+        - '[ "$TRAVIS_PULL_REQUEST" == false ] || exit 0'
+        - '[ "$TRAVIS_EVENT_TYPE" != cron ] || exit 0'
+        - '[ "$TRAVIS_REPO_SLUG" == aantron/repromise ] || exit 0'
+        - '( git diff --name-only HEAD~ | grep "^doc/" ) || exit 0'
+      install:
+        - cd doc/website
+        - '[ -d node_modules ] || npm install'
+      script:
+        - npm run build'
+        - echo $DEPLOY_KEY | base64 --decode > ~/.ssh/docusaurus
+        - chmod 400 ~/.ssh/docusaurus
+        - echo >> ~/.ssh/config
+        - echo "Host github.com" >> ~/.ssh/config
+        - echo "  IdentityFile ~/.ssh/docusaurus" >> ~/.ssh/config
+        - echo "  StrictHostKeyChecking no" >> ~/.ssh/config
+        - git clone git@github.com:aantron/repromise.git gh-pages
+        - cd gh-pages
+        - git config user.name "Anton Bachin"
+        - git config user.email "antonbachin@yahoo.com"
+        - git checkout gh-pages
+        - rm -rf *
+        - cp -r ../build/repromise/* .
+        - git add -A
+        - git commit --amend --no-edit --reset-author
+        - git push --force-with-lease
+      before_cache:
+        - npm cache clean --force
+        - rm -rf ../node_modules/.cache/@babel/register
+
+matrix:
+  fast_finish: true
+  allow_failures:
+    - env: BUILD_SYSTEM=docusaurus
+
 cache:
   directories:
     - $HOME/.esy
     - $HOME/.opam
-    - ./node_modules
+    - node_modules
+    - doc/website/node_modules
 
 notifications:
   email:
