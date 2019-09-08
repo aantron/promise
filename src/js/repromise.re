@@ -73,8 +73,38 @@ function catch_(callback, promise) {
     };
 
     return promise.catch(safeCallback);
-}
+};
+
+function arrayToList(array) {
+  var list = 0;
+  for (var index = array.length - 1; index >= 0; --index) {
+    list = [array[index], list];
+  }
+  return list;
+};
+
+function listToArray(list) {
+  var array = [];
+  while (list !== 0) {
+    array.push(list[0]);
+    list = list[1];
+  }
+  return array;
+};
+
+function mapArray(f, a) {
+  return a.map(f);
+};
 |}];
+
+[@bs.val]
+external arrayToList: array('a) => list('a) = "arrayToList";
+
+[@bs.val]
+external listToArray: list('a) => array('a) = "listToArray";
+
+[@bs.val]
+external mapArray: ('a => 'b, array('a)) => array('b) = "mapArray";
 
 
 
@@ -131,14 +161,14 @@ module Rejectable = {
   let arrayAll = promises =>
     promises
     |> jsAll
-    |> map (Array.map(unwrap))
+    |> map (mapArray(unwrap))
 
   let all = promises =>
     promises
-    |> Array.of_list
+    |> listToArray
     |> arrayAll
     |> map (results =>
-      results |> Array.to_list);
+      results |> arrayToList);
 
   let all2 = (p1, p2) =>
     jsAll((p1, p2));
@@ -164,7 +194,7 @@ module Rejectable = {
       raise(Invalid_argument("Repromise.race([]) would be pending forever"));
     }
     else {
-      jsRace(Array.of_list(promises));
+      jsRace(listToArray(promises));
     };
 
   external fromJsPromise:
