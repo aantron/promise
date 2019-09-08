@@ -62,6 +62,17 @@ function then(callback, promise) {
     });
 };
 
+function map(callback, promise) {
+    return promise.then(function (value) {
+        try {
+            return resolved(callback(unwrap(value)));
+        }
+        catch (exception) {
+            onUnhandledException[0](exception);
+        }
+    });
+};
+
 function catch_(callback, promise) {
     var safeCallback = function (error) {
         try {
@@ -136,8 +147,10 @@ module Rejectable = {
     ('a => rejectable('b, 'e), rejectable('a, 'e)) => rejectable('b, 'e) =
       "then";
 
-  let map = (callback, promise) =>
-    promise |> andThen(value => resolved(callback(value)));
+  [@bs.val]
+  external map:
+    ('a => 'b, rejectable('a, 'e)) => rejectable('b, 'e) =
+      "map";
 
   let wait = (callback, promise) =>
     promise |> map(callback) |> ignore;
