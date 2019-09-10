@@ -499,4 +499,139 @@ let raceTests = Framework.suite("race", [
 
 
 
-let suites = [basicTests, rejectTests, allTests, raceTests];
+let resultTests = Framework.suite("result", [
+  test("mapOk, ok", () => {
+    Repromise.resolved(Ok(42))
+    |> Repromise.mapOk(n => n + 1)
+    |> Repromise.map(v => v == Ok(43));
+  }),
+
+  test("mapOk, error", () => {
+    Repromise.resolved(Error(42))
+    |> Repromise.mapOk(n => n + 1)
+    |> Repromise.map(v => v == Error(42));
+  }),
+
+  test("mapError, ok", () => {
+    Repromise.resolved(Ok(42))
+    |> Repromise.mapError(n => n + 1)
+    |> Repromise.map(v => v == Ok(42));
+  }),
+
+  test("mapError, error", () => {
+    Repromise.resolved(Error(42))
+    |> Repromise.mapError(n => n + 1)
+    |> Repromise.map(v => v == Error(43));
+  }),
+
+  test("waitOk, ok", () => {
+    let (p, resolve) = Repromise.make();
+    Repromise.resolved(Ok(42))
+    |> Repromise.waitOk(n => resolve(n + 1));
+    p
+    |> Repromise.map(n => n == 43);
+  }),
+
+  test("waitOk, error", () => {
+    let called = ref(false);
+    Repromise.resolved(Error(42))
+    |> Repromise.waitOk(_ => called := true);
+    Repromise.resolved()
+    |> Repromise.map(() => !called^);
+  }),
+
+  test("waitError, ok", () => {
+    let called = ref(false);
+    Repromise.resolved(Ok(42))
+    |> Repromise.waitError(_ => called := true);
+    Repromise.resolved()
+    |> Repromise.map(() => !called^);
+  }),
+
+  test("waitError, error", () => {
+    let (p, resolve) = Repromise.make();
+    Repromise.resolved(Error(42))
+    |> Repromise.waitError(n => resolve(n + 1));
+    p
+    |> Repromise.map(n => n == 43);
+  }),
+
+  test("andThenOk, ok", () => {
+    Repromise.resolved(Ok(42))
+    |> Repromise.andThenOk(n => Repromise.resolved(Ok(n + 1)))
+    |> Repromise.map(v => v == Ok(43));
+  }),
+
+  test("andThenOk, error", () => {
+    Repromise.resolved(Error(42))
+    |> Repromise.andThenOk(n => Repromise.resolved(Ok(n + 1)))
+    |> Repromise.map(v => v == Error(42));
+  }),
+
+  test("andThenError, ok", () => {
+    Repromise.resolved(Ok(42))
+    |> Repromise.andThenError(n => Repromise.resolved(Error(n + 1)))
+    |> Repromise.map(v => v == Ok(42));
+  }),
+
+  test("andThenError, error", () => {
+    Repromise.resolved(Error(42))
+    |> Repromise.andThenError(n => Repromise.resolved(Error(n + 1)))
+    |> Repromise.map(v => v == Error(43));
+  }),
+]);
+
+
+
+let optionTests = Framework.suite("opton", [
+  test("mapSome, some", () => {
+    Repromise.resolved(Some(42))
+    |> Repromise.mapSome(n => n + 1)
+    |> Repromise.map(v => v == Some(43));
+  }),
+
+  test("mapOk, none", () => {
+    Repromise.resolved(None)
+    |> Repromise.mapSome(n => n + 1)
+    |> Repromise.map(v => v == None);
+  }),
+
+  test("waitSome, some", () => {
+    let (p, resolve) = Repromise.make();
+    Repromise.resolved(Some(42))
+    |> Repromise.waitSome(n => resolve(n + 1));
+    p
+    |> Repromise.map(n => n == 43);
+  }),
+
+  test("waitSome, none", () => {
+    let called = ref(false);
+    Repromise.resolved(None)
+    |> Repromise.waitSome(_ => called := true);
+    Repromise.resolved()
+    |> Repromise.map(() => !called^);
+  }),
+
+  test("andThenSome, some", () => {
+    Repromise.resolved(Some(42))
+    |> Repromise.andThenSome(n => Repromise.resolved(Some(n + 1)))
+    |> Repromise.map(v => v == Some(43));
+  }),
+
+  test("andThenSome, none", () => {
+    Repromise.resolved(None)
+    |> Repromise.andThenSome(n => Repromise.resolved(Some(n + 1)))
+    |> Repromise.map(v => v == None);
+  }),
+]);
+
+
+
+let suites = [
+  basicTests,
+  rejectTests,
+  allTests,
+  raceTests,
+  resultTests,
+  optionTests
+];
