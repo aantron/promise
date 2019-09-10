@@ -12,15 +12,16 @@ type t('a) = promise('a);
 
 
 
+/* Main API. */
 let make: unit => (promise('a), 'a => unit);
 
 let resolved: 'a => promise('a);
 
-let andThen: ('a => promise('b), promise('a)) => promise('b);
-
 let map: ('a => 'b, promise('a)) => promise('b);
 
 let wait: ('a => unit, promise('a)) => unit;
+
+let andThen: ('a => promise('b), promise('a)) => promise('b);
 
 let all: list(promise('a)) => promise(list('a));
 
@@ -51,6 +52,42 @@ let race: list(promise('a)) => promise('a);
 
 
 
+/* Results. */
+let mapOk:
+  ('a => 'b, promise(result('a, 'e))) => promise(result('b, 'e));
+
+let mapError:
+  ('e => 'e2, promise(result('a, 'e))) => promise(result('a, 'e2));
+
+let waitOk:
+  ('a => unit, promise(result('a, _))) => unit;
+
+let waitError:
+  ('e => unit, promise(result(_, 'e))) => unit;
+
+let andThenOk:
+  ('a => promise(result('b, 'e)), promise(result('a, 'e))) =>
+    promise(result('b, 'e));
+
+let andThenError:
+  ('e => promise(result('a, 'e2)), promise(result('a, 'e))) =>
+    promise(result('a, 'e2));
+
+
+
+/* Options. */
+let mapSome:
+  ('a => 'b, promise(option('a))) => promise(option('b));
+
+let waitSome:
+  ('a => unit, promise(option('a))) => unit;
+
+let andThenSome:
+  ('a => promise(option('b)), promise(option('a))) => promise(option('b));
+
+
+
+/* Shouldn't be used; provided for compatibility with JS Rejectable. */
 module Rejectable: {
   type t('a, 'e) = rejectable('a, 'e);
 
