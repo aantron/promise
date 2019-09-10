@@ -53,6 +53,10 @@ let race: list(promise('a)) => promise('a);
 
 
 /* Results. */
+
+/* Compatibility with OCaml 4.02. */
+type result('a, 'e) = Result.result('a, 'e);
+
 let mapOk:
   ('a => 'b, promise(result('a, 'e))) => promise(result('b, 'e));
 

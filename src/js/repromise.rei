@@ -54,7 +54,7 @@ let race: list(promise('a)) => promise('a);
 
 /* Results. */
 
-/* Compatibility with BukleScript < 6. */
+/* Compatibility with BuckleScript < 6. */
 type result('a, 'e) = Belt.Result.t('a, 'e);
 
 let mapOk:

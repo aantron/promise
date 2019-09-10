@@ -460,6 +460,10 @@ let race = promises => {
 
 
 
+type result('a, 'e) = Result.result('a, 'e);
+
+open Result
+
 let andThenOk = (callback, promise) =>
   promise |> andThen(fun
     | Ok(value) => callback(value)
