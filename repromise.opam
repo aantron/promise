@@ -16,6 +16,7 @@ depends: [
   "dune"
   "ocaml"
   "reason" {build & >= "3.0.0"}
+  "result"
 
   "bisect_ppx" {dev & >= "2.0.0"}
 ]

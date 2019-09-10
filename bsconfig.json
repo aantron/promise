@@ -5,8 +5,14 @@
     "src/js",
     {
       "dir": "test",
-      "subdirs": ["framework/js", "framework", "js", "bundle"],
-      "type": "dev"
+      "type": "dev",
+      "subdirs": [
+        "framework/js",
+        "framework",
+        "isoresult/js",
+        "js",
+        "bundle"
+      ]
     }
   ]
 }

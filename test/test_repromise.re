@@ -499,6 +499,9 @@ let raceTests = Framework.suite("race", [
 
 
 
+/* Compatibility with BukleScript < 6. */
+open! Isoresult;
+
 let resultTests = Framework.suite("result", [
   test("mapOk, ok", () => {
     Repromise.resolved(Ok(42))

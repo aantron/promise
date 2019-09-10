@@ -238,6 +238,9 @@ let race = Rejectable.race;
 
 
 
+/* Compatibility with BukleScript < 6. */
+type result('a, 'e) = Belt.Result.t('a, 'e) = Ok('a) | Error('e);
+
 let andThenOk = (_callback, promise) =>
   promise |> andThen(result =>
     switch (result) {
