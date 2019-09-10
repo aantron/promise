@@ -17,11 +17,11 @@ let make: unit => (promise('a), 'a => unit);
 
 let resolved: 'a => promise('a);
 
-let andThen: ('a => promise('b), promise('a)) => promise('b);
-
 let map: ('a => 'b, promise('a)) => promise('b);
 
 let wait: ('a => unit, promise('a)) => unit;
+
+let andThen: ('a => promise('b), promise('a)) => promise('b);
 
 let all: list(promise('a)) => promise(list('a));
 
@@ -53,14 +53,6 @@ let race: list(promise('a)) => promise('a);
 
 
 /* Results. */
-let andThenOk:
-  ('a => promise(result('b, 'e)), promise(result('a, 'e))) =>
-    promise(result('b, 'e));
-
-let andThenError:
-  ('e => promise(result('a, 'e2)), promise(result('a, 'e))) =>
-    promise(result('a, 'e2));
-
 let mapOk:
   ('a => 'b, promise(result('a, 'e))) => promise(result('b, 'e));
 
@@ -73,17 +65,25 @@ let waitOk:
 let waitError:
   ('e => unit, promise(result(_, 'e))) => unit;
 
+let andThenOk:
+  ('a => promise(result('b, 'e)), promise(result('a, 'e))) =>
+    promise(result('b, 'e));
+
+let andThenError:
+  ('e => promise(result('a, 'e2)), promise(result('a, 'e))) =>
+    promise(result('a, 'e2));
+
 
 
 /* Options. */
-let andThenSome:
-  ('a => promise(option('b)), promise(option('a))) => promise(option('b));
-
 let mapSome:
   ('a => 'b, promise(option('a))) => promise(option('b));
 
 let waitSome:
   ('a => unit, promise(option('a))) => unit;
+
+let andThenSome:
+  ('a => promise(option('b)), promise(option('a))) => promise(option('b));
 
 
 
@@ -99,12 +99,12 @@ module Rejectable: {
 
   let rejected: 'e => rejectable(_, 'e);
 
-  let andThen:
-    ('a => rejectable('b, 'e), rejectable('a, 'e)) => rejectable('b, 'e);
-
   let map: ('a => 'b, rejectable('a, 'e)) => rejectable('b, 'e);
 
   let wait: ('a => unit, rejectable('a, _)) => unit;
+
+  let andThen:
+    ('a => rejectable('b, 'e), rejectable('a, 'e)) => rejectable('b, 'e);
 
   let catch:
     ('e => rejectable('a, 'e2), rejectable('a, 'e)) => rejectable('a, 'e2);
