@@ -12,6 +12,7 @@ type t('a) = promise('a);
 
 
 
+/* Main API. */
 let make: unit => (promise('a), 'a => unit);
 
 let resolved: 'a => promise('a);
@@ -51,6 +52,42 @@ let race: list(promise('a)) => promise('a);
 
 
 
+/* Results. */
+let andThenOk:
+  ('a => promise(result('b, 'e)), promise(result('a, 'e))) =>
+    promise(result('b, 'e));
+
+let andThenError:
+  ('e => promise(result('a, 'e2)), promise(result('a, 'e))) =>
+    promise(result('a, 'e2));
+
+let mapOk:
+  ('a => 'b, promise(result('a, 'e))) => promise(result('b, 'e));
+
+let mapError:
+  ('e => 'e2, promise(result('a, 'e))) => promise(result('a, 'e2));
+
+let waitOk:
+  ('a => unit, promise(result('a, _))) => unit;
+
+let waitError:
+  ('e => unit, promise(result(_, 'e))) => unit;
+
+
+
+/* Options. */
+let andThenSome:
+  ('a => promise(option('b)), promise(option('a))) => promise(option('b));
+
+let mapSome:
+  ('a => 'b, promise(option('a))) => promise(option('b));
+
+let waitSome:
+  ('a => unit, promise(option('a))) => unit;
+
+
+
+/* For writing bindings. */
 module Rejectable: {
   type t('a, 'e) = rejectable('a, 'e);
 

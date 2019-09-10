@@ -235,3 +235,52 @@ let all5 = Rejectable.all5;
 let all6 = Rejectable.all6;
 let arrayAll = Rejectable.arrayAll;
 let race = Rejectable.race;
+
+
+
+let andThenOk = (callback, promise) =>
+  promise |> andThen(fun
+    | Ok(value) => callback(value)
+    | Error(_) as error => resolved(error));
+
+let andThenError = (callback, promise) =>
+  promise |> andThen(fun
+    | Ok(_) as ok => resolved(ok)
+    | Error(error) => callback(error));
+
+let mapOk = (callback, promise) =>
+  promise |> map(fun
+    | Ok(value) => Ok(callback(value))
+    | Error(_) as error => error);
+
+let mapError = (callback, promise) =>
+  promise |> map(fun
+    | Ok(_) as ok => ok
+    | Error(error) => Error(callback(error)));
+
+let waitOk = (callback, promise) =>
+  promise |> wait(fun
+    | Ok(value) => callback(value)
+    | Error(_) => ());
+
+let waitError = (callback, promise) =>
+  promise |> wait(fun
+    | Ok(_) => ()
+    | Error(error) => callback(error));
+
+
+
+let andThenSome = (callback, promise) =>
+  promise |> andThen(fun
+    | Some(value) => callback(value)
+    | None => resolved(None));
+
+let mapSome = (callback, promise) =>
+  promise |> map(fun
+    | Some(value) => Some(callback(value))
+    | None => None);
+
+let waitSome = (callback, promise) =>
+  promise |> wait(fun
+    | Some(value) => callback(value)
+    | None => ());
