@@ -238,49 +238,67 @@ let race = Rejectable.race;
 
 
 
-let andThenOk = (callback, promise) =>
-  promise |> andThen(fun
-    | Ok(value) => callback(value)
-    | Error(_) as error => resolved(error));
+let andThenOk = (_callback, promise) =>
+  promise |> andThen(result =>
+    switch (result) {
+    | Ok(_) => [%raw "_callback(result[0])"]
+    | Error(_) as error => resolved(error)
+    });
 
-let andThenError = (callback, promise) =>
-  promise |> andThen(fun
+let andThenError = (_callback, promise) =>
+  promise |> andThen(result =>
+    switch (result) {
     | Ok(_) as ok => resolved(ok)
-    | Error(error) => callback(error));
+    | Error(_) => [%raw "_callback(result[0])"]
+    });
 
-let mapOk = (callback, promise) =>
-  promise |> map(fun
-    | Ok(value) => Ok(callback(value))
-    | Error(_) as error => error);
+let mapOk = (_callback, promise) =>
+  promise |> map(result =>
+    switch (result) {
+    | Ok(_) => Ok([%raw "_callback(result[0])"])
+    | Error(_) as error => error
+    });
 
-let mapError = (callback, promise) =>
-  promise |> map(fun
+let mapError = (_callback, promise) =>
+  promise |> map(result =>
+    switch (result) {
     | Ok(_) as ok => ok
-    | Error(error) => Error(callback(error)));
+    | Error(_) => Error([%raw "_callback(result[0])"])
+    });
 
-let waitOk = (callback, promise) =>
-  promise |> wait(fun
-    | Ok(value) => callback(value)
-    | Error(_) => ());
+let waitOk = (_callback, promise) =>
+  promise |> wait(result =>
+    switch (result) {
+    | Ok(_) => [%raw "_callback(result[0])"]
+    | Error(_) => ()
+    });
 
-let waitError = (callback, promise) =>
-  promise |> wait(fun
+let waitError = (_callback, promise) =>
+  promise |> wait(result =>
+    switch (result) {
     | Ok(_) => ()
-    | Error(error) => callback(error));
+    | Error(_) => [%raw "_callback(result[0])"]
+    });
 
 
 
-let andThenSome = (callback, promise) =>
-  promise |> andThen(fun
-    | Some(value) => callback(value)
-    | None => resolved(None));
+let andThenSome = (_callback, promise) =>
+  promise |> andThen(option =>
+    switch (option) {
+    | Some(_) => [%raw "_callback(Caml_option.valFromOption(option))"]
+    | None => resolved(None)
+    });
 
-let mapSome = (callback, promise) =>
-  promise |> map(fun
-    | Some(value) => Some(callback(value))
-    | None => None);
+let mapSome = (_callback, promise) =>
+  promise |> map(option =>
+    switch (option) {
+    | Some(_) => Some([%raw "_callback(Caml_option.valFromOption(option))"])
+    | None => None
+    });
 
-let waitSome = (callback, promise) =>
-  promise |> wait(fun
-    | Some(value) => callback(value)
-    | None => ());
+let waitSome = (_callback, promise) =>
+  promise |> wait(option =>
+    switch (option) {
+    | Some(_) => [%raw "_callback(Caml_option.valFromOption(option))"]
+    | None => ()
+    });
