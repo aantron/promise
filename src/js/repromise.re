@@ -283,6 +283,14 @@ let waitError = (_callback, promise) =>
     | Error(_) => [%raw "_callback(result[0])"]
     });
 
+module Operators = {
+  let (>|=) = (promise, callback) =>
+    mapOk(callback, promise);
+
+  let (>>=) = (promise, callback) =>
+    andThenOk(callback, promise);
+};
+
 
 
 let andThenSome = (_callback, promise) =>

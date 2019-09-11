@@ -77,6 +77,15 @@ let andThenError:
   ('e => promise(result('a, 'e2)), promise(result('a, 'e))) =>
     promise(result('a, 'e2));
 
+module Operators: {
+  let (>|=):
+    (promise(result('a, 'e)), 'a => 'b) => promise(result('b, 'e));
+
+  let (>>=):
+    (promise(result('a, 'e)), 'a => promise(result('b, 'e))) =>
+      promise(result('b, 'e));
+};
+
 
 
 /* Options. */

@@ -494,6 +494,14 @@ let waitError = (callback, promise) =>
     | Ok(_) => ()
     | Error(error) => callback(error));
 
+module Operators = {
+  let (>|=) = (promise, callback) =>
+    mapOk(callback, promise);
+
+  let (>>=) = (promise, callback) =>
+    andThenOk(callback, promise);
+};
+
 
 
 let andThenSome = (callback, promise) =>

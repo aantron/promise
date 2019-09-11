@@ -582,6 +582,34 @@ let resultTests = Framework.suite("result", [
     |> Repromise.andThenError(n => Repromise.resolved(Error(n + 1)))
     |> Repromise.map(v => v == Error(43));
   }),
+
+  test(">|=, ok", () => {
+    let open Repromise.Operators;
+    Repromise.resolved(Ok(42))
+    >|= (n => n + 1)
+    |> Repromise.map(v => v == Ok(43));
+  }),
+
+  test(">|=, error", () => {
+    let open Repromise.Operators;
+    Repromise.resolved(Error(42))
+    >|= (n => n + 1)
+    |> Repromise.map(v => v == Error(42));
+  }),
+
+  test(">>=, ok", () => {
+    let open Repromise.Operators;
+    Repromise.resolved(Ok(42))
+    >>= (n => Repromise.resolved(Ok(n + 1)))
+    |> Repromise.map(v => v == Ok(43));
+  }),
+
+  test(">>=, error", () => {
+    let open Repromise.Operators;
+    Repromise.resolved(Error(42))
+    >>= (n => Repromise.resolved(Ok(n + 1)))
+    |> Repromise.map(v => v == Error(42));
+  }),
 ]);
 
 
