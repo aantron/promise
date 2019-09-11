@@ -1,4 +1,4 @@
-# Repromise &nbsp;&nbsp; [![Version 0.6.1][npm-img]][npm] [![Travis status][travis-img]][travis] [![Coverage][coveralls-img]][coveralls]
+# Repromise &nbsp;&nbsp;&nbsp; [![Version 0.6.1][npm-img]][npm] [![Travis status][travis-img]][travis] [![Coverage][coveralls-img]][coveralls]
 
 [npm-img]: https://img.shields.io/npm/v/@aantron/repromise.svg
 [npm]: https://www.npmjs.com/package/@aantron/repromise
@@ -7,27 +7,55 @@
 [coveralls]: https://coveralls.io/github/aantron/repromise?branch=master
 [coveralls-img]: https://img.shields.io/coveralls/aantron/repromise/master.svg
 
-Repromise is a binding to JS promises, with:
-
-- **Interop** &mdash; each Repromise [is a JS promise][representation], so JS libraries that return promises already return Repromises, and existing JS tooling should work.
-- **Type safety** &mdash; Repromises nest, and don't ["collapse"][broken] like JS promises.
-- **Explicit errors** &mdash; no baked-in `reject` or exception handling, so you can choose how to handle errors.
-- **Minimal code** &mdash; the compiled `repromise.js` compresses to about 1K.
-- **Native support** &mdash; Repromise also has a [pure-Reason implementation][native], which compiles to native code.
-
 <br/>
 
 ```reason
-let (p, resolve_p) = Repromise.make();
-
+let (p, resolveP) = Repromise.make();
 p
 |> Repromise.map(s => s ++ ", world!")
-|> Repromise.wait(print_endline);
+|> Repromise.wait(Js.log);
+resolveP("Hello");
 
-resolve_p("Hello");
-
-/* Prints "Hello, world!" */
+/* Hello, world! */
 ```
+
+<br/>
+
+**Repromise** is a simple Reason promise library. It has:
+
+- **Clean API** &mdash; correct types, unlike JS promises.
+- **Interop** &mdash; nonetheless, each Repromise is a JS promise underneath.
+You can `console.log` them 😄
+
+How does this work?
+
+It turns out that a cheap runtime check is all that's needed to make JS
+promises behave safely.
+
+So, Repromise is a very thin layer over the familiar JS `Promise`, which
+converts `Promise` into the kind of neat API you'd want to use in ReasonML.
+This gives...
+
+- **Simplicity** &mdash; no new runtime data types, no bookkeeping.
+- **Bindings** &mdash; anything that takes or returns `Promise`, already takes
+and returns Repromise.
+- **Tiny size**
+- **Memory safety** &mdash; Repromise avoids all known pitfalls of naive
+implementations.
+- **Semantics** &mdash; no timing issues, no starvation, etc. JS `Promise`
+actually gets this right 😆
+
+And finally, since the API is a clean start on promises...
+
+- **Better errors** &mdash; Repromises can't be rejected. Instead, they use
+`Result`.
+- **Ecosystem** &mdash; direct interop with Reason native and OCaml, with libuv
+and Lwt.
+
+Even though Repromise is simple, it has a ton of tests to make sure that JS
+`Promise` is behaving safely :smile: The tests also check that Repromise
+behaves the same way on BuckleScript and native, even checking timing and
+typical memory leaks!
 
 <br/>
 
@@ -38,7 +66,7 @@ npm install bs-platform
 npm install @aantron/repromise
 ```
 
-Add `@aantron/repromise` to your `bsconfig.json`:
+Then, add `@aantron/repromise` to your `bsconfig.json`:
 
 ```json
 {
@@ -50,53 +78,95 @@ Add `@aantron/repromise` to your `bsconfig.json`:
 
 <br/>
 
-## Sample projects
+## Tutorial
 
-We have a couple repos that show how to depend on Repromise and get started with it:
+To get started quickly, you can clone the starter repo:
 
-- [Minimal project that prints `"Hello, world!"`.][example-bsb]
-- [Minimal binding to a JS library, `node-fetch`.][example-binding]
+```
+git clone https://github.com/aantron/repromise-example-bsb tutorial
+cd tutorial
+npm install
+npm run test    /* To run the code. */
+```
+
+Open `main.re` and create a new promise with `Repromise.make`:
+
+```reason
+let (p, resolveP) = Repromise.make();
+Js.log(p);    /* Promise { <pending> } */
+```
+
+To resolve the promise, use `resolveP`:
+
+```reason
+let (p, resolveP) = Repromise.make();
+resolveP("Hi!");
+Js.log(p);    /* Promise { 'Hi!' } */
+```
+
+#### Waiting on promises
+
+To do something once a promise is resolved, use `wait`:
+
+```reason
+let (p, resolveP) = Repromise.make();
+p |> Repromise.wait(Js.log);
+resolveP("Hi!")    /* Hi! */
+```
+
+#### Transforming promises
+
+Use `map` for transforming the value inside a promise:
+
+```reason
+let (p, resolveP) = Repromise.make();
+p
+|> Repromise.map(s => s ++ ", there!")
+|> Repromise.wait(Js.log);
+resolveP("Hi");    /* Hi, there! */
+```
+
+To be a little more precise, `map` creates a new promise with the transformed
+value.
+
+If the function you are using to transform the promise also returns a promise,
+use `andThen` instead of `map`.
+
+#### Handling errors
+
+Potential errors are represented using Repromises that contain `Result`. Use
+`mapOk` to transform these promises:
+
+```reason
+let (p, resolveP) = Repromise.make();
+p
+|> Repromise.mapOk(s => s ++ ", there!")
+|> Repromise.waitOk(Js.log);
+resolveP(Ok("Hi"));    /* Hi, there! */
+```
+
+If you instead resolve the promise with `Error(_)`, there will be no output:
+
+```reason
+let (p, resolveP) = Repromise.make();
+p
+|> Repromise.mapOk(s => s ++ ", there!")
+|> Repromise.waitOk(Js.log);
+resolveP(Error("Oh no!"));
+```
+
+Apart from `mapOk`, there is also `mapError` for transforming the `Error`
+instead of the `Ok` value. There are also `waitOk`, `waitError`, `andThenOk`,
+and `andThenError` for all the other kinds of transformations.
 
 <br/>
 
-## Docs
+## Documentation
 
-...are [online][docs]!
+The full API can be neatly seen at a glance in the [`.rei` file][rei]. Repromise
+also has proper docs posted [online][docs], including how to write
+[bindings][bindings].
 
-To begin, we recommend looking at the [`"Hello, world!"` project][example-bsb], and then reading the [API docs][api]. Starting from [`wait`][Repromise.wait], each function has examples. You can paste them into the `"Hello, world!"` project to play around with Repromise.
-
-The [Design FAQ][design] gives some background about Repromise.
-
-To learn how to write bindings, we suggest starting with the [`node-fetch` project][example-binding], then reading the [Interop docs][interop], and perhaps the [rejectable API docs][rejectable].
-
-<br/>
-
-## Roadmap
-
-- [ ] Release [native implementation][native].
-- [ ] Helpers for converting `Repromise.Rejectable.t` to `Belt.Result.t`.
-- [ ] Smarter [async exception handling][onUnhandledException].
-
-<br/>
-
-## Contact
-
-Please don't hesitate to [open an issue][issue], or come [bug us on Discord][discord]. All questions, feedback, and [bikeshedding][bikeshedding] are welcome :)
-
-Repromise is at a pretty early stage of development, and we can change just about everything.
-
-[example-bsb]: https://github.com/aantron/repromise-example-bsb#readme
-[example-binding]: https://github.com/aantron/repromise-example-binding#readme
-[native]: https://github.com/aantron/repromise/blob/master/src/native/repromise.re
-[broken]: https://aantron.github.io/repromise/docs/DesignFAQ#why-are-js-promises-not-type-safe
-[rejectable]: https://aantron.github.io/repromise/docs/RejectableAPI
-[design]: https://aantron.github.io/repromise/docs/DesignFAQ
-[Repromise.wait]: https://aantron.github.io/repromise/docs/API#wait
-[api]: https://aantron.github.io/repromise/docs/API
-[docs]: https://aantron.github.io/repromise
-[interop]: https://aantron.github.io/repromise/docs/Interop
-[issue]: https://github.com/aantron/repromise/issues/new
-[discord]: https://discordapp.com/invite/reasonml
-[representation]: https://aantron.github.io/repromise/docs/Interop#representation
-[onUnhandledException]: https://aantron.github.io/repromise/docs/API#onunhandledexception
-[bikeshedding]: https://github.com/aantron/repromise/issues/22
+[rei]: https://github.com/aantron/repromise/blob/readme/src/js/repromise.rei
+[docs]: https://aantron.github.io/repromise/
+[bindings]: https://aantron.github.io/repromise/docs/Interop

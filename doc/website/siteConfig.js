@@ -2,7 +2,7 @@ const resaurus = require("resaurus");
 
 const siteConfig = {
   title: 'Repromise',
-  tagline: 'Type-safe JS promises for ReasonML',
+  tagline: 'Clean promise API for Reason',
   url: 'https://aantron.github.io/repromise',
   baseUrl: '/repromise/',
 
