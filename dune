@@ -1,1 +1,1 @@
-(ignored_subdirs (node_modules))
+(ignored_subdirs (doc esy.lock lib node_modules))
