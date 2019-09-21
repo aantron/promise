@@ -549,3 +549,9 @@ let make = () => {
   let (p, resolve, _) = Rejectable.make();
   (p, resolve);
 }
+
+let exec = executor => {
+  let (p, resolve) = make();
+  executor(resolve);
+  p;
+};

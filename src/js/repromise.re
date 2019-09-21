@@ -223,6 +223,12 @@ let make = () => {
   (p, resolve);
 };
 
+let exec = executor => {
+  let (p, resolve) = make();
+  executor(resolve);
+  p;
+};
+
 let resolved = Rejectable.resolved;
 let andThen = Rejectable.andThen;
 let map = Rejectable.map;

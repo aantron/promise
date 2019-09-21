@@ -15,6 +15,8 @@ type t('a) = promise('a);
 /* Main API. */
 let make: unit => (promise('a), 'a => unit);
 
+let exec: (('a => unit) => unit) => promise('a);
+
 let resolved: 'a => promise('a);
 
 let map: ('a => 'b, promise('a)) => promise('b);

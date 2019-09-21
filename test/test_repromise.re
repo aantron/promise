@@ -98,6 +98,10 @@ let basicTests = Framework.suite("basic", [
         n == 42 && n' == 42)});
   }),
 
+  test("exec", () => {
+    Repromise.exec(resolve => resolve(true));
+  }),
+
   test("callback order (already resolved)", () => {
     let firstCallbackCalled = ref(false);
     let p = Repromise.resolved();
