@@ -17,10 +17,10 @@ let basicTests = Framework.suite("basic", [
     Repromise.resolved(true);
   }),
 
-  test("wait", () => {
+  test("on", () => {
     let correct = ref(false);
     Repromise.resolved(1)
-    |> Repromise.wait(n => correct := (n == 1));
+    |> Repromise.on(n => correct := (n == 1));
     Repromise.resolved()
     |> Repromise.map(() => correct^)
   }),
@@ -531,34 +531,34 @@ let resultTests = Framework.suite("result", [
     |> Repromise.map(v => v == Error(43));
   }),
 
-  test("waitOk, ok", () => {
+  test("onOk, ok", () => {
     let (p, resolve) = Repromise.make();
     Repromise.resolved(Ok(42))
-    |> Repromise.waitOk(n => resolve(n + 1));
+    |> Repromise.onOk(n => resolve(n + 1));
     p
     |> Repromise.map(n => n == 43);
   }),
 
-  test("waitOk, error", () => {
+  test("onOk, error", () => {
     let called = ref(false);
     Repromise.resolved(Error(42))
-    |> Repromise.waitOk(_ => called := true);
+    |> Repromise.onOk(_ => called := true);
     Repromise.resolved()
     |> Repromise.map(() => !called^);
   }),
 
-  test("waitError, ok", () => {
+  test("onError, ok", () => {
     let called = ref(false);
     Repromise.resolved(Ok(42))
-    |> Repromise.waitError(_ => called := true);
+    |> Repromise.onError(_ => called := true);
     Repromise.resolved()
     |> Repromise.map(() => !called^);
   }),
 
-  test("waitError, error", () => {
+  test("onError, error", () => {
     let (p, resolve) = Repromise.make();
     Repromise.resolved(Error(42))
-    |> Repromise.waitError(n => resolve(n + 1));
+    |> Repromise.onError(n => resolve(n + 1));
     p
     |> Repromise.map(n => n == 43);
   }),
@@ -631,18 +631,18 @@ let optionTests = Framework.suite("opton", [
     |> Repromise.map(v => v == None);
   }),
 
-  test("waitSome, some", () => {
+  test("onSome, some", () => {
     let (p, resolve) = Repromise.make();
     Repromise.resolved(Some(42))
-    |> Repromise.waitSome(n => resolve(n + 1));
+    |> Repromise.onSome(n => resolve(n + 1));
     p
     |> Repromise.map(n => n == 43);
   }),
 
-  test("waitSome, none", () => {
+  test("onSome, none", () => {
     let called = ref(false);
     Repromise.resolved(None)
-    |> Repromise.waitSome(_ => called := true);
+    |> Repromise.onSome(_ => called := true);
     Repromise.resolved()
     |> Repromise.map(() => !called^);
   }),

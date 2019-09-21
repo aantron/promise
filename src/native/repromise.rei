@@ -21,7 +21,7 @@ let resolved: 'a => promise('a);
 
 let map: ('a => 'b, promise('a)) => promise('b);
 
-let wait: ('a => unit, promise('a)) => unit;
+let on: ('a => unit, promise('a)) => unit;
 
 let andThen: ('a => promise('b), promise('a)) => promise('b);
 
@@ -65,10 +65,10 @@ let mapOk:
 let mapError:
   ('e => 'e2, promise(result('a, 'e))) => promise(result('a, 'e2));
 
-let waitOk:
+let onOk:
   ('a => unit, promise(result('a, _))) => unit;
 
-let waitError:
+let onError:
   ('e => unit, promise(result(_, 'e))) => unit;
 
 let andThenOk:
@@ -94,7 +94,7 @@ module Operators: {
 let mapSome:
   ('a => 'b, promise(option('a))) => promise(option('b));
 
-let waitSome:
+let onSome:
   ('a => unit, promise(option('a))) => unit;
 
 let andThenSome:
@@ -119,7 +119,7 @@ module Rejectable: {
 
   let map: ('a => 'b, rejectable('a, 'e)) => rejectable('b, 'e);
 
-  let wait: ('a => unit, rejectable('a, _)) => unit;
+  let on: ('a => unit, rejectable('a, _)) => unit;
 
   let catch:
     ('e => rejectable('a, 'e2), rejectable('a, 'e)) => rejectable('a, 'e2);

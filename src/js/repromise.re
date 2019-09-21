@@ -152,7 +152,7 @@ module Rejectable = {
     ('a => 'b, rejectable('a, 'e)) => rejectable('b, 'e) =
       "map";
 
-  let wait = (callback, promise) =>
+  let on = (callback, promise) =>
     promise |> map(callback) |> ignore;
 
   [@bs.scope "Promise"]
@@ -232,7 +232,7 @@ let exec = executor => {
 let resolved = Rejectable.resolved;
 let andThen = Rejectable.andThen;
 let map = Rejectable.map;
-let wait = Rejectable.wait;
+let on = Rejectable.on;
 let all = Rejectable.all;
 let all2 = Rejectable.all2;
 let all3 = Rejectable.all3;
@@ -275,15 +275,15 @@ let mapError = (_callback, promise) =>
     | Error(_) => Error([%raw "_callback(result[0])"])
     });
 
-let waitOk = (_callback, promise) =>
-  promise |> wait(result =>
+let onOk = (_callback, promise) =>
+  promise |> on(result =>
     switch (result) {
     | Ok(_) => [%raw "_callback(result[0])"]
     | Error(_) => ()
     });
 
-let waitError = (_callback, promise) =>
-  promise |> wait(result =>
+let onError = (_callback, promise) =>
+  promise |> on(result =>
     switch (result) {
     | Ok(_) => ()
     | Error(_) => [%raw "_callback(result[0])"]
@@ -313,8 +313,8 @@ let mapSome = (_callback, promise) =>
     | None => None
     });
 
-let waitSome = (_callback, promise) =>
-  promise |> wait(option =>
+let onSome = (_callback, promise) =>
+  promise |> on(option =>
     switch (option) {
     | Some(_) => [%raw "_callback(Caml_option.valFromOption(option))"]
     | None => ()

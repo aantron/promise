@@ -211,7 +211,7 @@ let andThen = (callback, promise) => {
 let map = (mapper, promise) =>
   andThen(value => resolved(mapper(value)), promise);
 
-let wait = (callback, promise) =>
+let on = (callback, promise) =>
   map(callback, promise) |> ignore;
 
 let catch = (callback, promise) => {
@@ -484,13 +484,13 @@ let mapError = (callback, promise) =>
     | Ok(_) as ok => ok
     | Error(error) => Error(callback(error)));
 
-let waitOk = (callback, promise) =>
-  promise |> wait(fun
+let onOk = (callback, promise) =>
+  promise |> on(fun
     | Ok(value) => callback(value)
     | Error(_) => ());
 
-let waitError = (callback, promise) =>
-  promise |> wait(fun
+let onError = (callback, promise) =>
+  promise |> on(fun
     | Ok(_) => ()
     | Error(error) => callback(error));
 
@@ -514,8 +514,8 @@ let mapSome = (callback, promise) =>
     | Some(value) => Some(callback(value))
     | None => None);
 
-let waitSome = (callback, promise) =>
-  promise |> wait(fun
+let onSome = (callback, promise) =>
+  promise |> on(fun
     | Some(value) => callback(value)
     | None => ());
 
@@ -537,7 +537,7 @@ module Rejectable = {
   let rejected = rejected;
   let andThen = andThen;
   let map = map;
-  let wait = wait;
+  let on = on;
   let catch = catch;
   let all = all;
   let race = race;
