@@ -143,7 +143,7 @@ module Rejectable = {
   external resolved: 'a => rejectable('a, _) = "resolved";
 
   [@bs.val]
-  external andThen:
+  external flatMap:
     ('a => rejectable('b, 'e), rejectable('a, 'e)) => rejectable('b, 'e) =
       "then";
 
@@ -230,7 +230,7 @@ let exec = executor => {
 };
 
 let resolved = Rejectable.resolved;
-let andThen = Rejectable.andThen;
+let flatMap = Rejectable.flatMap;
 let map = Rejectable.map;
 let on = Rejectable.on;
 let all = Rejectable.all;
@@ -247,15 +247,15 @@ let race = Rejectable.race;
 /* Compatibility with BukleScript < 6. */
 type result('a, 'e) = Belt.Result.t('a, 'e) = Ok('a) | Error('e);
 
-let andThenOk = (_callback, promise) =>
-  promise |> andThen(result =>
+let flatMapOk = (_callback, promise) =>
+  promise |> flatMap(result =>
     switch (result) {
     | Ok(_) => [%raw "_callback(result[0])"]
     | Error(_) as error => resolved(error)
     });
 
-let andThenError = (_callback, promise) =>
-  promise |> andThen(result =>
+let flatMapError = (_callback, promise) =>
+  promise |> flatMap(result =>
     switch (result) {
     | Ok(_) as ok => resolved(ok)
     | Error(_) => [%raw "_callback(result[0])"]
@@ -294,13 +294,13 @@ module Operators = {
     mapOk(callback, promise);
 
   let (>>=) = (promise, callback) =>
-    andThenOk(callback, promise);
+    flatMapOk(callback, promise);
 };
 
 
 
-let andThenSome = (_callback, promise) =>
-  promise |> andThen(option =>
+let flatMapSome = (_callback, promise) =>
+  promise |> flatMap(option =>
     switch (option) {
     | Some(_) => [%raw "_callback(Caml_option.valFromOption(option))"]
     | None => resolved(None)

@@ -54,7 +54,7 @@ let run_test = test =>
   }
   else {
     test.run()
-    |> Repromise.andThen(test_did_pass =>
+    |> Repromise.flatMap(test_did_pass =>
       if (test_did_pass) {
         Repromise.resolved(Passed)
       }
@@ -109,7 +109,7 @@ let run_test_suite: suite => Repromise.t(suite_outcomes) = suite =>
       | [] => Repromise.resolved(List.rev(reversed_outcomes))
       | [test, ...more_tests] =>
         run_test(test)
-        |> Repromise.andThen(new_outcome => {
+        |> Repromise.flatMap(new_outcome => {
           new_outcome |> outcome_to_character |> print_char;
           flush(stdout);
           let outcome_with_name = (test.test_name, new_outcome);
@@ -180,7 +180,7 @@ let run = (library_name, suites) => {
 
     | [suite, ...rest] =>
       run_test_suite(suite)
-      |> Repromise.andThen(outcomes =>
+      |> Repromise.flatMap(outcomes =>
         if (!outcomes_all_ok(outcomes)) {
           print_newline();
           flush(stdout);

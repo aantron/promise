@@ -23,7 +23,7 @@ let map: ('a => 'b, promise('a)) => promise('b);
 
 let on: ('a => unit, promise('a)) => unit;
 
-let andThen: ('a => promise('b), promise('a)) => promise('b);
+let flatMap: ('a => promise('b), promise('a)) => promise('b);
 
 let all: list(promise('a)) => promise(list('a));
 
@@ -71,11 +71,11 @@ let onOk:
 let onError:
   ('e => unit, promise(result(_, 'e))) => unit;
 
-let andThenOk:
+let flatMapOk:
   ('a => promise(result('b, 'e)), promise(result('a, 'e))) =>
     promise(result('b, 'e));
 
-let andThenError:
+let flatMapError:
   ('e => promise(result('a, 'e2)), promise(result('a, 'e))) =>
     promise(result('a, 'e2));
 
@@ -97,7 +97,7 @@ let mapSome:
 let onSome:
   ('a => unit, promise(option('a))) => unit;
 
-let andThenSome:
+let flatMapSome:
   ('a => promise(option('b)), promise(option('a))) => promise(option('b));
 
 
@@ -118,7 +118,7 @@ module Rejectable: {
 
   let on: ('a => unit, rejectable('a, _)) => unit;
 
-  let andThen:
+  let flatMap:
     ('a => rejectable('b, 'e), rejectable('a, 'e)) => rejectable('b, 'e);
 
   let catch:

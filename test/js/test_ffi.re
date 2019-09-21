@@ -46,11 +46,11 @@ let interopTests = Framework.suite("interop", [
     Repromise.resolved(isPromise(p));
   }),
 
-  test("andThen is js promise", () => {
+  test("flatMap is js promise", () => {
     let p =
       Repromise.make()
       |> fst
-      |> Repromise.andThen((_) => Repromise.resolved());
+      |> Repromise.flatMap((_) => Repromise.resolved());
     Repromise.resolved(isPromise(p));
   }),
 
@@ -73,8 +73,8 @@ let interopTests = Framework.suite("interop", [
   test("js promise is repromise", () => {
     let js_promise: Repromise.t(int) = [%bs.raw {|Promise.resolve(1)|}];
     js_promise
-    |> Repromise.andThen(n => Repromise.resolved(n + 1))
-    |> Repromise.andThen(n => Repromise.resolved(n == 2));
+    |> Repromise.flatMap(n => Repromise.resolved(n + 1))
+    |> Repromise.flatMap(n => Repromise.resolved(n == 2));
   }),
 
   test("repromise as js argument", () => {
@@ -85,7 +85,7 @@ let interopTests = Framework.suite("interop", [
     };
     Repromise.resolved(1)
     |> Then.js_then(n => Repromise.resolved(n + 1))
-    |> Repromise.andThen(n => Repromise.resolved(n == 2));
+    |> Repromise.flatMap(n => Repromise.resolved(n == 2));
   }),
 
   test("coerce from Js.Promise", () => {
@@ -126,7 +126,7 @@ let isPromiseResolvedWith42 = p =>
     Repromise.resolved(false);
   }
   else {
-    p |> Repromise.andThen(n => Repromise.resolved(n == 42));
+    p |> Repromise.flatMap(n => Repromise.resolved(n == 42));
   };
 
 let isPromiseRejectedWith42 = p =>
@@ -141,7 +141,7 @@ let soundnessTests = Framework.suite("soundness", [
   test("make: resolved, resolve", () => {
     let (p, resolve) = Repromise.make();
     resolve(Repromise.resolved(42));
-    p |> Repromise.andThen(isPromiseResolvedWith42);
+    p |> Repromise.flatMap(isPromiseResolvedWith42);
   }),
 
   test("make: resolve, reject", () => {
@@ -153,7 +153,7 @@ let soundnessTests = Framework.suite("soundness", [
   test("make: rejected, resolve", () => {
     let (p, resolve) = Repromise.make();
     resolve(Repromise.Rejectable.rejected(42));
-    p |> Repromise.andThen(isPromiseRejectedWith42);
+    p |> Repromise.flatMap(isPromiseRejectedWith42);
   }),
 
   test("make: rejected, reject", () => {
@@ -164,12 +164,12 @@ let soundnessTests = Framework.suite("soundness", [
 
   test("resolve: resolved", () => {
     Repromise.resolved(Repromise.resolved(42))
-    |> Repromise.andThen(isPromiseResolvedWith42);
+    |> Repromise.flatMap(isPromiseResolvedWith42);
   }),
 
   test("resolve: rejected", () => {
     Repromise.resolved(Repromise.Rejectable.rejected(42))
-    |> Repromise.andThen(isPromiseRejectedWith42);
+    |> Repromise.flatMap(isPromiseRejectedWith42);
   }),
 
   test("rejected: resolved", () => {
@@ -182,15 +182,15 @@ let soundnessTests = Framework.suite("soundness", [
     |> Repromise.Rejectable.catch(isPromiseRejectedWith42);
   }),
 
-  test("andThen: resolved", () => {
+  test("flatMap: resolved", () => {
     Repromise.resolved()
-    |> Repromise.andThen(() => Repromise.resolved(Repromise.resolved(42)))
-    |> Repromise.andThen(isPromiseResolvedWith42);
+    |> Repromise.flatMap(() => Repromise.resolved(Repromise.resolved(42)))
+    |> Repromise.flatMap(isPromiseResolvedWith42);
   }),
 
-  test("andThen: rejected", () => {
+  test("flatMap: rejected", () => {
     Repromise.Rejectable.resolved()
-    |> Repromise.Rejectable.andThen(() =>
+    |> Repromise.Rejectable.flatMap(() =>
       Repromise.Rejectable.rejected(Repromise.Rejectable.rejected(42)))
     |> Repromise.Rejectable.catch(isPromiseRejectedWith42);
   }),
@@ -198,20 +198,20 @@ let soundnessTests = Framework.suite("soundness", [
   test("map: resolved", () => {
     Repromise.resolved()
     |> Repromise.map(() => Repromise.resolved(42))
-    |> Repromise.andThen(isPromiseResolvedWith42);
+    |> Repromise.flatMap(isPromiseResolvedWith42);
   }),
 
   test("map: rejected", () => {
     Repromise.resolved()
     |> Repromise.map(() => Repromise.Rejectable.rejected(42))
-    |> Repromise.andThen(isPromiseRejectedWith42);
+    |> Repromise.flatMap(isPromiseRejectedWith42);
   }),
 
   test("catch: resolved", () => {
     Repromise.Rejectable.rejected()
     |> Repromise.Rejectable.catch(() =>
       Repromise.resolved(Repromise.resolved(42)))
-    |> Repromise.andThen(isPromiseResolvedWith42);
+    |> Repromise.flatMap(isPromiseResolvedWith42);
   }),
 
   test("catch: rejected", () => {
@@ -224,12 +224,12 @@ let soundnessTests = Framework.suite("soundness", [
   test("make: JS promise", () => {
     let (p, resolve) = Repromise.make();
     resolve(Js.Promise.resolve());
-    p |> Repromise.andThen(p => Repromise.resolved(jsPromiseIsPromise(p)));
+    p |> Repromise.flatMap(p => Repromise.resolved(jsPromiseIsPromise(p)));
   }),
 
   test("resolved: JS promise", () => {
     Repromise.resolved(Js.Promise.resolve())
-    |> Repromise.andThen(p => Repromise.resolved(jsPromiseIsPromise(p)));
+    |> Repromise.flatMap(p => Repromise.resolved(jsPromiseIsPromise(p)));
   }),
 
   test("rejected: JS promise", () => {
@@ -240,19 +240,19 @@ let soundnessTests = Framework.suite("soundness", [
 
   test("resolved: Promise-like", () => {
     Repromise.resolved(makePromiseLike())
-    |> Repromise.andThen(p => Repromise.resolved(jsPromiseIsPromiseLike(p)));
+    |> Repromise.flatMap(p => Repromise.resolved(jsPromiseIsPromiseLike(p)));
   }),
 
   test("resolved: Almost-Promise-like", () => {
     Repromise.resolved(makeAlmostPromiseLike(42))
-    |> Repromise.andThen(x => Repromise.resolved(x##_then == 42));
+    |> Repromise.flatMap(x => Repromise.resolved(x##_then == 42));
   }),
 
   test("all", () => {
     let (p1, resolve) = Repromise.make();
     let p2 = Repromise.all([p1]);
     resolve(Repromise.resolved(42));
-    p2 |> Repromise.andThen(results =>
+    p2 |> Repromise.flatMap(results =>
       switch (results) {
       | [maybePromise] => isPromiseResolvedWith42(maybePromise)
       | _ => Repromise.resolved(false)
@@ -272,7 +272,7 @@ let soundnessTests = Framework.suite("soundness", [
     let (p1, resolve) = Repromise.make();
     let p2 = Repromise.race([p1]);
     resolve(Repromise.resolved(42));
-    p2 |> Repromise.andThen(isPromiseResolvedWith42);
+    p2 |> Repromise.flatMap(isPromiseResolvedWith42);
   }),
 
   test("race, rejection", () => {

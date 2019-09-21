@@ -27,7 +27,7 @@ type t('a) = promise('a);
 
 
 /* The `Merged constructor and this function, underlying, are used to avoid a
-   memory leak that arises when andThen is called on promises in a loop. See the
+   memory leak that arises when flatMap is called on promises in a loop. See the
    description in the associated test "promise loop memory leak". The rest of
    this comment is based on that description.
 
@@ -157,7 +157,7 @@ let makePromiseBehaveAs = (outerPromise, nestedPromise) => {
     | `Fulfilled(_)
     | `Rejected(_) =>
       /* These two cases are impossible, because if makePromiseBehaveAs is
-         called, andThen or catch_ called the callback that was passed to it, so
+         called, flatMap or catch_ called the callback that was passed to it, so
          the outer promise is still pending. It is this function which resolves
          the outer promise. */
       assert(false);
@@ -178,7 +178,7 @@ let makePromiseBehaveAs = (outerPromise, nestedPromise) => {
   };
 };
 
-let andThen = (callback, promise) => {
+let flatMap = (callback, promise) => {
   let outerPromise = newInternal();
 
   let onResolve = value =>
@@ -209,7 +209,7 @@ let andThen = (callback, promise) => {
 };
 
 let map = (mapper, promise) =>
-  andThen(value => resolved(mapper(value)), promise);
+  flatMap(value => resolved(mapper(value)), promise);
 
 let on = (callback, promise) =>
   map(callback, promise) |> ignore;
@@ -464,13 +464,13 @@ type result('a, 'e) = Result.result('a, 'e);
 
 open Result
 
-let andThenOk = (callback, promise) =>
-  promise |> andThen(fun
+let flatMapOk = (callback, promise) =>
+  promise |> flatMap(fun
     | Ok(value) => callback(value)
     | Error(_) as error => resolved(error));
 
-let andThenError = (callback, promise) =>
-  promise |> andThen(fun
+let flatMapError = (callback, promise) =>
+  promise |> flatMap(fun
     | Ok(_) as ok => resolved(ok)
     | Error(error) => callback(error));
 
@@ -499,13 +499,13 @@ module Operators = {
     mapOk(callback, promise);
 
   let (>>=) = (promise, callback) =>
-    andThenOk(callback, promise);
+    flatMapOk(callback, promise);
 };
 
 
 
-let andThenSome = (callback, promise) =>
-  promise |> andThen(fun
+let flatMapSome = (callback, promise) =>
+  promise |> flatMap(fun
     | Some(value) => callback(value)
     | None => resolved(None));
 
@@ -535,7 +535,7 @@ module Rejectable = {
 
   let resolved = resolved;
   let rejected = rejected;
-  let andThen = andThen;
+  let flatMap = flatMap;
   let map = map;
   let on = on;
   let catch = catch;

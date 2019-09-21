@@ -9,7 +9,7 @@ let test = Framework.test;
 
 
 let basicTests = Framework.suite("basic", [
-  /* The basic [resolved]-[andThen] tests are a bit useless, because the testing
+  /* The basic [resolved]-[flatMap] tests are a bit useless, because the testing
      framework itself already uses both [resolved] and [then], i.e. every test
      implicitly tests those. However, we include these for completeness, in case
      we become enlightened and rewrite the framework in CPS or something.  */
@@ -25,14 +25,14 @@ let basicTests = Framework.suite("basic", [
     |> Repromise.map(() => correct^)
   }),
 
-  test("andThen", () => {
+  test("flatMap", () => {
     Repromise.resolved(1)
-    |> Repromise.andThen(n => Repromise.resolved(n == 1));
+    |> Repromise.flatMap(n => Repromise.resolved(n == 1));
   }),
 
   test("map", () => {
     let p = Repromise.resolved(6) |> Repromise.map(v => v * 7);
-    p |> Repromise.andThen(r => Repromise.resolved(r == 42));
+    p |> Repromise.flatMap(r => Repromise.resolved(r == 42));
   }),
 
   test("map chain", () => {
@@ -40,40 +40,40 @@ let basicTests = Framework.suite("basic", [
       Repromise.resolved(6)
       |> Repromise.map(v => v * 7)
       |> Repromise.map(r => r * 10);
-    p |> Repromise.andThen(r => Repromise.resolved(r == 420));
+    p |> Repromise.flatMap(r => Repromise.resolved(r == 420));
   }),
 
   test("map soundness", () => {
       Repromise.resolved(6)
       |> Repromise.map(v => v * 7)
       |> Repromise.map(x => Repromise.resolved(x == 42))
-      |> Repromise.andThen(r => r);
+      |> Repromise.flatMap(r => r);
   }),
 
-  test("andThen chain", () => {
+  test("flatMap chain", () => {
     Repromise.resolved(1)
-    |> Repromise.andThen(n => Repromise.resolved(n + 1))
-    |> Repromise.andThen(n => Repromise.resolved(n == 2));
+    |> Repromise.flatMap(n => Repromise.resolved(n + 1))
+    |> Repromise.flatMap(n => Repromise.resolved(n == 2));
   }),
 
-  test("andThen nested", () => {
+  test("flatMap nested", () => {
     Repromise.resolved(1)
-    |> Repromise.andThen (n =>
+    |> Repromise.flatMap (n =>
       Repromise.resolved(n + 1)
-      |> Repromise.andThen (n => Repromise.resolved(n + 1)))
-    |> Repromise.andThen (n => Repromise.resolved(n == 3));
+      |> Repromise.flatMap (n => Repromise.resolved(n + 1)))
+    |> Repromise.flatMap (n => Repromise.resolved(n == 3));
   }),
 
   /* If promises are implemented on JS directly as ordinary JS promises,
      [resolved(resolved(42))] will collapse to just a [promise(int)], even
      though the Reason type is [promise(promise(int))]. This causes a soundness
-     bug, because, due to the type, the callback of [andThen] will expect the
+     bug, because, due to the type, the callback of [flatMap] will expect the
      nested value to be a [promise(int)]. A correct implementation of Reason
      promises on JS will avoid this bug. */
   test("no collapsing", () => {
     Repromise.resolved(Repromise.resolved(1))
-    |> Repromise.andThen(p =>
-      p |> Repromise.andThen(n => Repromise.resolved(n == 1)));
+    |> Repromise.flatMap(p =>
+      p |> Repromise.flatMap(n => Repromise.resolved(n == 1)));
   }),
 
   test("make", () => {
@@ -84,7 +84,7 @@ let basicTests = Framework.suite("basic", [
 
   test("defer", () => {
     let (p, resolve) = Repromise.make();
-    let p' = p |> Repromise.andThen(n => Repromise.resolved(n == 1));
+    let p' = p |> Repromise.flatMap(n => Repromise.resolved(n == 1));
     resolve(1);
     p';
   }),
@@ -92,7 +92,7 @@ let basicTests = Framework.suite("basic", [
   test("double resolve", () => {
     let (p, resolve) = Repromise.make();
     resolve(42);
-    p |> Repromise.andThen(n => {
+    p |> Repromise.flatMap(n => {
       resolve(43);
       p |> Repromise.map(n' =>
         n == 42 && n' == 42)});
@@ -145,16 +145,16 @@ let rejectTests = Framework.suite("reject", [
     |> Repromise.Rejectable.catch(s => Repromise.resolved(s == "foo"));
   }),
 
-  test("andThen, reject, catch", () => {
+  test("flatMap, reject, catch", () => {
     Repromise.Rejectable.resolved(1)
-    |> Repromise.Rejectable.andThen(n => Repromise.Rejectable.rejected(n + 1))
+    |> Repromise.Rejectable.flatMap(n => Repromise.Rejectable.rejected(n + 1))
     |> Repromise.Rejectable.catch(n => Repromise.resolved(n == 2));
   }),
 
-  test("reject, catch, andThen", () => {
+  test("reject, catch, flatMap", () => {
     Repromise.Rejectable.rejected(1)
     |> Repromise.Rejectable.catch(n => Repromise.resolved(n + 1))
-    |> Repromise.andThen(n => Repromise.resolved(n == 2));
+    |> Repromise.flatMap(n => Repromise.resolved(n == 2));
   }),
 
   test("no double catch", () => {
@@ -174,9 +174,9 @@ let rejectTests = Framework.suite("reject", [
     |> Repromise.Rejectable.catch((_) => Repromise.resolved(false));
   }),
 
-  test("no catching resolved, after andThen", () => {
+  test("no catching resolved, after flatMap", () => {
     Repromise.resolved()
-    |> Repromise.andThen(() => Repromise.resolved(true))
+    |> Repromise.flatMap(() => Repromise.resolved(true))
     |> Repromise.Rejectable.catch((_) => Repromise.resolved(false));
   }),
 ]);
@@ -190,7 +190,7 @@ let remainsPending = (p, dummyValue) => {
     }
     else {
       f ()
-      |> Repromise.andThen(result =>
+      |> Repromise.flatMap(result =>
         if (!result) {
           Repromise.resolved(false);
         }
@@ -201,7 +201,7 @@ let remainsPending = (p, dummyValue) => {
 
   repeat(10, () =>
     Repromise.race([p, Repromise.resolved(dummyValue)])
-    |> Repromise.andThen(v1 =>
+    |> Repromise.flatMap(v1 =>
       Repromise.race([Repromise.resolved(dummyValue), p])
       |> Repromise.map(v2 =>
         v1 == dummyValue && v2 == dummyValue)));
@@ -241,7 +241,7 @@ let allTests = Framework.suite("all", [
     let (p1, _, _) = Repromise.Rejectable.make();
     let p2 = Repromise.Rejectable.all([p1, Repromise.Rejectable.rejected(43)]);
     p2
-    |> Repromise.Rejectable.andThen((_) => Repromise.Rejectable.resolved(false))
+    |> Repromise.Rejectable.flatMap((_) => Repromise.Rejectable.resolved(false))
     |> Repromise.Rejectable.catch(n => Repromise.resolved(n == 43));
   }),
 
@@ -251,7 +251,7 @@ let allTests = Framework.suite("all", [
     let p3 = Repromise.Rejectable.all([p1, p2]);
     rejectP1(42);
     p3
-    |> Repromise.Rejectable.andThen((_) => Repromise.Rejectable.resolved(false))
+    |> Repromise.Rejectable.flatMap((_) => Repromise.Rejectable.resolved(false))
     |> Repromise.Rejectable.catch(n => Repromise.resolved(n == 42));
   }),
 
@@ -263,9 +263,9 @@ let allTests = Framework.suite("all", [
     resolveP2(43);
     p2
     |> Repromise.Rejectable.catch((_) => assert false)
-    |> Repromise.Rejectable.andThen((_) =>
+    |> Repromise.Rejectable.flatMap((_) =>
       p3
-      |> Repromise.Rejectable.andThen((_) =>
+      |> Repromise.Rejectable.flatMap((_) =>
         Repromise.Rejectable.resolved(false))
       |> Repromise.Rejectable.catch(n => Repromise.resolved(n == 42)));
   }),
@@ -454,46 +454,46 @@ let raceTests = Framework.suite("race", [
   }),
 
   /* This test is for an implementation detail. When a pending promise p is
-     returned by the callback of andThen, the native implementation (and
+     returned by the callback of flatMap, the native implementation (and
      non-memory-leaking JavaScript implementations) will move the callbacks
-     attached to p into the list attached to the outer promise of andThen. We
+     attached to p into the list attached to the outer promise of flatMap. We
      want to make sure that callbacks attached by race survive this moving. For
      that, p has to be involved in a call to race. */
   test("race, then callbacks moved", () => {
     let (p, resolve) = Repromise.make();
     let final = Repromise.race([p]);
 
-    /* We are using this resolve() just so we can call andThen on it,
+    /* We are using this resolve() just so we can call flatMap on it,
        guaranteeing that the second time will run after the first time.. */
     let delay = Repromise.resolved();
 
     delay
-    |> Repromise.andThen(fun () => p)
+    |> Repromise.flatMap(fun () => p)
     |> ignore;
 
     delay
-    |> Repromise.andThen(fun () => {
+    |> Repromise.flatMap(fun () => {
       resolve(42);
       /* This tests now succeeds only if resolving p resolved final^, despite
-         the fact that p was returned to andThen while still a pending
+         the fact that p was returned to flatMap while still a pending
          promise. */
       final |> Repromise.map(n => n == 42);
     });
   }),
 
   /* Similar to the preceding test, but the race callback is attached to p after
-     its callback list has been merged with the outer promise of andThen. */
+     its callback list has been merged with the outer promise of flatMap. */
   test("callbacks moved, then race", () => {
     let (p, resolve) = Repromise.make();
 
     let delay = Repromise.resolved();
 
     delay
-    |> Repromise.andThen(fun () => p)
+    |> Repromise.flatMap(fun () => p)
     |> ignore;
 
     delay
-    |> Repromise.andThen(fun () => {
+    |> Repromise.flatMap(fun () => {
       let final = Repromise.race([p]);
       resolve(42);
       final |> Repromise.map(n => n == 42);
@@ -563,27 +563,27 @@ let resultTests = Framework.suite("result", [
     |> Repromise.map(n => n == 43);
   }),
 
-  test("andThenOk, ok", () => {
+  test("flatMapOk, ok", () => {
     Repromise.resolved(Ok(42))
-    |> Repromise.andThenOk(n => Repromise.resolved(Ok(n + 1)))
+    |> Repromise.flatMapOk(n => Repromise.resolved(Ok(n + 1)))
     |> Repromise.map(v => v == Ok(43));
   }),
 
-  test("andThenOk, error", () => {
+  test("flatMapOk, error", () => {
     Repromise.resolved(Error(42))
-    |> Repromise.andThenOk(n => Repromise.resolved(Ok(n + 1)))
+    |> Repromise.flatMapOk(n => Repromise.resolved(Ok(n + 1)))
     |> Repromise.map(v => v == Error(42));
   }),
 
-  test("andThenError, ok", () => {
+  test("flatMapError, ok", () => {
     Repromise.resolved(Ok(42))
-    |> Repromise.andThenError(n => Repromise.resolved(Error(n + 1)))
+    |> Repromise.flatMapError(n => Repromise.resolved(Error(n + 1)))
     |> Repromise.map(v => v == Ok(42));
   }),
 
-  test("andThenError, error", () => {
+  test("flatMapError, error", () => {
     Repromise.resolved(Error(42))
-    |> Repromise.andThenError(n => Repromise.resolved(Error(n + 1)))
+    |> Repromise.flatMapError(n => Repromise.resolved(Error(n + 1)))
     |> Repromise.map(v => v == Error(43));
   }),
 
@@ -647,15 +647,15 @@ let optionTests = Framework.suite("opton", [
     |> Repromise.map(() => !called^);
   }),
 
-  test("andThenSome, some", () => {
+  test("flatMapSome, some", () => {
     Repromise.resolved(Some(42))
-    |> Repromise.andThenSome(n => Repromise.resolved(Some(n + 1)))
+    |> Repromise.flatMapSome(n => Repromise.resolved(Some(n + 1)))
     |> Repromise.map(v => v == Some(43));
   }),
 
-  test("andThenSome, none", () => {
+  test("flatMapSome, none", () => {
     Repromise.resolved(None)
-    |> Repromise.andThenSome(n => Repromise.resolved(Some(n + 1)))
+    |> Repromise.flatMapSome(n => Repromise.resolved(Some(n + 1)))
     |> Repromise.map(v => v == None);
   }),
 ]);
