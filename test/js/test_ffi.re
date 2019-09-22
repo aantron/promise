@@ -30,8 +30,8 @@ let test = Framework.test;
 
 
 let interopTests = Framework.suite("interop", [
-  test("make is js promise", () => {
-    let (p, _) = Promise.make();
+  test("pending is js promise", () => {
+    let (p, _) = Promise.pending();
     Promise.resolved(isPromise(p));
   }),
 
@@ -48,7 +48,7 @@ let interopTests = Framework.suite("interop", [
 
   test("flatMap is js promise", () => {
     let p =
-      Promise.make()
+      Promise.pending()
       ->fst
       ->Promise.flatMap((_) => Promise.resolved());
     Promise.resolved(isPromise(p));
@@ -56,14 +56,14 @@ let interopTests = Framework.suite("interop", [
 
   test("map is js promise", () => {
     let p =
-      fst(Promise.make())
+      fst(Promise.pending())
       ->Promise.map(v => v);
     Promise.resolved(isPromise(p));
   }),
 
   test("catch is js promise", () => {
     let p =
-      Promise.make()
+      Promise.pending()
       |> fst
       |> Promise.Rejectable.catch((_) => Promise.resolved());
     Promise.resolved(isPromise(p));
@@ -137,26 +137,26 @@ let isPromiseRejectedWith42 = p =>
   };
 
 let soundnessTests = Framework.suite("soundness", [
-  test("make: resolved, resolve", () => {
-    let (p, resolve) = Promise.make();
+  test("pending: resolved, resolve", () => {
+    let (p, resolve) = Promise.pending();
     resolve(Promise.resolved(42));
     p->Promise.flatMap(isPromiseResolvedWith42);
   }),
 
-  test("make: resolve, reject", () => {
-    let (p, _, reject) = Promise.Rejectable.make();
+  test("pending: resolve, reject", () => {
+    let (p, _, reject) = Promise.Rejectable.pending();
     reject(Promise.resolved(42));
     p |> Promise.Rejectable.catch(isPromiseResolvedWith42);
   }),
 
-  test("make: rejected, resolve", () => {
-    let (p, resolve) = Promise.make();
+  test("pending: rejected, resolve", () => {
+    let (p, resolve) = Promise.pending();
     resolve(Promise.Rejectable.rejected(42));
     p->Promise.flatMap(isPromiseRejectedWith42);
   }),
 
-  test("make: rejected, reject", () => {
-    let (p, _, reject) = Promise.Rejectable.make();
+  test("pending: rejected, reject", () => {
+    let (p, _, reject) = Promise.Rejectable.pending();
     reject(Promise.Rejectable.rejected(42));
     p |> Promise.Rejectable.catch(isPromiseRejectedWith42);
   }),
@@ -220,8 +220,8 @@ let soundnessTests = Framework.suite("soundness", [
     |> Promise.Rejectable.catch(isPromiseRejectedWith42);
   }),
 
-  test("make: JS promise", () => {
-    let (p, resolve) = Promise.make();
+  test("pending: JS promise", () => {
+    let (p, resolve) = Promise.pending();
     resolve(Js.Promise.resolve());
     p->Promise.flatMap(p => Promise.resolved(jsPromiseIsPromise(p)));
   }),
@@ -248,7 +248,7 @@ let soundnessTests = Framework.suite("soundness", [
   }),
 
   test("all", () => {
-    let (p1, resolve) = Promise.make();
+    let (p1, resolve) = Promise.pending();
     let p2 = Promise.all([p1]);
     resolve(Promise.resolved(42));
     p2->Promise.flatMap(results =>
@@ -259,7 +259,7 @@ let soundnessTests = Framework.suite("soundness", [
   }),
 
   test("all, rejection", () => {
-    let (p1, _, reject) = Promise.Rejectable.make();
+    let (p1, _, reject) = Promise.Rejectable.pending();
     let p2 = Promise.Rejectable.all([p1]);
     reject(Promise.resolved(42));
     p2
@@ -268,14 +268,14 @@ let soundnessTests = Framework.suite("soundness", [
   }),
 
   test("race", () => {
-    let (p1, resolve) = Promise.make();
+    let (p1, resolve) = Promise.pending();
     let p2 = Promise.race([p1]);
     resolve(Promise.resolved(42));
     p2->Promise.flatMap(isPromiseResolvedWith42);
   }),
 
   test("race, rejection", () => {
-    let (p1, _, reject) = Promise.Rejectable.make();
+    let (p1, _, reject) = Promise.Rejectable.pending();
     let p2 = Promise.Rejectable.race([p1]);
     reject(Promise.resolved(42));
     p2

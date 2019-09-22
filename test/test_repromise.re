@@ -83,20 +83,20 @@ let basicTests = Framework.suite("basic", [
   }),
 
   test("make", () => {
-    let (p, resolve) = Promise.make();
+    let (p, resolve) = Promise.pending();
     resolve(true);
     p;
   }),
 
   test("defer", () => {
-    let (p, resolve) = Promise.make();
+    let (p, resolve) = Promise.pending();
     let p' = p->Promise.flatMap(n => Promise.resolved(n == 1));
     resolve(1);
     p';
   }),
 
   test("double resolve", () => {
-    let (p, resolve) = Promise.make();
+    let (p, resolve) = Promise.pending();
     resolve(42);
     p->Promise.flatMap(n => {
       resolve(43);
@@ -118,7 +118,7 @@ let basicTests = Framework.suite("basic", [
   test("callback order (resolved later)", () => {
     let firstCallbackCalled = ref(false);
     let secondCallbackCalledSecond = ref(false);
-    let (p, resolve) = Promise.make();
+    let (p, resolve) = Promise.pending();
     p->Promise.map(() => firstCallbackCalled := true) |> ignore;
     p->Promise.map(() =>
       secondCallbackCalledSecond := firstCallbackCalled^) |> ignore;
@@ -136,7 +136,7 @@ let basicTests = Framework.suite("basic", [
 
 let rejectTests = Framework.suite("reject", [
   test("make", () => {
-    let (p, _, reject) = Promise.Rejectable.make();
+    let (p, _, reject) = Promise.Rejectable.pending();
     reject(1);
     p |> Promise.Rejectable.catch(n => Promise.resolved(n == 1));
   }),
@@ -220,8 +220,8 @@ let allTests = Framework.suite("all", [
   }),
 
   test("resolved later", () => {
-    let (p1, resolveP1) = Promise.make();
-    let (p2, resolveP2) = Promise.make();
+    let (p1, resolveP1) = Promise.pending();
+    let (p2, resolveP2) = Promise.pending();
     let p3 = Promise.all([p1, p2]);
     resolveP1(42);
     resolveP2(43);
@@ -229,22 +229,22 @@ let allTests = Framework.suite("all", [
   }),
 
   test("not all resolved", () => {
-    let (p1, resolveP1) = Promise.make();
-    let (p2, _) = Promise.make();
+    let (p1, resolveP1) = Promise.pending();
+    let (p2, _) = Promise.pending();
     let p3 = Promise.all([p1, p2]);
     resolveP1(42);
     remainsPending(p3, []);
   }),
 
   test("simultaneous resolve", () => {
-    let (p1, resolveP1) = Promise.make();
+    let (p1, resolveP1) = Promise.pending();
     let p2 = Promise.all([p1, p1]);
     resolveP1(42);
     p2->Promise.map(results => results == [42, 42]);
   }),
 
   test("already rejected", () => {
-    let (p1, _, _) = Promise.Rejectable.make();
+    let (p1, _, _) = Promise.Rejectable.pending();
     let p2 = Promise.Rejectable.all([p1, Promise.Rejectable.rejected(43)]);
     p2
     ->Promise.Rejectable.flatMap((_) => Promise.Rejectable.resolved(false))
@@ -252,8 +252,8 @@ let allTests = Framework.suite("all", [
   }),
 
   test("rejected later", () => {
-    let (p1, _, rejectP1) = Promise.Rejectable.make();
-    let (p2, _, _) = Promise.Rejectable.make();
+    let (p1, _, rejectP1) = Promise.Rejectable.pending();
+    let (p2, _, _) = Promise.Rejectable.pending();
     let p3 = Promise.Rejectable.all([p1, p2]);
     rejectP1(42);
     p3
@@ -262,8 +262,8 @@ let allTests = Framework.suite("all", [
   }),
 
   test("remains rejected", () => {
-    let (p1, _, rejectP1) = Promise.Rejectable.make();
-    let (p2, resolveP2, _) = Promise.Rejectable.make();
+    let (p1, _, rejectP1) = Promise.Rejectable.pending();
+    let (p2, resolveP2, _) = Promise.Rejectable.pending();
     let p3 = Promise.Rejectable.all([p1, p2]);
     rejectP1(42);
     resolveP2(43);
@@ -282,8 +282,8 @@ let allTests = Framework.suite("all", [
   }),
 
   test("all2", () => {
-    let (p1, resolveP1) = Promise.make();
-    let (p2, resolveP2) = Promise.make();
+    let (p1, resolveP1) = Promise.pending();
+    let (p2, resolveP2) = Promise.pending();
     let result =
       Promise.all2(p1, p2)
       ->Promise.map(((x, y)) => x == 42 && y == 43);
@@ -293,9 +293,9 @@ let allTests = Framework.suite("all", [
   }),
 
   test("all3", () => {
-    let (p1, resolveP1) = Promise.make();
-    let (p2, resolveP2) = Promise.make();
-    let (p3, resolveP3) = Promise.make();
+    let (p1, resolveP1) = Promise.pending();
+    let (p2, resolveP2) = Promise.pending();
+    let (p3, resolveP3) = Promise.pending();
     let result =
       Promise.all3(p1, p2, p3)
       ->Promise.map(((x, y, z)) => x == 42 && y == 43 && z == 44);
@@ -306,10 +306,10 @@ let allTests = Framework.suite("all", [
   }),
 
   test("all4", () => {
-    let (p1, resolveP1) = Promise.make();
-    let (p2, resolveP2) = Promise.make();
-    let (p3, resolveP3) = Promise.make();
-    let (p4, resolveP4) = Promise.make();
+    let (p1, resolveP1) = Promise.pending();
+    let (p2, resolveP2) = Promise.pending();
+    let (p3, resolveP3) = Promise.pending();
+    let (p4, resolveP4) = Promise.pending();
     let result =
       Promise.all4(p1, p2, p3, p4)
       ->Promise.map(((x, y, z, u)) =>
@@ -322,11 +322,11 @@ let allTests = Framework.suite("all", [
   }),
 
   test("all5", () => {
-    let (p1, resolveP1) = Promise.make();
-    let (p2, resolveP2) = Promise.make();
-    let (p3, resolveP3) = Promise.make();
-    let (p4, resolveP4) = Promise.make();
-    let (p5, resolveP5) = Promise.make();
+    let (p1, resolveP1) = Promise.pending();
+    let (p2, resolveP2) = Promise.pending();
+    let (p3, resolveP3) = Promise.pending();
+    let (p4, resolveP4) = Promise.pending();
+    let (p5, resolveP5) = Promise.pending();
     let result =
       Promise.all5(p1, p2, p3, p4, p5)
       ->Promise.map(((x, y, z, u, v)) =>
@@ -340,12 +340,12 @@ let allTests = Framework.suite("all", [
   }),
 
   test("all6", () => {
-    let (p1, resolveP1) = Promise.make();
-    let (p2, resolveP2) = Promise.make();
-    let (p3, resolveP3) = Promise.make();
-    let (p4, resolveP4) = Promise.make();
-    let (p5, resolveP5) = Promise.make();
-    let (p6, resolveP6) = Promise.make();
+    let (p1, resolveP1) = Promise.pending();
+    let (p2, resolveP2) = Promise.pending();
+    let (p3, resolveP3) = Promise.pending();
+    let (p4, resolveP4) = Promise.pending();
+    let (p5, resolveP5) = Promise.pending();
+    let (p6, resolveP6) = Promise.pending();
     let result =
       Promise.all6(p1, p2, p3, p4, p5, p6)
       ->Promise.map(((x, y, z, u, v, w)) =>
@@ -360,8 +360,8 @@ let allTests = Framework.suite("all", [
   }),
 
   test("arrayAll", () => {
-    let (p1, resolveP1) = Promise.make();
-    let (p2, resolveP2) = Promise.make();
+    let (p1, resolveP1) = Promise.pending();
+    let (p2, resolveP2) = Promise.pending();
     let result =
       Promise.arrayAll([|p1, p2|])
       ->Promise.map(fun
@@ -377,24 +377,24 @@ let allTests = Framework.suite("all", [
 
 let raceTests = Framework.suite("race", [
   test("first resolves", () => {
-    let (p1, resolveP1) = Promise.make();
-    let (p2, _) = Promise.make();
+    let (p1, resolveP1) = Promise.pending();
+    let (p2, _) = Promise.pending();
     let p3 = Promise.race([p1, p2]);
     resolveP1(42);
     p3->Promise.map(n => n == 42);
   }),
 
   test("second resolves", () => {
-    let (p1, _) = Promise.make();
-    let (p2, resolveP2) = Promise.make();
+    let (p1, _) = Promise.pending();
+    let (p2, resolveP2) = Promise.pending();
     let p3 = Promise.race([p1, p2]);
     resolveP2(43);
     p3->Promise.map(n => n == 43);
   }),
 
   test("first resolves first", () => {
-    let (p1, resolveP1) = Promise.make();
-    let (p2, resolveP2) = Promise.make();
+    let (p1, resolveP1) = Promise.pending();
+    let (p2, resolveP2) = Promise.pending();
     let p3 = Promise.race([p1, p2]);
     resolveP1(42);
     resolveP2(43);
@@ -402,8 +402,8 @@ let raceTests = Framework.suite("race", [
   }),
 
   test("second resolves first", () => {
-    let (p1, resolveP1) = Promise.make();
-    let (p2, resolveP2) = Promise.make();
+    let (p1, resolveP1) = Promise.pending();
+    let (p2, resolveP2) = Promise.pending();
     let p3 = Promise.race([p1, p2]);
     resolveP2(43);
     resolveP1(42);
@@ -411,22 +411,22 @@ let raceTests = Framework.suite("race", [
   }),
 
   test("rejection", () => {
-    let (p1, _, rejectP1) = Promise.Rejectable.make();
-    let (p2, _, _) = Promise.Rejectable.make();
+    let (p1, _, rejectP1) = Promise.Rejectable.pending();
+    let (p2, _, _) = Promise.Rejectable.pending();
     let p3 = Promise.Rejectable.race([p1, p2]);
     rejectP1(42);
     p3 |> Promise.Rejectable.catch(n => Promise.resolved(n == 42));
   }),
 
   test("already resolved", () => {
-    let (p1, _) = Promise.make();
+    let (p1, _) = Promise.pending();
     let p2 = Promise.resolved(43);
     let p3 = Promise.race([p1, p2]);
     p3->Promise.map(n => n == 43);
   }),
 
   test("already rejected", () => {
-    let (p1, _, _) = Promise.Rejectable.make();
+    let (p1, _, _) = Promise.Rejectable.pending();
     let p2 = Promise.Rejectable.rejected(43);
     let p3 = Promise.Rejectable.race([p1, p2]);
     p3 |> Promise.Rejectable.catch(n => Promise.resolved(n == 43));
@@ -440,14 +440,14 @@ let raceTests = Framework.suite("race", [
   }),
 
   test("forever pending", () => {
-    let (p1, _) = Promise.make();
-    let (p2, _) = Promise.make();
+    let (p1, _) = Promise.pending();
+    let (p2, _) = Promise.pending();
     let p3 = Promise.race([p1, p2]);
     remainsPending(p3, 43);
   }),
 
   test("simultaneous resolve", () => {
-    let (p1, resolveP1) = Promise.make();
+    let (p1, resolveP1) = Promise.pending();
     let p2 = Promise.race([p1, p1]);
     resolveP1(42);
     p2->Promise.map(n => n == 42);
@@ -466,7 +466,7 @@ let raceTests = Framework.suite("race", [
      want to make sure that callbacks attached by race survive this moving. For
      that, p has to be involved in a call to race. */
   test("race, then callbacks moved", () => {
-    let (p, resolve) = Promise.make();
+    let (p, resolve) = Promise.pending();
     let final = Promise.race([p]);
 
     /* We are using this resolve() just so we can call flatMap on it,
@@ -487,7 +487,7 @@ let raceTests = Framework.suite("race", [
   /* Similar to the preceding test, but the race callback is attached to p after
      its callback list has been merged with the outer promise of flatMap. */
   test("callbacks moved, then race", () => {
-    let (p, resolve) = Promise.make();
+    let (p, resolve) = Promise.pending();
 
     let delay = Promise.resolved();
 
@@ -533,7 +533,7 @@ let resultTests = Framework.suite("result", [
   }),
 
   test("onOk, ok", () => {
-    let (p, resolve) = Promise.make();
+    let (p, resolve) = Promise.pending();
     Promise.resolved(Ok(42))->Promise.onOk(n => resolve(n + 1));
     p->Promise.map(n => n == 43);
   }),
@@ -551,7 +551,7 @@ let resultTests = Framework.suite("result", [
   }),
 
   test("onError, error", () => {
-    let (p, resolve) = Promise.make();
+    let (p, resolve) = Promise.pending();
     Promise.resolved(Error(42))->Promise.onError(n => resolve(n + 1));
     p->Promise.map(n => n == 43);
   }),
@@ -653,7 +653,7 @@ let optionTests = Framework.suite("opton", [
   }),
 
   test("onSome, some", () => {
-    let (p, resolve) = Promise.make();
+    let (p, resolve) = Promise.pending();
     Promise.resolved(Some(42))->Promise.onSome(n => resolve(n + 1));
     p->Promise.map(n => n == 43);
   }),

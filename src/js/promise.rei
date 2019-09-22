@@ -13,7 +13,7 @@ type t('a) = promise('a);
 
 
 /* Main API. */
-let make: unit => (promise('a), 'a => unit);
+let pending: unit => (promise('a), 'a => unit);
 
 let exec: (('a => unit) => unit) => promise('a);
 
@@ -119,7 +119,7 @@ module Rejectable: {
 
   let relax: promise('a) => rejectable('a, _);
 
-  let make: unit => (rejectable('a, 'e), 'a => unit, 'e => unit);
+  let pending: unit => (rejectable('a, 'e), 'a => unit, 'e => unit);
 
   let resolved: 'a => rejectable('a, _);
 

@@ -128,7 +128,7 @@ module Rejectable = {
   external jsNew:
     (('a => unit) => ('e => unit) => unit) => rejectable('a, 'e) = "make";
 
-  let make = () => {
+  let pending = () => {
     let resolve = ref(ignore);
     let reject = ref(ignore);
     let p =
@@ -217,13 +217,13 @@ module Rejectable = {
 
 
 
-let make = () => {
-  let (p, resolve, _) = Rejectable.make();
+let pending = () => {
+  let (p, resolve, _) = Rejectable.pending();
   (p, resolve);
 };
 
 let exec = executor => {
-  let (p, resolve) = make();
+  let (p, resolve) = pending();
   executor(resolve);
   p;
 };

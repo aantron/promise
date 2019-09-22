@@ -536,7 +536,7 @@ module Rejectable = {
 
   external relax: promise('a) => rejectable('a, _) = "%identity";
 
-  let make = () => {
+  let pending = () => {
     let p = newInternal();
     let resolve = resolveInternal(p);
     let reject = rejectInternal(p);
@@ -556,13 +556,13 @@ module Rejectable = {
 
 
 
-let make = () => {
-  let (p, resolve, _) = Rejectable.make();
+let pending = () => {
+  let (p, resolve, _) = Rejectable.pending();
   (p, resolve);
 }
 
 let exec = executor => {
-  let (p, resolve) = make();
+  let (p, resolve) = pending();
   executor(resolve);
   p;
 };
