@@ -18,7 +18,7 @@
   "dependencies": {
     "@opam/dune": "*",
     "@opam/result": "*",
-    "@esy-ocaml/reason": "^3.0.0"
+    "@esy-ocaml/reason": "^3.3.2"
   },
   "devDependencies": {
     "bisect_ppx": "aantron/bisect_ppx",
