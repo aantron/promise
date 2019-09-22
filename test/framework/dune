@@ -1,3 +1,3 @@
 (library
  (name framework)
- (libraries repromise run))
+ (libraries promise run))

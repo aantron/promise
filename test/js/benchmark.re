@@ -27,7 +27,7 @@ let measure_resolved = (label, f) => {
   let nanoseconds = elapsed /. float_of_int(resolved_repetitions) *. 1e9;
   Printf.printf("%s   %f\n", label, nanoseconds);
 
-  Repromise.resolved(true);
+  Promise.resolved(true);
 };
 
 let resolved = Framework.suite("resolved", [
@@ -38,10 +38,10 @@ let resolved = Framework.suite("resolved", [
       });
   }),
 
-  test("Repromise.resolved", () => {
-    measure_resolved("Repromise.resolved", () =>
+  test("Promise.resolved", () => {
+    measure_resolved("Promise.resolved", () =>
       for (_ in 1 to resolved_repetitions) {
-        ignore(Repromise.resolved(1));
+        ignore(Promise.resolved(1));
       });
   }),
 
@@ -53,11 +53,11 @@ let resolved = Framework.suite("resolved", [
       });
   }),
 
-  test("Repromise.resolved, nested promise", () => {
-    let p = Repromise.resolved(1);
-    measure_resolved("Repromise.resolved, nested", () =>
+  test("Promise.resolved, nested promise", () => {
+    let p = Promise.resolved(1);
+    measure_resolved("Promise.resolved, nested", () =>
       for (_ in 1 to resolved_repetitions) {
-        ignore(Repromise.resolved(p))
+        ignore(Promise.resolved(p))
       });
   }),
 ]);
@@ -68,7 +68,7 @@ let resolved = Framework.suite("resolved", [
    With a number of repetitions that *almost* exhausts the heap (1M, with my
    setup), we *have* to run multiple ticks. Otherwise, we don't trigger a
    garbage collection during the Js.Promise measurement, and *do* trigger GC
-   during the Repromise measurement, invalidating its result. By running many
+   during the Promise measurement, invalidating its result. By running many
    ticks, we suffer multiple garbage collections during each measurement, and
    the cost is fairly included in each one. */
 let then_repetitions = 1_000_000;
@@ -83,8 +83,8 @@ let measure_then = (label, f) => {
 
       /* The callback will be called on the next event loop iteration, after any
          callbacks scheduled by f(). */
-      Repromise.resolved()
-      ->Repromise.flatMap(() => iteration(iterations_remaining - 1));
+      Promise.resolved()
+      ->Promise.flatMap(() => iteration(iterations_remaining - 1));
     }
     else {
       let elapsed = hrtime() -. start_time;
@@ -95,7 +95,7 @@ let measure_then = (label, f) => {
         *. 1e9;
       Printf.printf("%s   %f\n", label, nanoseconds);
 
-      Repromise.resolved(true);
+      Promise.resolved(true);
     }
   };
   iteration(then_ticks);
@@ -112,11 +112,11 @@ let flatMap = Framework.suite("flatMap", [
       });
   }),
 
-  test("Repromise.flatMap", () => {
-    let p = Repromise.resolved(1);
-    measure_then("Repromise.flatMap", () =>
+  test("Promise.flatMap", () => {
+    let p = Promise.resolved(1);
+    measure_then("Promise.flatMap", () =>
       for (_ in 1 to then_repetitions) {
-        ignore(p->Repromise.flatMap(_ => p));
+        ignore(p->Promise.flatMap(_ => p));
       });
   }),
 ]);

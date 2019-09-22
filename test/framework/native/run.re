@@ -5,12 +5,12 @@
 
 
 let rec main_loop = () => {
-  if (!Repromise.ReadyCallbacks.callbacksPending()) {
+  if (!Promise.ReadyCallbacks.callbacksPending()) {
     ()
   }
   else {
-    let callbackSnapshot = Repromise.ReadyCallbacks.snapshot();
-    Repromise.ReadyCallbacks.call(callbackSnapshot);
+    let callbackSnapshot = Promise.ReadyCallbacks.snapshot();
+    Promise.ReadyCallbacks.call(callbackSnapshot);
     main_loop();
   }
 };

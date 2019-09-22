@@ -37,7 +37,7 @@
 type test = {
   test_name: string,
   skip_if_this_is_false: unit => bool,
-  run: unit => Repromise.t(bool),
+  run: unit => Promise.t(bool),
 };
 
 type outcome =
@@ -50,21 +50,21 @@ let test = (test_name, ~only_if = () => true, run) =>
 
 let run_test = test =>
   if (test.skip_if_this_is_false() == false) {
-    Repromise.resolved(Skipped)
+    Promise.resolved(Skipped)
   }
   else {
-    Repromise.flatMap(test.run(), test_did_pass =>
+    Promise.flatMap(test.run(), test_did_pass =>
       if (test_did_pass) {
-        Repromise.resolved(Passed)
+        Promise.resolved(Passed)
       }
       else {
-        Repromise.resolved(Failed)
+        Promise.resolved(Failed)
       })
   };
 
 /* We don't support exception handling in the tester for now, largely because
-   the [Repromise] module doesn't know what to do about exceptions at this
-   point. Future work. */
+   the [Promise] module doesn't know what to do about exceptions at this point.
+   Future work. */
 let outcome_to_character = fun
   | Passed => '.'
   | Failed => 'F'
@@ -86,7 +86,7 @@ let suite = (name, ~only_if = () => true, tests) =>
    suite_tests: tests,
    skip_entire_suite_if_this_is_false: only_if};
 
-let run_test_suite: suite => Repromise.t(suite_outcomes) = suite =>
+let run_test_suite: suite => Promise.t(suite_outcomes) = suite =>
   if (suite.skip_entire_suite_if_this_is_false() == false) {
     /* For the outcome list, list all tests in the suite as skipped. */
     let outcomes =
@@ -100,14 +100,14 @@ let run_test_suite: suite => Repromise.t(suite_outcomes) = suite =>
     |> print_string;
     flush(stdout);
 
-    Repromise.resolved(outcomes);
+    Promise.resolved(outcomes);
   }
   else {
     let rec run_each_test(tests, reversed_outcomes) =
       switch tests {
-      | [] => Repromise.resolved(List.rev(reversed_outcomes))
+      | [] => Promise.resolved(List.rev(reversed_outcomes))
       | [test, ...more_tests] =>
-        Repromise.flatMap(run_test(test), new_outcome => {
+        Promise.flatMap(run_test(test), new_outcome => {
           new_outcome |> outcome_to_character |> print_char;
           flush(stdout);
           let outcome_with_name = (test.test_name, new_outcome);
@@ -174,10 +174,10 @@ let run = (library_name, suites) => {
         "\nOk. %i tests ran, %i tests skipped\n",
         count_ran(aggregated_outcomes),
         count_skipped(aggregated_outcomes));
-      Repromise.resolved();
+      Promise.resolved();
 
     | [suite, ...rest] =>
-      Repromise.flatMap(run_test_suite(suite), outcomes =>
+      Promise.flatMap(run_test_suite(suite), outcomes =>
         if (!outcomes_all_ok(outcomes)) {
           print_newline();
           flush(stdout);
