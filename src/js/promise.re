@@ -119,7 +119,7 @@ external mapArray: ('a => 'b, array('a)) => array('b) = "mapArray";
 
 
 
-module Rejectable = {
+module Js_ = {
   type t('a, 'e) = rejectable('a, 'e);
 
   external relax: promise('a) => rejectable('a, _) = "%identity";
@@ -218,7 +218,7 @@ module Rejectable = {
 
 
 let pending = () => {
-  let (p, resolve, _) = Rejectable.pending();
+  let (p, resolve, _) = Js_.pending();
   (p, resolve);
 };
 
@@ -228,19 +228,19 @@ let exec = executor => {
   p;
 };
 
-let resolved = Rejectable.resolved;
-let flatMap = Rejectable.flatMap;
-let map = Rejectable.map;
-let on = Rejectable.on;
-let tap = Rejectable.tap;
-let all = Rejectable.all;
-let all2 = Rejectable.all2;
-let all3 = Rejectable.all3;
-let all4 = Rejectable.all4;
-let all5 = Rejectable.all5;
-let all6 = Rejectable.all6;
-let arrayAll = Rejectable.arrayAll;
-let race = Rejectable.race;
+let resolved = Js_.resolved;
+let flatMap = Js_.flatMap;
+let map = Js_.map;
+let on = Js_.on;
+let tap = Js_.tap;
+let all = Js_.all;
+let all2 = Js_.all2;
+let all3 = Js_.all3;
+let all4 = Js_.all4;
+let all5 = Js_.all5;
+let all6 = Js_.all6;
+let arrayAll = Js_.arrayAll;
+let race = Js_.race;
 
 
 
@@ -336,3 +336,5 @@ let tapSome = (promise, callback) => {
 
 module FastPipe = {
 };
+
+module Js = Js_;

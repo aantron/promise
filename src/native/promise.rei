@@ -153,8 +153,8 @@ let all6:
 
 
 
-/* Shouldn't be used; provided for compatibility with JS Rejectable. */
-module Rejectable: {
+/* Shouldn't be used; provided for compatibility with Js. */
+module Js: {
   type t('a, 'e) = rejectable('a, 'e);
 
   let relax:

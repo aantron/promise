@@ -154,7 +154,7 @@ let all6:
 
 
 /* For writing bindings. */
-module Rejectable: {
+module Js: {
   type t('a, 'e) = rejectable('a, 'e);
 
   let relax:

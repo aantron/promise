@@ -32,10 +32,10 @@ let countAllocatedWords = () => {
    function doesNotLeakMemory will call countAllocatedWords too late, because
    loop will have returned and released all references that it is holding. */
 let doesNotLeakMemory = (loop, baseIterations) =>
-  Promise.Rejectable.flatMap(loop(baseIterations), wordsAllocated =>
-    Promise.Rejectable.flatMap(loop(baseIterations * 10), wordsAllocated' => {
+  Promise.Js.flatMap(loop(baseIterations), wordsAllocated =>
+    Promise.Js.flatMap(loop(baseIterations * 10), wordsAllocated' => {
       let ratio = float_of_int(wordsAllocated') /. float_of_int(wordsAllocated);
-      Promise.Rejectable.resolved(ratio < 2.);
+      Promise.Js.resolved(ratio < 2.);
     }));
 
 
@@ -134,14 +134,14 @@ let promiseLoopTests = Framework.suite("promise loop", [
 let raceTest = (name, body) =>
   test(name, () => {
     let instrumentedLoop = n => {
-      let (foreverPendingPromise, _, _) = Promise.Rejectable.pending();
+      let (foreverPendingPromise, _, _) = Promise.Js.pending();
 
       let initialWords = countAllocatedWords();
 
-      let rec theLoop: int => Promise.Rejectable.t(int, unit) = n =>
+      let rec theLoop: int => Promise.Js.t(int, unit) = n =>
         if (n == 0) {
           let wordsAllocated = countAllocatedWords() - initialWords;
-          Promise.Rejectable.resolved(wordsAllocated);
+          Promise.Js.resolved(wordsAllocated);
         }
         else {
           let nextIteration = () => theLoop(n - 1);
@@ -150,7 +150,7 @@ let raceTest = (name, body) =>
       theLoop(n);
     };
 
-    Promise.Rejectable.catch(
+    Promise.Js.catch(
       doesNotLeakMemory(instrumentedLoop, 100),
       () => assert(false));
   });
@@ -177,49 +177,49 @@ let raceLoopTests = Framework.suite("race loop", [
      test checks for such an implementation. */
   raceTest("race loop memory leak", (foreverPendingPromise, nextIteration) => {
     let (shortLivedPromise, resolveShortLivedPromise, _) =
-      Promise.Rejectable.pending();
+      Promise.Js.pending();
 
     let racePromise =
-      Promise.Rejectable.race([foreverPendingPromise, shortLivedPromise]);
+      Promise.Js.race([foreverPendingPromise, shortLivedPromise]);
 
     resolveShortLivedPromise();
 
-    Promise.Rejectable.flatMap(racePromise, nextIteration);
+    Promise.Js.flatMap(racePromise, nextIteration);
   }),
 
   raceTest("race loop memory leak, with already-resolved promises",
       (foreverPendingPromise, nextIteration) => {
-    let resolvedPromise = Promise.Rejectable.resolved();
+    let resolvedPromise = Promise.Js.resolved();
 
     let racePromise =
-      Promise.Rejectable.race([foreverPendingPromise, resolvedPromise]);
+      Promise.Js.race([foreverPendingPromise, resolvedPromise]);
 
-    Promise.Rejectable.flatMap(racePromise, nextIteration);
+    Promise.Js.flatMap(racePromise, nextIteration);
   }),
 
   raceTest("race loop memory leak, with rejection",
       (foreverPendingPromise, nextIteration) => {
     let (shortLivedPromise, _, rejectShortLivedPromise) =
-      Promise.Rejectable.pending();
+      Promise.Js.pending();
 
     let racePromise =
-      Promise.Rejectable.race([foreverPendingPromise, shortLivedPromise]);
+      Promise.Js.race([foreverPendingPromise, shortLivedPromise]);
 
     rejectShortLivedPromise();
 
-    Promise.Rejectable.flatMap(racePromise, () => assert(false))
-    ->Promise.Rejectable.catch(nextIteration);
+    Promise.Js.flatMap(racePromise, () => assert(false))
+    ->Promise.Js.catch(nextIteration);
   }),
 
   raceTest("race loop memory leak, with already-rejected promises",
       (foreverPendingPromise, nextIteration) => {
-    let rejectedPromise = Promise.Rejectable.rejected();
+    let rejectedPromise = Promise.Js.rejected();
 
     let racePromise =
-      Promise.Rejectable.race([foreverPendingPromise, rejectedPromise]);
+      Promise.Js.race([foreverPendingPromise, rejectedPromise]);
 
-    Promise.Rejectable.flatMap(racePromise, () => assert(false))
-    ->Promise.Rejectable.catch(nextIteration);
+    Promise.Js.flatMap(racePromise, () => assert(false))
+    ->Promise.Js.catch(nextIteration);
   }),
 
   /* This test is like the first, but it tests for the interaction of the fixes
@@ -236,25 +236,25 @@ let raceLoopTests = Framework.suite("race loop", [
   raceTest("race loop memory leak with flatMap merging",
       (foreverPendingPromise, nextIteration) => {
     let (shortLivedPromise, resolveShortLivedPromise, _) =
-      Promise.Rejectable.pending();
+      Promise.Js.pending();
 
     let racePromise =
-      Promise.Rejectable.race([foreverPendingPromise, shortLivedPromise]);
+      Promise.Js.race([foreverPendingPromise, shortLivedPromise]);
 
     /* Return foreverPendingPromise from the callback of flatMap. This causes all
        of its callbacks to be moved to the outer promise of the flatMap (which we
        don't give a name to). The delay promise is just used to make the second
        call to flatMap definitely run after the first. */
-    let delay = Promise.Rejectable.resolved();
+    let delay = Promise.Js.resolved();
 
-    ignore(Promise.Rejectable.flatMap(delay, () => foreverPendingPromise));
+    ignore(Promise.Js.flatMap(delay, () => foreverPendingPromise));
 
-    Promise.Rejectable.flatMap(delay, () => {
+    Promise.Js.flatMap(delay, () => {
       /* Now, we resolve the short-lived promise. If that doesn't delete the
          callback that was merged away from foreverPendingPromise, then this is
          where we will accumulate the memory leak. */
       resolveShortLivedPromise();
-      Promise.Rejectable.flatMap(racePromise, nextIteration);
+      Promise.Js.flatMap(racePromise, nextIteration);
     });
   }),
 ]);
@@ -271,26 +271,26 @@ let allLoopTests = Framework.suite("all loop", [
      race remains the function with the most opportunities to leak memory. */
   raceTest("all loop memory leak", (foreverPendingPromise, nextIteration) => {
     let (shortLivedPromise, _, rejectShortLivedPromise) =
-      Promise.Rejectable.pending();
+      Promise.Js.pending();
 
     let allPromise =
-      Promise.Rejectable.all([foreverPendingPromise, shortLivedPromise]);
+      Promise.Js.all([foreverPendingPromise, shortLivedPromise]);
 
     rejectShortLivedPromise();
 
-    Promise.Rejectable.flatMap(allPromise, (_) => assert false)
-    ->Promise.Rejectable.catch(nextIteration);
+    Promise.Js.flatMap(allPromise, (_) => assert false)
+    ->Promise.Js.catch(nextIteration);
   }),
 
   raceTest("all loop memory leak, with already-rejected promises",
       (foreverPendingPromise, nextIteration) => {
-    let rejectedPromise = Promise.Rejectable.rejected();
+    let rejectedPromise = Promise.Js.rejected();
 
     let allPromise =
-      Promise.Rejectable.all([foreverPendingPromise, rejectedPromise]);
+      Promise.Js.all([foreverPendingPromise, rejectedPromise]);
 
-    Promise.Rejectable.flatMap(allPromise, (_) => assert false)
-    ->Promise.Rejectable.catch(nextIteration);
+    Promise.Js.flatMap(allPromise, (_) => assert false)
+    ->Promise.Js.catch(nextIteration);
   }),
 
   /* Tests the interaction of the memory-leak fixes in all and flatMap, as tested
@@ -298,21 +298,21 @@ let allLoopTests = Framework.suite("all loop", [
   raceTest("race loop memory leak with flatMap merging",
       (foreverPendingPromise, nextIteration) => {
     let (shortLivedPromise, _, rejectShortLivedPromise) =
-      Promise.Rejectable.pending();
+      Promise.Js.pending();
 
     let allPromise =
-      Promise.Rejectable.all([foreverPendingPromise, shortLivedPromise]);
+      Promise.Js.all([foreverPendingPromise, shortLivedPromise]);
 
-    let delay = Promise.Rejectable.resolved();
+    let delay = Promise.Js.resolved();
 
-    let p = delay->Promise.Rejectable.catch((_) => assert(false));
-    ignore(Promise.Rejectable.flatMap(p, () => foreverPendingPromise));
+    let p = delay->Promise.Js.catch((_) => assert(false));
+    ignore(Promise.Js.flatMap(p, () => foreverPendingPromise));
 
-    let p = delay->Promise.Rejectable.catch((_) => assert(false));
-    Promise.Rejectable.flatMap(p, () => {
+    let p = delay->Promise.Js.catch((_) => assert(false));
+    Promise.Js.flatMap(p, () => {
       rejectShortLivedPromise();
-      Promise.Rejectable.flatMap(allPromise, (_) => assert false)
-      ->Promise.Rejectable.catch(nextIteration);
+      Promise.Js.flatMap(allPromise, (_) => assert false)
+      ->Promise.Js.catch(nextIteration);
     });
   }),
 ]);

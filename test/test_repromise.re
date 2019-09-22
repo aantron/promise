@@ -128,7 +128,7 @@ let basicTests = Framework.suite("basic", [
 
   test("relax", () => {
     let p = Promise.resolved();
-    Promise.resolved(Promise.Rejectable.relax(p) === p);
+    Promise.resolved(Promise.Js.relax(p) === p);
   }),
 ]);
 
@@ -136,54 +136,54 @@ let basicTests = Framework.suite("basic", [
 
 let rejectTests = Framework.suite("reject", [
   test("make", () => {
-    let (p, _, reject) = Promise.Rejectable.pending();
+    let (p, _, reject) = Promise.Js.pending();
     reject(1);
-    p->Promise.Rejectable.catch(n => Promise.resolved(n == 1));
+    p->Promise.Js.catch(n => Promise.resolved(n == 1));
   }),
 
   test("reject, catch", () => {
-    Promise.Rejectable.rejected("foo")
-    ->Promise.Rejectable.catch(s => Promise.resolved(s == "foo"));
+    Promise.Js.rejected("foo")
+    ->Promise.Js.catch(s => Promise.resolved(s == "foo"));
   }),
 
   test("catch chosen", () => {
-    Promise.Rejectable.rejected("foo")
-    ->Promise.Rejectable.catch(s => Promise.resolved(s == "foo"));
+    Promise.Js.rejected("foo")
+    ->Promise.Js.catch(s => Promise.resolved(s == "foo"));
   }),
 
   test("flatMap, reject, catch", () => {
-    Promise.Rejectable.resolved(1)
-    ->Promise.Rejectable.flatMap(n => Promise.Rejectable.rejected(n + 1))
-    ->Promise.Rejectable.catch(n => Promise.resolved(n == 2));
+    Promise.Js.resolved(1)
+    ->Promise.Js.flatMap(n => Promise.Js.rejected(n + 1))
+    ->Promise.Js.catch(n => Promise.resolved(n == 2));
   }),
 
   test("reject, catch, flatMap", () => {
-    Promise.Rejectable.rejected(1)
-    ->Promise.Rejectable.catch(n => Promise.resolved(n + 1))
+    Promise.Js.rejected(1)
+    ->Promise.Js.catch(n => Promise.resolved(n + 1))
     ->Promise.flatMap(n => Promise.resolved(n == 2));
   }),
 
   test("no double catch", () => {
-    Promise.Rejectable.rejected("foo")
-    ->Promise.Rejectable.catch(s => Promise.resolved(s == "foo"))
-    ->Promise.Rejectable.catch((_) => Promise.resolved(false));
+    Promise.Js.rejected("foo")
+    ->Promise.Js.catch(s => Promise.resolved(s == "foo"))
+    ->Promise.Js.catch((_) => Promise.resolved(false));
   }),
 
   test("catch chain", () => {
-    Promise.Rejectable.rejected(1)
-    ->Promise.Rejectable.catch(n => Promise.Rejectable.rejected(n + 1))
-    ->Promise.Rejectable.catch(n => Promise.resolved(n == 2));
+    Promise.Js.rejected(1)
+    ->Promise.Js.catch(n => Promise.Js.rejected(n + 1))
+    ->Promise.Js.catch(n => Promise.resolved(n == 2));
   }),
 
   test("no catching resolved", () => {
     Promise.resolved(true)
-    ->Promise.Rejectable.catch((_) => Promise.resolved(false));
+    ->Promise.Js.catch((_) => Promise.resolved(false));
   }),
 
   test("no catching resolved, after flatMap", () => {
     Promise.resolved()
     ->Promise.flatMap(() => Promise.resolved(true))
-    ->Promise.Rejectable.catch((_) => Promise.resolved(false));
+    ->Promise.Js.catch((_) => Promise.resolved(false));
   }),
 ]);
 
@@ -244,36 +244,35 @@ let allTests = Framework.suite("all", [
   }),
 
   test("already rejected", () => {
-    let (p1, _, _) = Promise.Rejectable.pending();
-    let p2 = Promise.Rejectable.all([p1, Promise.Rejectable.rejected(43)]);
+    let (p1, _, _) = Promise.Js.pending();
+    let p2 = Promise.Js.all([p1, Promise.Js.rejected(43)]);
     p2
-    ->Promise.Rejectable.flatMap((_) => Promise.Rejectable.resolved(false))
-    ->Promise.Rejectable.catch(n => Promise.resolved(n == 43));
+    ->Promise.Js.flatMap((_) => Promise.Js.resolved(false))
+    ->Promise.Js.catch(n => Promise.resolved(n == 43));
   }),
 
   test("rejected later", () => {
-    let (p1, _, rejectP1) = Promise.Rejectable.pending();
-    let (p2, _, _) = Promise.Rejectable.pending();
-    let p3 = Promise.Rejectable.all([p1, p2]);
+    let (p1, _, rejectP1) = Promise.Js.pending();
+    let (p2, _, _) = Promise.Js.pending();
+    let p3 = Promise.Js.all([p1, p2]);
     rejectP1(42);
     p3
-    ->Promise.Rejectable.flatMap((_) => Promise.Rejectable.resolved(false))
-    ->Promise.Rejectable.catch(n => Promise.resolved(n == 42));
+    ->Promise.Js.flatMap((_) => Promise.Js.resolved(false))
+    ->Promise.Js.catch(n => Promise.resolved(n == 42));
   }),
 
   test("remains rejected", () => {
-    let (p1, _, rejectP1) = Promise.Rejectable.pending();
-    let (p2, resolveP2, _) = Promise.Rejectable.pending();
-    let p3 = Promise.Rejectable.all([p1, p2]);
+    let (p1, _, rejectP1) = Promise.Js.pending();
+    let (p2, resolveP2, _) = Promise.Js.pending();
+    let p3 = Promise.Js.all([p1, p2]);
     rejectP1(42);
     resolveP2(43);
     p2
-    ->Promise.Rejectable.catch((_) => assert false)
-    ->Promise.Rejectable.flatMap((_) =>
+    ->Promise.Js.catch((_) => assert false)
+    ->Promise.Js.flatMap((_) =>
       p3
-      ->Promise.Rejectable.flatMap((_) =>
-        Promise.Rejectable.resolved(false))
-      ->Promise.Rejectable.catch(n => Promise.resolved(n == 42)));
+      ->Promise.Js.flatMap((_) => Promise.Js.resolved(false))
+      ->Promise.Js.catch(n => Promise.resolved(n == 42)));
   }),
 
   test("empty", () => {
@@ -411,11 +410,11 @@ let raceTests = Framework.suite("race", [
   }),
 
   test("rejection", () => {
-    let (p1, _, rejectP1) = Promise.Rejectable.pending();
-    let (p2, _, _) = Promise.Rejectable.pending();
-    let p3 = Promise.Rejectable.race([p1, p2]);
+    let (p1, _, rejectP1) = Promise.Js.pending();
+    let (p2, _, _) = Promise.Js.pending();
+    let p3 = Promise.Js.race([p1, p2]);
     rejectP1(42);
-    p3->Promise.Rejectable.catch(n => Promise.resolved(n == 42));
+    p3->Promise.Js.catch(n => Promise.resolved(n == 42));
   }),
 
   test("already resolved", () => {
@@ -426,10 +425,10 @@ let raceTests = Framework.suite("race", [
   }),
 
   test("already rejected", () => {
-    let (p1, _, _) = Promise.Rejectable.pending();
-    let p2 = Promise.Rejectable.rejected(43);
-    let p3 = Promise.Rejectable.race([p1, p2]);
-    p3->Promise.Rejectable.catch(n => Promise.resolved(n == 43));
+    let (p1, _, _) = Promise.Js.pending();
+    let p2 = Promise.Js.rejected(43);
+    let p3 = Promise.Js.race([p1, p2]);
+    p3->Promise.Js.catch(n => Promise.resolved(n == 43));
   }),
 
   test("two resolved", () => {

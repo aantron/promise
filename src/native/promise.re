@@ -531,7 +531,7 @@ let tapSome = (promise, callback) => {
 
 
 
-module Rejectable = {
+module Js = {
   type t('a, 'e) = rejectable('a, 'e);
 
   external relax: promise('a) => rejectable('a, _) = "%identity";
@@ -557,7 +557,7 @@ module Rejectable = {
 
 
 let pending = () => {
-  let (p, resolve, _) = Rejectable.pending();
+  let (p, resolve, _) = Js.pending();
   (p, resolve);
 }
 

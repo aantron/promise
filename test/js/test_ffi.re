@@ -15,7 +15,7 @@ function isPromiseLike(v) {
 |}];
 
 [@bs.val]
-external isPromise: Promise.Rejectable.t(_, _) => bool = "isPromise";
+external isPromise: Promise.Js.t(_, _) => bool = "isPromise";
 
 [@bs.val]
 external jsPromiseIsPromise: Js.Promise.t(_) => bool = "isPromise";
@@ -41,8 +41,8 @@ let interopTests = Framework.suite("interop", [
   }),
 
   test("rejected is js promise", () => {
-    let p = Promise.Rejectable.rejected();
-    let _ = p->Promise.Rejectable.catch(() => Promise.resolved());
+    let p = Promise.Js.rejected();
+    let _ = p->Promise.Js.catch(() => Promise.resolved());
     Promise.resolved(isPromise(p));
   }),
 
@@ -65,7 +65,7 @@ let interopTests = Framework.suite("interop", [
     let p =
       Promise.pending()
       ->fst
-      ->Promise.Rejectable.catch((_) => Promise.resolved());
+      ->Promise.Js.catch((_) => Promise.resolved());
     Promise.resolved(isPromise(p));
   }),
 
@@ -89,17 +89,17 @@ let interopTests = Framework.suite("interop", [
 
   test("coerce from Js.Promise", () => {
     Js.Promise.resolve(42)
-    ->Promise.Rejectable.fromJsPromise
-    ->Promise.Rejectable.catch(_ => assert(false))
+    ->Promise.Js.fromJsPromise
+    ->Promise.Js.catch(_ => assert(false))
     ->Promise.map(n => n == 42);
   }),
 
   test("coerce to Js.Promise", () => {
     (Promise.resolved(42)
-    ->Promise.Rejectable.toJsPromise
+    ->Promise.Js.toJsPromise
     |> Js.Promise.then_(n => Js.Promise.resolve(n + 1)))
-    ->Promise.Rejectable.fromJsPromise
-    ->Promise.Rejectable.catch(_ => assert(false))
+    ->Promise.Js.fromJsPromise
+    ->Promise.Js.catch(_ => assert(false))
     ->Promise.map(n => n == 43);
   }),
 ]);
@@ -133,7 +133,7 @@ let isPromiseRejectedWith42 = p =>
     Promise.resolved(false);
   }
   else {
-    p->Promise.Rejectable.catch(n => Promise.resolved(n == 42));
+    p->Promise.Js.catch(n => Promise.resolved(n == 42));
   };
 
 let soundnessTests = Framework.suite("soundness", [
@@ -144,21 +144,21 @@ let soundnessTests = Framework.suite("soundness", [
   }),
 
   test("pending: resolve, reject", () => {
-    let (p, _, reject) = Promise.Rejectable.pending();
+    let (p, _, reject) = Promise.Js.pending();
     reject(Promise.resolved(42));
-    p->Promise.Rejectable.catch(isPromiseResolvedWith42);
+    p->Promise.Js.catch(isPromiseResolvedWith42);
   }),
 
   test("pending: rejected, resolve", () => {
     let (p, resolve) = Promise.pending();
-    resolve(Promise.Rejectable.rejected(42));
+    resolve(Promise.Js.rejected(42));
     p->Promise.flatMap(isPromiseRejectedWith42);
   }),
 
   test("pending: rejected, reject", () => {
-    let (p, _, reject) = Promise.Rejectable.pending();
-    reject(Promise.Rejectable.rejected(42));
-    p->Promise.Rejectable.catch(isPromiseRejectedWith42);
+    let (p, _, reject) = Promise.Js.pending();
+    reject(Promise.Js.rejected(42));
+    p->Promise.Js.catch(isPromiseRejectedWith42);
   }),
 
   test("resolve: resolved", () => {
@@ -167,18 +167,18 @@ let soundnessTests = Framework.suite("soundness", [
   }),
 
   test("resolve: rejected", () => {
-    Promise.resolved(Promise.Rejectable.rejected(42))
+    Promise.resolved(Promise.Js.rejected(42))
     ->Promise.flatMap(isPromiseRejectedWith42);
   }),
 
   test("rejected: resolved", () => {
-    Promise.Rejectable.rejected(Promise.resolved(42))
-    ->Promise.Rejectable.catch(isPromiseResolvedWith42);
+    Promise.Js.rejected(Promise.resolved(42))
+    ->Promise.Js.catch(isPromiseResolvedWith42);
   }),
 
   test("rejected: rejected", () => {
-    Promise.Rejectable.rejected(Promise.Rejectable.rejected(42))
-    ->Promise.Rejectable.catch(isPromiseRejectedWith42);
+    Promise.Js.rejected(Promise.Js.rejected(42))
+    ->Promise.Js.catch(isPromiseRejectedWith42);
   }),
 
   test("flatMap: resolved", () => {
@@ -188,10 +188,10 @@ let soundnessTests = Framework.suite("soundness", [
   }),
 
   test("flatMap: rejected", () => {
-    Promise.Rejectable.resolved()
-    ->Promise.Rejectable.flatMap(() =>
-      Promise.Rejectable.rejected(Promise.Rejectable.rejected(42)))
-    ->Promise.Rejectable.catch(isPromiseRejectedWith42);
+    Promise.Js.resolved()
+    ->Promise.Js.flatMap(() =>
+      Promise.Js.rejected(Promise.Js.rejected(42)))
+    ->Promise.Js.catch(isPromiseRejectedWith42);
   }),
 
   test("map: resolved", () => {
@@ -202,21 +202,21 @@ let soundnessTests = Framework.suite("soundness", [
 
   test("map: rejected", () => {
     Promise.resolved()
-    ->Promise.map(() => Promise.Rejectable.rejected(42))
+    ->Promise.map(() => Promise.Js.rejected(42))
     ->Promise.flatMap(isPromiseRejectedWith42);
   }),
 
   test("catch: resolved", () => {
-    Promise.Rejectable.rejected()
-    ->Promise.Rejectable.catch(() => Promise.resolved(Promise.resolved(42)))
+    Promise.Js.rejected()
+    ->Promise.Js.catch(() => Promise.resolved(Promise.resolved(42)))
     ->Promise.flatMap(isPromiseResolvedWith42);
   }),
 
   test("catch: rejected", () => {
-    Promise.Rejectable.rejected()
-    ->Promise.Rejectable.catch(() =>
-      Promise.Rejectable.rejected(Promise.Rejectable.rejected(42)))
-    ->Promise.Rejectable.catch(isPromiseRejectedWith42);
+    Promise.Js.rejected()
+    ->Promise.Js.catch(() =>
+      Promise.Js.rejected(Promise.Js.rejected(42)))
+    ->Promise.Js.catch(isPromiseRejectedWith42);
   }),
 
   test("pending: JS promise", () => {
@@ -231,8 +231,8 @@ let soundnessTests = Framework.suite("soundness", [
   }),
 
   test("rejected: JS promise", () => {
-    Promise.Rejectable.rejected(Js.Promise.resolve(42))
-    ->Promise.Rejectable.catch(p =>
+    Promise.Js.rejected(Js.Promise.resolve(42))
+    ->Promise.Js.catch(p =>
       Promise.resolved(jsPromiseIsPromise(p)));
   }),
 
@@ -258,12 +258,12 @@ let soundnessTests = Framework.suite("soundness", [
   }),
 
   test("all, rejection", () => {
-    let (p1, _, reject) = Promise.Rejectable.pending();
-    let p2 = Promise.Rejectable.all([p1]);
+    let (p1, _, reject) = Promise.Js.pending();
+    let p2 = Promise.Js.all([p1]);
     reject(Promise.resolved(42));
     p2
-    ->Promise.Rejectable.map((_) => false)
-    ->Promise.Rejectable.catch(isPromiseResolvedWith42);
+    ->Promise.Js.map((_) => false)
+    ->Promise.Js.catch(isPromiseResolvedWith42);
   }),
 
   test("race", () => {
@@ -274,12 +274,12 @@ let soundnessTests = Framework.suite("soundness", [
   }),
 
   test("race, rejection", () => {
-    let (p1, _, reject) = Promise.Rejectable.pending();
-    let p2 = Promise.Rejectable.race([p1]);
+    let (p1, _, reject) = Promise.Js.pending();
+    let p2 = Promise.Js.race([p1]);
     reject(Promise.resolved(42));
     p2
-    ->Promise.Rejectable.map((_) => false)
-    ->Promise.Rejectable.catch(isPromiseResolvedWith42);
+    ->Promise.Js.map((_) => false)
+    ->Promise.Js.catch(isPromiseResolvedWith42);
   }),
 ]);
 
