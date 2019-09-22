@@ -5,6 +5,7 @@
 
 
 let test = Framework.test;
+open! Repromise.FastPipe;
 
 
 
@@ -19,56 +20,54 @@ let basicTests = Framework.suite("basic", [
 
   test("on", () => {
     let correct = ref(false);
-    Repromise.resolved(1)
-    |> Repromise.on(n => correct := (n == 1));
-    Repromise.resolved()
-    |> Repromise.map(() => correct^);
+    Repromise.resolved(1)->Repromise.on(n => correct := (n == 1));
+    Repromise.resolved()->Repromise.map(() => correct^);
   }),
 
   test("tap", () => {
     let correct = ref(false);
     Repromise.resolved(1)
-    |> Repromise.tap(n => correct := (n == 1))
-    |> Repromise.map(n => n == 1 && correct^);
+    ->Repromise.tap(n => correct := (n == 1))
+    ->Repromise.map(n => n == 1 && correct^);
   }),
 
   test("flatMap", () => {
     Repromise.resolved(1)
-    |> Repromise.flatMap(n => Repromise.resolved(n == 1));
+    ->Repromise.flatMap(n => Repromise.resolved(n == 1));
   }),
 
   test("map", () => {
-    let p = Repromise.resolved(6) |> Repromise.map(v => v * 7);
-    p |> Repromise.flatMap(r => Repromise.resolved(r == 42));
+    let p = Repromise.resolved(6)->Repromise.map(v => v * 7);
+    p->Repromise.flatMap(r => Repromise.resolved(r == 42));
   }),
 
   test("map chain", () => {
     let p =
       Repromise.resolved(6)
-      |> Repromise.map(v => v * 7)
-      |> Repromise.map(r => r * 10);
-    p |> Repromise.flatMap(r => Repromise.resolved(r == 420));
+      ->Repromise.map(v => v * 7)
+      ->Repromise.map(r => r * 10);
+    p->Repromise.flatMap(r => Repromise.resolved(r == 420));
   }),
 
   test("map soundness", () => {
       Repromise.resolved(6)
-      |> Repromise.map(v => v * 7)
-      |> Repromise.map(x => Repromise.resolved(x == 42))
-      |> Repromise.flatMap(r => r);
+      ->Repromise.map(v => v * 7)
+      ->Repromise.map(x => Repromise.resolved(x == 42))
+      ->Repromise.flatMap(r => r);
   }),
 
   test("flatMap chain", () => {
     Repromise.resolved(1)
-    |> Repromise.flatMap(n => Repromise.resolved(n + 1))
-    |> Repromise.flatMap(n => Repromise.resolved(n == 2));
+    ->Repromise.flatMap(n => Repromise.resolved(n + 1))
+    ->Repromise.flatMap(n => Repromise.resolved(n == 2));
   }),
 
   test("flatMap nested", () => {
     Repromise.resolved(1)
-    |> Repromise.flatMap (n =>
+    ->Repromise.flatMap (n =>
       Repromise.resolved(n + 1)
-      |> Repromise.flatMap (n => Repromise.resolved(n + 1)))
-    |> Repromise.flatMap (n => Repromise.resolved(n == 3));
+      ->Repromise.flatMap (n => Repromise.resolved(n + 1)))
+    ->Repromise.flatMap (n => Repromise.resolved(n == 3));
   }),
 
   /* If promises are implemented on JS directly as ordinary JS promises,
@@ -79,8 +78,8 @@ let basicTests = Framework.suite("basic", [
      promises on JS will avoid this bug. */
   test("no collapsing", () => {
     Repromise.resolved(Repromise.resolved(1))
-    |> Repromise.flatMap(p =>
-      p |> Repromise.flatMap(n => Repromise.resolved(n == 1)));
+    ->Repromise.flatMap(p =>
+      p->Repromise.flatMap(n => Repromise.resolved(n == 1)));
   }),
 
   test("make", () => {
@@ -91,7 +90,7 @@ let basicTests = Framework.suite("basic", [
 
   test("defer", () => {
     let (p, resolve) = Repromise.make();
-    let p' = p |> Repromise.flatMap(n => Repromise.resolved(n == 1));
+    let p' = p->Repromise.flatMap(n => Repromise.resolved(n == 1));
     resolve(1);
     p';
   }),
@@ -99,9 +98,9 @@ let basicTests = Framework.suite("basic", [
   test("double resolve", () => {
     let (p, resolve) = Repromise.make();
     resolve(42);
-    p |> Repromise.flatMap(n => {
+    p->Repromise.flatMap(n => {
       resolve(43);
-      p |> Repromise.map(n' =>
+      p->Repromise.map(n' =>
         n == 42 && n' == 42)});
   }),
 
@@ -112,19 +111,19 @@ let basicTests = Framework.suite("basic", [
   test("callback order (already resolved)", () => {
     let firstCallbackCalled = ref(false);
     let p = Repromise.resolved();
-    p |> Repromise.map(() => firstCallbackCalled := true) |> ignore;
-    p |> Repromise.map(() => firstCallbackCalled^);
+    p->Repromise.map(() => firstCallbackCalled := true) |> ignore;
+    p->Repromise.map(() => firstCallbackCalled^);
   }),
 
   test("callback order (resolved later)", () => {
     let firstCallbackCalled = ref(false);
     let secondCallbackCalledSecond = ref(false);
     let (p, resolve) = Repromise.make();
-    p |> Repromise.map(() => firstCallbackCalled := true) |> ignore;
-    p |> Repromise.map(() =>
+    p->Repromise.map(() => firstCallbackCalled := true) |> ignore;
+    p->Repromise.map(() =>
       secondCallbackCalledSecond := firstCallbackCalled^) |> ignore;
     resolve();
-    p |> Repromise.map(() => secondCallbackCalledSecond^);
+    p->Repromise.map(() => secondCallbackCalledSecond^);
   }),
 
   test("relax", () => {
@@ -154,14 +153,14 @@ let rejectTests = Framework.suite("reject", [
 
   test("flatMap, reject, catch", () => {
     Repromise.Rejectable.resolved(1)
-    |> Repromise.Rejectable.flatMap(n => Repromise.Rejectable.rejected(n + 1))
+    ->Repromise.Rejectable.flatMap(n => Repromise.Rejectable.rejected(n + 1))
     |> Repromise.Rejectable.catch(n => Repromise.resolved(n == 2));
   }),
 
   test("reject, catch, flatMap", () => {
-    Repromise.Rejectable.rejected(1)
-    |> Repromise.Rejectable.catch(n => Repromise.resolved(n + 1))
-    |> Repromise.flatMap(n => Repromise.resolved(n == 2));
+    (Repromise.Rejectable.rejected(1)
+    |> Repromise.Rejectable.catch(n => Repromise.resolved(n + 1)))
+    ->Repromise.flatMap(n => Repromise.resolved(n == 2));
   }),
 
   test("no double catch", () => {
@@ -183,7 +182,7 @@ let rejectTests = Framework.suite("reject", [
 
   test("no catching resolved, after flatMap", () => {
     Repromise.resolved()
-    |> Repromise.flatMap(() => Repromise.resolved(true))
+    ->Repromise.flatMap(() => Repromise.resolved(true))
     |> Repromise.Rejectable.catch((_) => Repromise.resolved(false));
   }),
 ]);
@@ -197,7 +196,7 @@ let remainsPending = (p, dummyValue) => {
     }
     else {
       f ()
-      |> Repromise.flatMap(result =>
+      ->Repromise.flatMap(result =>
         if (!result) {
           Repromise.resolved(false);
         }
@@ -208,16 +207,16 @@ let remainsPending = (p, dummyValue) => {
 
   repeat(10, () =>
     Repromise.race([p, Repromise.resolved(dummyValue)])
-    |> Repromise.flatMap(v1 =>
+    ->Repromise.flatMap(v1 =>
       Repromise.race([Repromise.resolved(dummyValue), p])
-      |> Repromise.map(v2 =>
+      ->Repromise.map(v2 =>
         v1 == dummyValue && v2 == dummyValue)));
 };
 
 let allTests = Framework.suite("all", [
   test("already resolved", () => {
     Repromise.all([Repromise.resolved(42), Repromise.resolved(43)])
-    |> Repromise.map(results => results == [42, 43]);
+    ->Repromise.map(results => results == [42, 43]);
   }),
 
   test("resolved later", () => {
@@ -226,7 +225,7 @@ let allTests = Framework.suite("all", [
     let p3 = Repromise.all([p1, p2]);
     resolveP1(42);
     resolveP2(43);
-    p3 |> Repromise.map(results => results == [42, 43]);
+    p3->Repromise.map(results => results == [42, 43]);
   }),
 
   test("not all resolved", () => {
@@ -241,14 +240,14 @@ let allTests = Framework.suite("all", [
     let (p1, resolveP1) = Repromise.make();
     let p2 = Repromise.all([p1, p1]);
     resolveP1(42);
-    p2 |> Repromise.map(results => results == [42, 42]);
+    p2->Repromise.map(results => results == [42, 42]);
   }),
 
   test("already rejected", () => {
     let (p1, _, _) = Repromise.Rejectable.make();
     let p2 = Repromise.Rejectable.all([p1, Repromise.Rejectable.rejected(43)]);
     p2
-    |> Repromise.Rejectable.flatMap((_) => Repromise.Rejectable.resolved(false))
+    ->Repromise.Rejectable.flatMap((_) => Repromise.Rejectable.resolved(false))
     |> Repromise.Rejectable.catch(n => Repromise.resolved(n == 43));
   }),
 
@@ -258,7 +257,7 @@ let allTests = Framework.suite("all", [
     let p3 = Repromise.Rejectable.all([p1, p2]);
     rejectP1(42);
     p3
-    |> Repromise.Rejectable.flatMap((_) => Repromise.Rejectable.resolved(false))
+    ->Repromise.Rejectable.flatMap((_) => Repromise.Rejectable.resolved(false))
     |> Repromise.Rejectable.catch(n => Repromise.resolved(n == 42));
   }),
 
@@ -268,11 +267,11 @@ let allTests = Framework.suite("all", [
     let p3 = Repromise.Rejectable.all([p1, p2]);
     rejectP1(42);
     resolveP2(43);
-    p2
-    |> Repromise.Rejectable.catch((_) => assert false)
-    |> Repromise.Rejectable.flatMap((_) =>
+    (p2
+    |> Repromise.Rejectable.catch((_) => assert false))
+    ->Repromise.Rejectable.flatMap((_) =>
       p3
-      |> Repromise.Rejectable.flatMap((_) =>
+      ->Repromise.Rejectable.flatMap((_) =>
         Repromise.Rejectable.resolved(false))
       |> Repromise.Rejectable.catch(n => Repromise.resolved(n == 42)));
   }),
@@ -287,7 +286,7 @@ let allTests = Framework.suite("all", [
     let (p2, resolveP2) = Repromise.make();
     let result =
       Repromise.all2(p1, p2)
-      |> Repromise.map(((x, y)) => x == 42 && y == 43);
+      ->Repromise.map(((x, y)) => x == 42 && y == 43);
     resolveP1(42);
     resolveP2(43);
     result;
@@ -299,7 +298,7 @@ let allTests = Framework.suite("all", [
     let (p3, resolveP3) = Repromise.make();
     let result =
       Repromise.all3(p1, p2, p3)
-      |> Repromise.map(((x, y, z)) => x == 42 && y == 43 && z == 44);
+      ->Repromise.map(((x, y, z)) => x == 42 && y == 43 && z == 44);
     resolveP1(42);
     resolveP2(43);
     resolveP3(44);
@@ -313,7 +312,7 @@ let allTests = Framework.suite("all", [
     let (p4, resolveP4) = Repromise.make();
     let result =
       Repromise.all4(p1, p2, p3, p4)
-      |> Repromise.map(((x, y, z, u)) =>
+      ->Repromise.map(((x, y, z, u)) =>
         x == 42 && y == 43 && z == 44 && u == 45);
     resolveP1(42);
     resolveP2(43);
@@ -330,7 +329,7 @@ let allTests = Framework.suite("all", [
     let (p5, resolveP5) = Repromise.make();
     let result =
       Repromise.all5(p1, p2, p3, p4, p5)
-      |> Repromise.map(((x, y, z, u, v)) =>
+      ->Repromise.map(((x, y, z, u, v)) =>
         x == 42 && y == 43 && z == 44 && u == 45 && v == 46);
     resolveP1(42);
     resolveP2(43);
@@ -349,7 +348,7 @@ let allTests = Framework.suite("all", [
     let (p6, resolveP6) = Repromise.make();
     let result =
       Repromise.all6(p1, p2, p3, p4, p5, p6)
-      |> Repromise.map(((x, y, z, u, v, w)) =>
+      ->Repromise.map(((x, y, z, u, v, w)) =>
         x == 42 && y == 43 && z == 44 && u == 45 && v == 46 && w == 47);
     resolveP1(42);
     resolveP2(43);
@@ -365,7 +364,7 @@ let allTests = Framework.suite("all", [
     let (p2, resolveP2) = Repromise.make();
     let result =
       Repromise.arrayAll([|p1, p2|])
-      |> Repromise.map(fun
+      ->Repromise.map(fun
         | [|x, y|] => x == 42 && y == 43
         | _ => false);
     resolveP1(42);
@@ -382,7 +381,7 @@ let raceTests = Framework.suite("race", [
     let (p2, _) = Repromise.make();
     let p3 = Repromise.race([p1, p2]);
     resolveP1(42);
-    p3 |> Repromise.map(n => n == 42);
+    p3->Repromise.map(n => n == 42);
   }),
 
   test("second resolves", () => {
@@ -390,7 +389,7 @@ let raceTests = Framework.suite("race", [
     let (p2, resolveP2) = Repromise.make();
     let p3 = Repromise.race([p1, p2]);
     resolveP2(43);
-    p3 |> Repromise.map(n => n == 43);
+    p3->Repromise.map(n => n == 43);
   }),
 
   test("first resolves first", () => {
@@ -399,7 +398,7 @@ let raceTests = Framework.suite("race", [
     let p3 = Repromise.race([p1, p2]);
     resolveP1(42);
     resolveP2(43);
-    p3 |> Repromise.map(n => n == 42);
+    p3->Repromise.map(n => n == 42);
   }),
 
   test("second resolves first", () => {
@@ -408,7 +407,7 @@ let raceTests = Framework.suite("race", [
     let p3 = Repromise.race([p1, p2]);
     resolveP2(43);
     resolveP1(42);
-    p3 |> Repromise.map(n => n == 43);
+    p3->Repromise.map(n => n == 43);
   }),
 
   test("rejection", () => {
@@ -423,7 +422,7 @@ let raceTests = Framework.suite("race", [
     let (p1, _) = Repromise.make();
     let p2 = Repromise.resolved(43);
     let p3 = Repromise.race([p1, p2]);
-    p3 |> Repromise.map(n => n == 43);
+    p3->Repromise.map(n => n == 43);
   }),
 
   test("already rejected", () => {
@@ -437,7 +436,7 @@ let raceTests = Framework.suite("race", [
     let p1 = Repromise.resolved(42);
     let p2 = Repromise.resolved(43);
     let p3 = Repromise.race([p1, p2]);
-    p3 |> Repromise.map(n => n == 42 || n == 43);
+    p3->Repromise.map(n => n == 42 || n == 43);
   }),
 
   test("forever pending", () => {
@@ -451,7 +450,7 @@ let raceTests = Framework.suite("race", [
     let (p1, resolveP1) = Repromise.make();
     let p2 = Repromise.race([p1, p1]);
     resolveP1(42);
-    p2 |> Repromise.map(n => n == 42);
+    p2->Repromise.map(n => n == 42);
   }),
 
   test("empty", () => {
@@ -474,17 +473,14 @@ let raceTests = Framework.suite("race", [
        guaranteeing that the second time will run after the first time.. */
     let delay = Repromise.resolved();
 
-    delay
-    |> Repromise.flatMap(fun () => p)
-    |> ignore;
+    ignore(delay->Repromise.flatMap(fun () => p));
 
-    delay
-    |> Repromise.flatMap(fun () => {
+    delay->Repromise.flatMap(fun () => {
       resolve(42);
       /* This tests now succeeds only if resolving p resolved final^, despite
          the fact that p was returned to flatMap while still a pending
          promise. */
-      final |> Repromise.map(n => n == 42);
+      final->Repromise.map(n => n == 42);
     });
   }),
 
@@ -495,15 +491,13 @@ let raceTests = Framework.suite("race", [
 
     let delay = Repromise.resolved();
 
-    delay
-    |> Repromise.flatMap(fun () => p)
-    |> ignore;
+    ignore(delay->Repromise.flatMap(fun () => p));
 
     delay
-    |> Repromise.flatMap(fun () => {
+    ->Repromise.flatMap(fun () => {
       let final = Repromise.race([p]);
       resolve(42);
-      final |> Repromise.map(n => n == 42);
+      final->Repromise.map(n => n == 42);
     });
   }),
 ]);
@@ -516,138 +510,130 @@ open! Isoresult;
 let resultTests = Framework.suite("result", [
   test("mapOk, ok", () => {
     Repromise.resolved(Ok(42))
-    |> Repromise.mapOk(n => n + 1)
-    |> Repromise.map(v => v == Ok(43));
+    ->Repromise.mapOk(n => n + 1)
+    ->Repromise.map(v => v == Ok(43));
   }),
 
   test("mapOk, error", () => {
     Repromise.resolved(Error(42))
-    |> Repromise.mapOk(n => n + 1)
-    |> Repromise.map(v => v == Error(42));
+    ->Repromise.mapOk(n => n + 1)
+    ->Repromise.map(v => v == Error(42));
   }),
 
   test("mapError, ok", () => {
     Repromise.resolved(Ok(42))
-    |> Repromise.mapError(n => n + 1)
-    |> Repromise.map(v => v == Ok(42));
+    ->Repromise.mapError(n => n + 1)
+    ->Repromise.map(v => v == Ok(42));
   }),
 
   test("mapError, error", () => {
     Repromise.resolved(Error(42))
-    |> Repromise.mapError(n => n + 1)
-    |> Repromise.map(v => v == Error(43));
+    ->Repromise.mapError(n => n + 1)
+    ->Repromise.map(v => v == Error(43));
   }),
 
   test("onOk, ok", () => {
     let (p, resolve) = Repromise.make();
-    Repromise.resolved(Ok(42))
-    |> Repromise.onOk(n => resolve(n + 1));
-    p
-    |> Repromise.map(n => n == 43);
+    Repromise.resolved(Ok(42))->Repromise.onOk(n => resolve(n + 1));
+    p->Repromise.map(n => n == 43);
   }),
 
   test("onOk, error", () => {
     let called = ref(false);
-    Repromise.resolved(Error(42))
-    |> Repromise.onOk(_ => called := true);
-    Repromise.resolved()
-    |> Repromise.map(() => !called^);
+    Repromise.resolved(Error(42))->Repromise.onOk(_ => called := true);
+    Repromise.resolved()->Repromise.map(() => !called^);
   }),
 
   test("onError, ok", () => {
     let called = ref(false);
-    Repromise.resolved(Ok(42))
-    |> Repromise.onError(_ => called := true);
-    Repromise.resolved()
-    |> Repromise.map(() => !called^);
+    Repromise.resolved(Ok(42))->Repromise.onError(_ => called := true);
+    Repromise.resolved()->Repromise.map(() => !called^);
   }),
 
   test("onError, error", () => {
     let (p, resolve) = Repromise.make();
-    Repromise.resolved(Error(42))
-    |> Repromise.onError(n => resolve(n + 1));
-    p
-    |> Repromise.map(n => n == 43);
+    Repromise.resolved(Error(42))->Repromise.onError(n => resolve(n + 1));
+    p->Repromise.map(n => n == 43);
   }),
 
   test("tapOk, ok", () => {
     let correct = ref(false);
     Repromise.resolved(Ok(42))
-    |> Repromise.tapOk(n => correct := n == 42)
-    |> Repromise.map(result => result == Ok(42) && correct^);
+    ->Repromise.tapOk(n => correct := n == 42)
+    ->Repromise.map(result => result == Ok(42) && correct^);
   }),
 
   test("tapOk, error", () => {
     let called = ref(false);
     Repromise.resolved(Error(42))
-    |> Repromise.tapOk(_ => called := true)
-    |> Repromise.map(result => result == Error(42) && !called^);
+    ->Repromise.tapOk(_ => called := true)
+    ->Repromise.map(result => result == Error(42) && !called^);
   }),
 
   test("tapError, ok", () => {
     let called = ref(false);
     Repromise.resolved(Ok(42))
-    |> Repromise.tapError(_ => called := true)
-    |> Repromise.map(result => result == Ok(42) && !called^);
+    ->Repromise.tapError(_ => called := true)
+    ->Repromise.map(result => result == Ok(42) && !called^);
   }),
 
   test("onError, error", () => {
     let correct = ref(false);
     Repromise.resolved(Error(42))
-    |> Repromise.tapError(n => correct := n == 42)
-    |> Repromise.map(result => result == Error(42) && correct^);
+    ->Repromise.tapError(n => correct := n == 42)
+    ->Repromise.map(result => result == Error(42) && correct^);
   }),
 
   test("flatMapOk, ok", () => {
     Repromise.resolved(Ok(42))
-    |> Repromise.flatMapOk(n => Repromise.resolved(Ok(n + 1)))
-    |> Repromise.map(v => v == Ok(43));
+    ->Repromise.flatMapOk(n => Repromise.resolved(Ok(n + 1)))
+    ->Repromise.map(v => v == Ok(43));
   }),
 
   test("flatMapOk, error", () => {
     Repromise.resolved(Error(42))
-    |> Repromise.flatMapOk(n => Repromise.resolved(Ok(n + 1)))
-    |> Repromise.map(v => v == Error(42));
+    ->Repromise.flatMapOk(n => Repromise.resolved(Ok(n + 1)))
+    ->Repromise.map(v => v == Error(42));
   }),
 
   test("flatMapError, ok", () => {
     Repromise.resolved(Ok(42))
-    |> Repromise.flatMapError(n => Repromise.resolved(Error(n + 1)))
-    |> Repromise.map(v => v == Ok(42));
+    ->Repromise.flatMapError(n => Repromise.resolved(Error(n + 1)))
+    ->Repromise.map(v => v == Ok(42));
   }),
 
   test("flatMapError, error", () => {
     Repromise.resolved(Error(42))
-    |> Repromise.flatMapError(n => Repromise.resolved(Error(n + 1)))
-    |> Repromise.map(v => v == Error(43));
+    ->Repromise.flatMapError(n => Repromise.resolved(Error(n + 1)))
+    ->Repromise.map(v => v == Error(43));
   }),
 
   test(">|=, ok", () => {
     let open Repromise.Operators;
-    Repromise.resolved(Ok(42))
-    >|= (n => n + 1)
-    |> Repromise.map(v => v == Ok(43));
+    (Repromise.resolved(Ok(42))
+    >|= (n => n + 1))
+    ->Repromise.map(v => v == Ok(43));
   }),
 
   test(">|=, error", () => {
     let open Repromise.Operators;
-    Repromise.resolved(Error(42))
-    >|= (n => n + 1)
-    |> Repromise.map(v => v == Error(42));
+    (Repromise.resolved(Error(42))
+    >|= (n => n + 1))
+    ->Repromise.map(v => v == Error(42));
   }),
 
   test(">>=, ok", () => {
     let open Repromise.Operators;
-    Repromise.resolved(Ok(42))
-    >>= (n => Repromise.resolved(Ok(n + 1)))
-    |> Repromise.map(v => v == Ok(43));
+    (Repromise.resolved(Ok(42))
+    >>= (n => Repromise.resolved(Ok(n + 1))))
+    ->Repromise.map(v => v == Ok(43));
   }),
 
   test(">>=, error", () => {
     let open Repromise.Operators;
-    Repromise.resolved(Error(42))
-    >>= (n => Repromise.resolved(Ok(n + 1)))
-    |> Repromise.map(v => v == Error(42));
+    (Repromise.resolved(Error(42))
+    >>= (n => Repromise.resolved(Ok(n + 1))))
+    ->Repromise.map(v => v == Error(42));
   }),
 ]);
 
@@ -656,56 +642,52 @@ let resultTests = Framework.suite("result", [
 let optionTests = Framework.suite("opton", [
   test("mapSome, some", () => {
     Repromise.resolved(Some(42))
-    |> Repromise.mapSome(n => n + 1)
-    |> Repromise.map(v => v == Some(43));
+    ->Repromise.mapSome(n => n + 1)
+    ->Repromise.map(v => v == Some(43));
   }),
 
-  test("mapOk, none", () => {
+  test("mapSome, none", () => {
     Repromise.resolved(None)
-    |> Repromise.mapSome(n => n + 1)
-    |> Repromise.map(v => v == None);
+    ->Repromise.mapSome(n => n + 1)
+    ->Repromise.map(v => v == None);
   }),
 
   test("onSome, some", () => {
     let (p, resolve) = Repromise.make();
-    Repromise.resolved(Some(42))
-    |> Repromise.onSome(n => resolve(n + 1));
-    p
-    |> Repromise.map(n => n == 43);
+    Repromise.resolved(Some(42))->Repromise.onSome(n => resolve(n + 1));
+    p->Repromise.map(n => n == 43);
   }),
 
   test("onSome, none", () => {
     let called = ref(false);
-    Repromise.resolved(None)
-    |> Repromise.onSome(_ => called := true);
-    Repromise.resolved()
-    |> Repromise.map(() => !called^);
+    Repromise.resolved(None)->Repromise.onSome(_ => called := true);
+    Repromise.resolved()->Repromise.map(() => !called^);
   }),
 
   test("tapSome, some", () => {
     let correct = ref(false);
     Repromise.resolved(Some(42))
-    |> Repromise.tapSome(n => correct := n == 42)
-    |> Repromise.map(result => result == Some(42) && correct^);
+    ->Repromise.tapSome(n => correct := n == 42)
+    ->Repromise.map(result => result == Some(42) && correct^);
   }),
 
   test("tapSome, none", () => {
     let called = ref(false);
     Repromise.resolved(None)
-    |> Repromise.tapSome(_ => called := true)
-    |> Repromise.map(result => result == None && !called^);
+    ->Repromise.tapSome(_ => called := true)
+    ->Repromise.map(result => result == None && !called^);
   }),
 
   test("flatMapSome, some", () => {
     Repromise.resolved(Some(42))
-    |> Repromise.flatMapSome(n => Repromise.resolved(Some(n + 1)))
-    |> Repromise.map(v => v == Some(43));
+    ->Repromise.flatMapSome(n => Repromise.resolved(Some(n + 1)))
+    ->Repromise.map(v => v == Some(43));
   }),
 
   test("flatMapSome, none", () => {
     Repromise.resolved(None)
-    |> Repromise.flatMapSome(n => Repromise.resolved(Some(n + 1)))
-    |> Repromise.map(v => v == None);
+    ->Repromise.flatMapSome(n => Repromise.resolved(Some(n + 1)))
+    ->Repromise.map(v => v == None);
   }),
 ]);
 

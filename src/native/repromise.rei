@@ -19,13 +19,13 @@ let exec: (('a => unit) => unit) => promise('a);
 
 let resolved: 'a => promise('a);
 
-let map: ('a => 'b, promise('a)) => promise('b);
+let map: (promise('a), 'a => 'b) => promise('b);
 
-let on: ('a => unit, promise('a)) => unit;
+let on: (promise('a), 'a => unit) => unit;
 
-let tap: ('a => unit, promise('a)) => promise('a);
+let tap: (promise('a), 'a => unit) => promise('a);
 
-let flatMap: ('a => promise('b), promise('a)) => promise('b);
+let flatMap: (promise('a), 'a => promise('b)) => promise('b);
 
 let all: list(promise('a)) => promise(list('a));
 
@@ -62,29 +62,29 @@ let race: list(promise('a)) => promise('a);
 type result('a, 'e) = Result.result('a, 'e);
 
 let mapOk:
-  ('a => 'b, promise(result('a, 'e))) => promise(result('b, 'e));
+  (promise(result('a, 'e)), 'a => 'b) => promise(result('b, 'e));
 
 let mapError:
-  ('e => 'e2, promise(result('a, 'e))) => promise(result('a, 'e2));
+  (promise(result('a, 'e)), 'e => 'e2) => promise(result('a, 'e2));
 
 let onOk:
-  ('a => unit, promise(result('a, _))) => unit;
+  (promise(result('a, _)), 'a => unit) => unit;
 
 let onError:
-  ('e => unit, promise(result(_, 'e))) => unit;
+  (promise(result(_, 'e)), 'e => unit) => unit;
 
 let tapOk:
-  ('a => unit, promise(result('a, 'e))) => promise(result('a, 'e));
+  (promise(result('a, 'e)), 'a => unit) => promise(result('a, 'e));
 
 let tapError:
-  ('e => unit, promise(result('a, 'e))) => promise(result('a, 'e));
+  (promise(result('a, 'e)), 'e => unit) => promise(result('a, 'e));
 
 let flatMapOk:
-  ('a => promise(result('b, 'e)), promise(result('a, 'e))) =>
+  (promise(result('a, 'e)), 'a => promise(result('b, 'e))) =>
     promise(result('b, 'e));
 
 let flatMapError:
-  ('e => promise(result('a, 'e2)), promise(result('a, 'e))) =>
+  (promise(result('a, 'e)), 'e => promise(result('a, 'e2))) =>
     promise(result('a, 'e2));
 
 module Operators: {
@@ -100,16 +100,16 @@ module Operators: {
 
 /* Options. */
 let mapSome:
-  ('a => 'b, promise(option('a))) => promise(option('b));
+  (promise(option('a)), 'a => 'b) => promise(option('b));
 
 let onSome:
-  ('a => unit, promise(option('a))) => unit;
+  (promise(option('a)), 'a => unit) => unit;
 
 let tapSome:
-  ('a => unit, promise(option('a))) => promise(option('a));
+  (promise(option('a)), 'a => unit) => promise(option('a));
 
 let flatMapSome:
-  ('a => promise(option('b)), promise(option('a))) => promise(option('b));
+  (promise(option('a)), 'a => promise(option('b))) => promise(option('b));
 
 
 
@@ -126,13 +126,13 @@ module Rejectable: {
   let rejected: 'e => rejectable(_, 'e);
 
   let flatMap:
-    ('a => rejectable('b, 'e), rejectable('a, 'e)) => rejectable('b, 'e);
+    (rejectable('a, 'e), 'a => rejectable('b, 'e)) => rejectable('b, 'e);
 
-  let map: ('a => 'b, rejectable('a, 'e)) => rejectable('b, 'e);
+  let map: (rejectable('a, 'e), 'a => 'b) => rejectable('b, 'e);
 
-  let on: ('a => unit, rejectable('a, _)) => unit;
+  let on: (rejectable('a, _), 'a => unit) => unit;
 
-  let tap: ('a => unit, rejectable('a, 'e)) => rejectable('a, 'e);
+  let tap: (rejectable('a, 'e), 'a => unit) => rejectable('a, 'e);
 
   let catch:
     ('e => rejectable('a, 'e2), rejectable('a, 'e)) => rejectable('a, 'e2);
@@ -140,6 +140,12 @@ module Rejectable: {
   let all: list(rejectable('a, 'e)) => rejectable(list('a), 'e);
 
   let race: list(rejectable('a, 'e)) => rejectable('a, 'e);
+};
+
+
+
+module FastPipe: {
+  let (|.): ('a, 'a => 'b) => 'b;
 };
 
 

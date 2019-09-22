@@ -26,6 +26,7 @@
     "bs-platform": ">= 3.0.0"
   },
   "devDependencies": {
+    "bs-platform": ">= 5.0.0",
     "webpack": "*",
     "webpack-cli": "*"
   },

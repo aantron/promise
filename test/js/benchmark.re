@@ -84,7 +84,7 @@ let measure_then = (label, f) => {
       /* The callback will be called on the next event loop iteration, after any
          callbacks scheduled by f(). */
       Repromise.resolved()
-      |> Repromise.flatMap(() => iteration(iterations_remaining - 1));
+      ->Repromise.flatMap(() => iteration(iterations_remaining - 1));
     }
     else {
       let elapsed = hrtime() -. start_time;
@@ -116,9 +116,7 @@ let flatMap = Framework.suite("flatMap", [
     let p = Repromise.resolved(1);
     measure_then("Repromise.flatMap", () =>
       for (_ in 1 to then_repetitions) {
-        p
-        |> Repromise.flatMap(_ => p)
-        |> ignore
+        ignore(p->Repromise.flatMap(_ => p));
       });
   }),
 ]);

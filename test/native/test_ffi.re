@@ -31,12 +31,8 @@ let countAllocatedWords = () => {
    function doesNotLeakMemory will call countAllocatedWords too late, because
    loop will have returned and released all references that it is holding. */
 let doesNotLeakMemory = (loop, baseIterations) =>
-  loop(baseIterations)
-  |> Repromise.Rejectable.flatMap(wordsAllocated =>
-
-    loop(baseIterations * 10)
-    |> Repromise.Rejectable.flatMap(wordsAllocated' => {
-
+  Repromise.Rejectable.flatMap(loop(baseIterations), wordsAllocated =>
+    Repromise.Rejectable.flatMap(loop(baseIterations * 10), wordsAllocated' => {
       let ratio = float_of_int(wordsAllocated') /. float_of_int(wordsAllocated);
       Repromise.Rejectable.resolved(ratio < 2.);
     }));
@@ -71,9 +67,7 @@ let promiseLoopTests = Framework.suite("promise loop", [
 
       let rec promiseLoop: Repromise.t(int) => Repromise.t(int) =
           previousPromise =>
-
-        previousPromise
-        |> Repromise.flatMap(n => {
+        Repromise.flatMap(previousPromise, n => {
           if (n == 0) {
             let wordsAllocated = countAllocatedWords() - initialWords;
             Repromise.resolved(wordsAllocated);
@@ -120,12 +114,8 @@ let promiseLoopTests = Framework.suite("promise loop", [
           let delay = Repromise.resolved();
 
           /* If union-find is not implemented, we will leak memory here. */
-          delay
-          |> Repromise.flatMap(() => foreverPendingPromise)
-          |> ignore;
-
-          delay
-          |> Repromise.flatMap(() => tryToBuildTower(n - 1));
+          ignore(Repromise.flatMap(delay, () => foreverPendingPromise));
+          Repromise.flatMap(delay, () => tryToBuildTower(n - 1));
         };
 
       tryToBuildTower(n);
@@ -192,7 +182,7 @@ let raceLoopTests = Framework.suite("race loop", [
 
     resolveShortLivedPromise();
 
-    racePromise |> Repromise.Rejectable.flatMap(nextIteration);
+    Repromise.Rejectable.flatMap(racePromise, nextIteration);
   }),
 
   raceTest("race loop memory leak, with already-resolved promises",
@@ -202,7 +192,7 @@ let raceLoopTests = Framework.suite("race loop", [
     let racePromise =
       Repromise.Rejectable.race([foreverPendingPromise, resolvedPromise]);
 
-    racePromise |> Repromise.Rejectable.flatMap(nextIteration);
+    Repromise.Rejectable.flatMap(racePromise, nextIteration);
   }),
 
   raceTest("race loop memory leak, with rejection",
@@ -215,8 +205,7 @@ let raceLoopTests = Framework.suite("race loop", [
 
     rejectShortLivedPromise();
 
-    racePromise
-    |> Repromise.Rejectable.flatMap(() => assert(false))
+    Repromise.Rejectable.flatMap(racePromise, () => assert(false))
     |> Repromise.Rejectable.catch(nextIteration);
   }),
 
@@ -227,8 +216,7 @@ let raceLoopTests = Framework.suite("race loop", [
     let racePromise =
       Repromise.Rejectable.race([foreverPendingPromise, rejectedPromise]);
 
-    racePromise
-    |> Repromise.Rejectable.flatMap(() => assert(false))
+    Repromise.Rejectable.flatMap(racePromise, () => assert(false))
     |> Repromise.Rejectable.catch(nextIteration);
   }),
 
@@ -257,17 +245,14 @@ let raceLoopTests = Framework.suite("race loop", [
        call to flatMap definitely run after the first. */
     let delay = Repromise.Rejectable.resolved();
 
-    delay
-    |> Repromise.Rejectable.flatMap(() => foreverPendingPromise)
-    |> ignore;
+    ignore(Repromise.Rejectable.flatMap(delay, () => foreverPendingPromise));
 
-    delay
-    |> Repromise.Rejectable.flatMap(() => {
+    Repromise.Rejectable.flatMap(delay, () => {
       /* Now, we resolve the short-lived promise. If that doesn't delete the
          callback that was merged away from foreverPendingPromise, then this is
          where we will accumulate the memory leak. */
       resolveShortLivedPromise();
-      racePromise |> Repromise.Rejectable.flatMap(nextIteration);
+      Repromise.Rejectable.flatMap(racePromise, nextIteration);
     });
   }),
 ]);
@@ -291,8 +276,7 @@ let allLoopTests = Framework.suite("all loop", [
 
     rejectShortLivedPromise();
 
-    allPromise
-    |> Repromise.Rejectable.flatMap((_) => assert false)
+    Repromise.Rejectable.flatMap(allPromise, (_) => assert false)
     |> Repromise.Rejectable.catch(nextIteration);
   }),
 
@@ -303,8 +287,7 @@ let allLoopTests = Framework.suite("all loop", [
     let allPromise =
       Repromise.Rejectable.all([foreverPendingPromise, rejectedPromise]);
 
-    allPromise
-    |> Repromise.Rejectable.flatMap((_) => assert false)
+    Repromise.Rejectable.flatMap(allPromise, (_) => assert false)
     |> Repromise.Rejectable.catch(nextIteration);
   }),
 
@@ -320,17 +303,13 @@ let allLoopTests = Framework.suite("all loop", [
 
     let delay = Repromise.Rejectable.resolved();
 
-    delay
-    |> Repromise.Rejectable.catch((_) => assert(false))
-    |> Repromise.Rejectable.flatMap(() => foreverPendingPromise)
-    |> ignore;
+    let p = delay |> Repromise.Rejectable.catch((_) => assert(false));
+    ignore(Repromise.Rejectable.flatMap(p, () => foreverPendingPromise));
 
-    delay
-    |> Repromise.Rejectable.catch((_) => assert(false))
-    |> Repromise.Rejectable.flatMap(() => {
+    let p = delay |> Repromise.Rejectable.catch((_) => assert(false));
+    Repromise.Rejectable.flatMap(p, () => {
       rejectShortLivedPromise();
-      allPromise
-      |> Repromise.Rejectable.flatMap((_) => assert false)
+      Repromise.Rejectable.flatMap(allPromise, (_) => assert false)
       |> Repromise.Rejectable.catch(nextIteration);
     });
   }),

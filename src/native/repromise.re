@@ -178,7 +178,7 @@ let makePromiseBehaveAs = (outerPromise, nestedPromise) => {
   };
 };
 
-let flatMap = (callback, promise) => {
+let flatMap = (promise, callback) => {
   let outerPromise = newInternal();
 
   let onResolve = value =>
@@ -208,14 +208,14 @@ let flatMap = (callback, promise) => {
   outerPromise;
 };
 
-let map = (mapper, promise) =>
-  flatMap(value => resolved(mapper(value)), promise);
+let map = (promise, mapper) =>
+  flatMap(promise, value => resolved(mapper(value)));
 
-let on = (callback, promise) =>
-  map(callback, promise) |> ignore;
+let on = (promise, callback) =>
+  ignore(map(promise, callback));
 
-let tap = (callback, promise) => {
-  on(callback, promise);
+let tap = (promise, callback) => {
+  on(promise, callback);
   promise;
 };
 
@@ -348,58 +348,51 @@ let all = promises => {
 };
 
 let arrayAll = promises =>
-  promises
-  |> Array.to_list
-  |> all
-  |> map(Array.of_list)
+  map(all(Array.to_list(promises)), Array.of_list);
 
 /* Not a "legitimate" implementation. To get a legitimate one, the tricky parts
    of "all," above, should be factoed out. */
 let all2 = (p1, p2) => {
-  [Obj.magic(p1), Obj.magic(p2)]
-  |> all
-  |> map (fun
+  let promises = [Obj.magic(p1), Obj.magic(p2)];
+  map(all(promises), fun
   | [v1, v2] => (Obj.magic(v1), Obj.magic(v2))
-  | _ => assert(false))
+  | _ => assert(false));
 };
 
 let all3 = (p1, p2, p3) => {
-  [Obj.magic(p1), Obj.magic(p2), Obj.magic(p3)]
-  |> all
-  |> map (fun
+  let promises = [Obj.magic(p1), Obj.magic(p2), Obj.magic(p3)];
+  map(all(promises), fun
   | [v1, v2, v3] => (Obj.magic(v1), Obj.magic(v2), Obj.magic(v3))
-  | _ => assert(false))
+  | _ => assert(false));
 };
 
 let all4 = (p1, p2, p3, p4) => {
-  [Obj.magic(p1), Obj.magic(p2), Obj.magic(p3), Obj.magic(p4)]
-  |> all
-  |> map (fun
+  let promises = [Obj.magic(p1), Obj.magic(p2), Obj.magic(p3), Obj.magic(p4)];
+  map(all(promises), fun
   | [v1, v2, v3, v4] =>
     (Obj.magic(v1), Obj.magic(v2), Obj.magic(v3), Obj.magic(v4))
-  | _ => assert(false))
+  | _ => assert(false));
 };
 
 let all5 = (p1, p2, p3, p4, p5) => {
-  [Obj.magic(p1), Obj.magic(p2), Obj.magic(p3), Obj.magic(p4), Obj.magic(p5)]
-  |> all
-  |> map (fun
+  let promises =
+    [Obj.magic(p1), Obj.magic(p2), Obj.magic(p3), Obj.magic(p4), Obj.magic(p5)];
+  map(all(promises), fun
   | [v1, v2, v3, v4, v5] =>
     (Obj.magic(v1), Obj.magic(v2), Obj.magic(v3), Obj.magic(v4), Obj.magic(v5))
-  | _ => assert(false))
+  | _ => assert(false));
 };
 
 let all6 = (p1, p2, p3, p4, p5, p6) => {
-  [
+  let promises = [
     Obj.magic(p1),
     Obj.magic(p2),
     Obj.magic(p3),
     Obj.magic(p4),
     Obj.magic(p5),
     Obj.magic(p6)
-  ]
-  |> all
-  |> map (fun
+  ];
+  map(all(promises), fun
   | [v1, v2, v3, v4, v5, v6] =>
     (
       Obj.magic(v1),
@@ -409,7 +402,7 @@ let all6 = (p1, p2, p3, p4, p5, p6) => {
       Obj.magic(v5),
       Obj.magic(v6)
     )
-  | _ => assert(false))
+  | _ => assert(false));
 };
 
 
@@ -469,73 +462,70 @@ type result('a, 'e) = Result.result('a, 'e);
 
 open Result
 
-let flatMapOk = (callback, promise) =>
-  promise |> flatMap(fun
+let flatMapOk = (promise, callback) =>
+  flatMap(promise, fun
     | Ok(value) => callback(value)
     | Error(_) as error => resolved(error));
 
-let flatMapError = (callback, promise) =>
-  promise |> flatMap(fun
+let flatMapError = (promise, callback) =>
+  flatMap(promise, fun
     | Ok(_) as ok => resolved(ok)
     | Error(error) => callback(error));
 
-let mapOk = (callback, promise) =>
-  promise |> map(fun
+let mapOk = (promise, callback) =>
+  map(promise, fun
     | Ok(value) => Ok(callback(value))
     | Error(_) as error => error);
 
-let mapError = (callback, promise) =>
-  promise |> map(fun
+let mapError = (promise, callback) =>
+  map(promise, fun
     | Ok(_) as ok => ok
     | Error(error) => Error(callback(error)));
 
-let onOk = (callback, promise) =>
-  promise |> on(fun
+let onOk = (promise, callback) =>
+  on(promise, fun
     | Ok(value) => callback(value)
     | Error(_) => ());
 
-let onError = (callback, promise) =>
-  promise |> on(fun
+let onError = (promise, callback) =>
+  on(promise, fun
     | Ok(_) => ()
     | Error(error) => callback(error));
 
-let tapOk = (callback, promise) => {
-  onOk(callback, promise);
+let tapOk = (promise, callback) => {
+  onOk(promise, callback);
   promise;
 };
 
-let tapError = (callback, promise) => {
-  onError(callback, promise);
+let tapError = (promise, callback) => {
+  onError(promise, callback);
   promise;
 };
 
 module Operators = {
-  let (>|=) = (promise, callback) =>
-    mapOk(callback, promise);
-
-  let (>>=) = (promise, callback) =>
-    flatMapOk(callback, promise);
+  let (>|=) = mapOk;
+  let (>>=) = flatMapOk;
 };
 
 
 
-let flatMapSome = (callback, promise) =>
-  promise |> flatMap(fun
+let flatMapSome = (promise, callback) =>
+  flatMap(promise, fun
     | Some(value) => callback(value)
     | None => resolved(None));
 
-let mapSome = (callback, promise) =>
-  promise |> map(fun
+let mapSome = (promise, callback) =>
+  map(promise, fun
     | Some(value) => Some(callback(value))
     | None => None);
 
-let onSome = (callback, promise) =>
-  promise |> on(fun
+let onSome = (promise, callback) =>
+  on(promise, fun
     | Some(value) => callback(value)
     | None => ());
 
-let tapSome = (callback, promise) => {
-  onSome(callback, promise);
+let tapSome = (promise, callback) => {
+  onSome(promise, callback);
   promise;
 };
 
@@ -575,4 +565,10 @@ let exec = executor => {
   let (p, resolve) = make();
   executor(resolve);
   p;
+};
+
+
+
+module FastPipe = {
+  let (|.) = (v, f) => f(v);
 };
