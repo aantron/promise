@@ -5,6 +5,7 @@
 
 
 let test = Framework.test;
+open Promise.FastPipe;
 
 
 
@@ -149,8 +150,9 @@ let raceTest = (name, body) =>
       theLoop(n);
     };
 
-    doesNotLeakMemory(instrumentedLoop, 100)
-    |> Promise.Rejectable.catch(() => assert(false));
+    Promise.Rejectable.catch(
+      doesNotLeakMemory(instrumentedLoop, 100),
+      () => assert(false));
   });
 
 let raceLoopTests = Framework.suite("race loop", [
@@ -206,7 +208,7 @@ let raceLoopTests = Framework.suite("race loop", [
     rejectShortLivedPromise();
 
     Promise.Rejectable.flatMap(racePromise, () => assert(false))
-    |> Promise.Rejectable.catch(nextIteration);
+    ->Promise.Rejectable.catch(nextIteration);
   }),
 
   raceTest("race loop memory leak, with already-rejected promises",
@@ -217,7 +219,7 @@ let raceLoopTests = Framework.suite("race loop", [
       Promise.Rejectable.race([foreverPendingPromise, rejectedPromise]);
 
     Promise.Rejectable.flatMap(racePromise, () => assert(false))
-    |> Promise.Rejectable.catch(nextIteration);
+    ->Promise.Rejectable.catch(nextIteration);
   }),
 
   /* This test is like the first, but it tests for the interaction of the fixes
@@ -277,7 +279,7 @@ let allLoopTests = Framework.suite("all loop", [
     rejectShortLivedPromise();
 
     Promise.Rejectable.flatMap(allPromise, (_) => assert false)
-    |> Promise.Rejectable.catch(nextIteration);
+    ->Promise.Rejectable.catch(nextIteration);
   }),
 
   raceTest("all loop memory leak, with already-rejected promises",
@@ -288,7 +290,7 @@ let allLoopTests = Framework.suite("all loop", [
       Promise.Rejectable.all([foreverPendingPromise, rejectedPromise]);
 
     Promise.Rejectable.flatMap(allPromise, (_) => assert false)
-    |> Promise.Rejectable.catch(nextIteration);
+    ->Promise.Rejectable.catch(nextIteration);
   }),
 
   /* Tests the interaction of the memory-leak fixes in all and flatMap, as tested
@@ -303,14 +305,14 @@ let allLoopTests = Framework.suite("all loop", [
 
     let delay = Promise.Rejectable.resolved();
 
-    let p = delay |> Promise.Rejectable.catch((_) => assert(false));
+    let p = delay->Promise.Rejectable.catch((_) => assert(false));
     ignore(Promise.Rejectable.flatMap(p, () => foreverPendingPromise));
 
-    let p = delay |> Promise.Rejectable.catch((_) => assert(false));
+    let p = delay->Promise.Rejectable.catch((_) => assert(false));
     Promise.Rejectable.flatMap(p, () => {
       rejectShortLivedPromise();
       Promise.Rejectable.flatMap(allPromise, (_) => assert false)
-      |> Promise.Rejectable.catch(nextIteration);
+      ->Promise.Rejectable.catch(nextIteration);
     });
   }),
 ]);

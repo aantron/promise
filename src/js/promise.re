@@ -73,7 +73,7 @@ function map(promise, callback) {
     });
 };
 
-function catch_(callback, promise) {
+function catch_(promise, callback) {
     var safeCallback = function (error) {
         try {
             return callback(error);
@@ -166,7 +166,7 @@ module Rejectable = {
 
   [@bs.val]
   external catch:
-    ('e => rejectable('a, 'e2), rejectable('a, 'e)) => rejectable('a, 'e2) =
+    (rejectable('a, 'e), 'e => rejectable('a, 'e2)) => rejectable('a, 'e2) =
       "catch_";
 
   [@bs.val]

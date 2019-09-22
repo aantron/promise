@@ -219,7 +219,7 @@ let tap = (promise, callback) => {
   promise;
 };
 
-let catch = (callback, promise) => {
+let catch = (promise, callback) => {
   let outerPromise = newInternal();
 
   let onReject = error =>

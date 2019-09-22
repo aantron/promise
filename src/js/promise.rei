@@ -190,7 +190,7 @@ module Rejectable: {
       rejectable('b, 'e);
 
   let catch:
-    ('e => rejectable('a, 'e2), rejectable('a, 'e)) =>
+    (rejectable('a, 'e), 'e => rejectable('a, 'e2)) =>
       rejectable('a, 'e2);
 
   let all:
