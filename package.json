@@ -1,5 +1,5 @@
 {
-  "name": "@aantron/repromise",
+  "name": "reason-promise",
   "version": "0.6.1",
   "description": "Type-safe JS promises for ReasonML",
   "keywords": [
@@ -38,8 +38,8 @@
     "benchmark": "bsb -make-world && node lib/js/test/js/benchmark.js"
   },
   "files": [
-    "src/js/repromise.rei",
-    "src/js/repromise.re",
+    "src/js/promise.rei",
+    "src/js/promise.re",
     "bsconfig.json"
   ]
 }

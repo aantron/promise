@@ -1,7 +1,7 @@
 {
-  "name": "@aantron/repromise",
+  "name": "reason-promise",
   "version": "0.6.1",
-  "description": "Type-safe JS promises for ReasonML, native version",
+  "description": "A fresh take on promises for ReasonML (native version)",
   "keywords": [
     "BuckleScript",
     "reason",
@@ -26,7 +26,7 @@
     "ocaml": "~4.6.0"
   },
   "esy": {
-    "build": "dune build -p repromise",
-    "install": "esy-installer repromise.install"
+    "build": "dune build -p promise",
+    "install": "esy-installer promise.install"
   }
 }

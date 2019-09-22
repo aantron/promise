@@ -30,7 +30,7 @@ bundle-size-test :
 	  --entry ./test/bundle/main_control.js \
 	  --output ./test/bundle/bundle_control.js
 	@$(WEBPACK) \
-	  --entry ./test/bundle/main_repromise.js \
-	  --output ./test/bundle/bundle_repromise.js
+	  --entry ./test/bundle/main_promise.js \
+	  --output ./test/bundle/bundle_promise.js
 	@ls -l lib/js/src/js/promise.js
 	@ls -l test/bundle/bundle*.js
