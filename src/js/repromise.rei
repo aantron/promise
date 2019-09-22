@@ -23,6 +23,8 @@ let map: ('a => 'b, promise('a)) => promise('b);
 
 let on: ('a => unit, promise('a)) => unit;
 
+let tap: ('a => unit, promise('a)) => promise('a);
+
 let flatMap: ('a => promise('b), promise('a)) => promise('b);
 
 let all: list(promise('a)) => promise(list('a));
@@ -71,6 +73,12 @@ let onOk:
 let onError:
   ('e => unit, promise(result(_, 'e))) => unit;
 
+let tapOk:
+  ('a => unit, promise(result('a, 'e))) => promise(result('a, 'e));
+
+let tapError:
+  ('e => unit, promise(result('a, 'e))) => promise(result('a, 'e));
+
 let flatMapOk:
   ('a => promise(result('b, 'e)), promise(result('a, 'e))) =>
     promise(result('b, 'e));
@@ -97,6 +105,9 @@ let mapSome:
 let onSome:
   ('a => unit, promise(option('a))) => unit;
 
+let tapSome:
+  ('a => unit, promise(option('a))) => promise(option('a));
+
 let flatMapSome:
   ('a => promise(option('b)), promise(option('a))) => promise(option('b));
 
@@ -117,6 +128,8 @@ module Rejectable: {
   let map: ('a => 'b, rejectable('a, 'e)) => rejectable('b, 'e);
 
   let on: ('a => unit, rejectable('a, _)) => unit;
+
+  let tap: ('a => unit, rejectable('a, 'e)) => rejectable('a, 'e);
 
   let flatMap:
     ('a => rejectable('b, 'e), rejectable('a, 'e)) => rejectable('b, 'e);

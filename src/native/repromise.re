@@ -214,6 +214,11 @@ let map = (mapper, promise) =>
 let on = (callback, promise) =>
   map(callback, promise) |> ignore;
 
+let tap = (callback, promise) => {
+  on(callback, promise);
+  promise;
+};
+
 let catch = (callback, promise) => {
   let outerPromise = newInternal();
 
@@ -494,6 +499,16 @@ let onError = (callback, promise) =>
     | Ok(_) => ()
     | Error(error) => callback(error));
 
+let tapOk = (callback, promise) => {
+  onOk(callback, promise);
+  promise;
+};
+
+let tapError = (callback, promise) => {
+  onError(callback, promise);
+  promise;
+};
+
 module Operators = {
   let (>|=) = (promise, callback) =>
     mapOk(callback, promise);
@@ -519,6 +534,11 @@ let onSome = (callback, promise) =>
     | Some(value) => callback(value)
     | None => ());
 
+let tapSome = (callback, promise) => {
+  onSome(callback, promise);
+  promise;
+};
+
 
 
 module Rejectable = {
@@ -538,6 +558,7 @@ module Rejectable = {
   let flatMap = flatMap;
   let map = map;
   let on = on;
+  let tap = tap;
   let catch = catch;
   let all = all;
   let race = race;

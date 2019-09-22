@@ -155,6 +155,11 @@ module Rejectable = {
   let on = (callback, promise) =>
     promise |> map(callback) |> ignore;
 
+  let tap = (callback, promise) => {
+    on(callback, promise);
+    promise;
+  };
+
   [@bs.scope "Promise"]
   [@bs.val]
   external rejected: 'e => rejectable(_, 'e) = "reject";
@@ -233,6 +238,7 @@ let resolved = Rejectable.resolved;
 let flatMap = Rejectable.flatMap;
 let map = Rejectable.map;
 let on = Rejectable.on;
+let tap = Rejectable.tap;
 let all = Rejectable.all;
 let all2 = Rejectable.all2;
 let all3 = Rejectable.all3;
@@ -289,6 +295,16 @@ let onError = (_callback, promise) =>
     | Error(_) => [%raw "_callback(result[0])"]
     });
 
+let tapOk = (callback, promise) => {
+  onOk(callback, promise);
+  promise;
+};
+
+let tapError = (callback, promise) => {
+  onError(callback, promise);
+  promise;
+};
+
 module Operators = {
   let (>|=) = (promise, callback) =>
     mapOk(callback, promise);
@@ -319,3 +335,8 @@ let onSome = (_callback, promise) =>
     | Some(_) => [%raw "_callback(Caml_option.valFromOption(option))"]
     | None => ()
     });
+
+let tapSome = (callback, promise) => {
+  onSome(callback, promise);
+  promise;
+};

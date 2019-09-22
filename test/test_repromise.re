@@ -22,7 +22,14 @@ let basicTests = Framework.suite("basic", [
     Repromise.resolved(1)
     |> Repromise.on(n => correct := (n == 1));
     Repromise.resolved()
-    |> Repromise.map(() => correct^)
+    |> Repromise.map(() => correct^);
+  }),
+
+  test("tap", () => {
+    let correct = ref(false);
+    Repromise.resolved(1)
+    |> Repromise.tap(n => correct := (n == 1))
+    |> Repromise.map(n => n == 1 && correct^);
   }),
 
   test("flatMap", () => {
@@ -563,6 +570,34 @@ let resultTests = Framework.suite("result", [
     |> Repromise.map(n => n == 43);
   }),
 
+  test("tapOk, ok", () => {
+    let correct = ref(false);
+    Repromise.resolved(Ok(42))
+    |> Repromise.tapOk(n => correct := n == 42)
+    |> Repromise.map(result => result == Ok(42) && correct^);
+  }),
+
+  test("tapOk, error", () => {
+    let called = ref(false);
+    Repromise.resolved(Error(42))
+    |> Repromise.tapOk(_ => called := true)
+    |> Repromise.map(result => result == Error(42) && !called^);
+  }),
+
+  test("tapError, ok", () => {
+    let called = ref(false);
+    Repromise.resolved(Ok(42))
+    |> Repromise.tapError(_ => called := true)
+    |> Repromise.map(result => result == Ok(42) && !called^);
+  }),
+
+  test("onError, error", () => {
+    let correct = ref(false);
+    Repromise.resolved(Error(42))
+    |> Repromise.tapError(n => correct := n == 42)
+    |> Repromise.map(result => result == Error(42) && correct^);
+  }),
+
   test("flatMapOk, ok", () => {
     Repromise.resolved(Ok(42))
     |> Repromise.flatMapOk(n => Repromise.resolved(Ok(n + 1)))
@@ -645,6 +680,20 @@ let optionTests = Framework.suite("opton", [
     |> Repromise.onSome(_ => called := true);
     Repromise.resolved()
     |> Repromise.map(() => !called^);
+  }),
+
+  test("tapSome, some", () => {
+    let correct = ref(false);
+    Repromise.resolved(Some(42))
+    |> Repromise.tapSome(n => correct := n == 42)
+    |> Repromise.map(result => result == Some(42) && correct^);
+  }),
+
+  test("tapSome, none", () => {
+    let called = ref(false);
+    Repromise.resolved(None)
+    |> Repromise.tapSome(_ => called := true)
+    |> Repromise.map(result => result == None && !called^);
   }),
 
   test("flatMapSome, some", () => {
