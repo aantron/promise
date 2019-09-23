@@ -214,11 +214,11 @@ module Js: {
     promise(result('a, 'e)) =>
       rejectable('a, 'e);
 
-  let fromJsPromise:
+  let fromBsPromise:
     Js.Promise.t('a) =>
       rejectable('a, Js.Promise.error);
 
-  let toJsPromise:
+  let toBsPromise:
     rejectable('a, _) =>
       Js.Promise.t('a);
 };

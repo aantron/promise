@@ -222,10 +222,11 @@ module Js_ = {
       | Ok(v) => resolved(v)
       | Error(e) => rejected(e));
 
-  external fromJsPromise:
+  external fromBsPromise:
     Js.Promise.t('a) => rejectable('a, Js.Promise.error) = "%identity";
 
-  external toJsPromise: rejectable('a, _) => Js.Promise.t('a) = "%identity";
+  external toBsPromise:
+    rejectable('a, _) => Js.Promise.t('a) = "%identity";
 };
 
 

@@ -89,16 +89,16 @@ let interopTests = Framework.suite("interop", [
 
   test("coerce from Js.Promise", () => {
     Js.Promise.resolve(42)
-    ->Promise.Js.fromJsPromise
+    ->Promise.Js.fromBsPromise
     ->Promise.Js.catch(_ => assert(false))
     ->Promise.map(n => n == 42);
   }),
 
   test("coerce to Js.Promise", () => {
     (Promise.resolved(42)
-    ->Promise.Js.toJsPromise
+    ->Promise.Js.toBsPromise
     |> Js.Promise.then_(n => Js.Promise.resolve(n + 1)))
-    ->Promise.Js.fromJsPromise
+    ->Promise.Js.fromBsPromise
     ->Promise.Js.catch(_ => assert(false))
     ->Promise.map(n => n == 43);
   }),
