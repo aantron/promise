@@ -82,7 +82,7 @@ let basicTests = Framework.suite("basic", [
       p->Promise.flatMap(n => Promise.resolved(n == 1)));
   }),
 
-  test("make", () => {
+  test("pending", () => {
     let (p, resolve) = Promise.pending();
     resolve(true);
     p;
@@ -135,7 +135,7 @@ let basicTests = Framework.suite("basic", [
 
 
 let rejectTests = Framework.suite("reject", [
-  test("make", () => {
+  test("pending", () => {
     let (p, _, reject) = Promise.Js.pending();
     reject(1);
     p->Promise.Js.catch(n => Promise.resolved(n == 1));
