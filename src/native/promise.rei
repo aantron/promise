@@ -157,10 +157,7 @@ let all6:
 module Js: {
   type t('a, 'e) = rejectable('a, 'e);
 
-  let relax:
-    promise('a) =>
-      rejectable('a, _);
-
+  /* Making. */
   let pending:
     unit =>
       (rejectable('a, 'e), 'a => unit, 'e => unit);
@@ -173,10 +170,7 @@ module Js: {
     'e =>
       rejectable('a, 'e);
 
-  let flatMap:
-    (rejectable('a, 'e), 'a => rejectable('b, 'e)) =>
-      rejectable('b, 'e);
-
+  /* Handling fulfillment. */
   let on:
     (rejectable('a, 'e), 'a => unit) =>
       unit;
@@ -189,10 +183,16 @@ module Js: {
     (rejectable('a, 'e), 'a => 'b) =>
       rejectable('b, 'e);
 
+  let flatMap:
+    (rejectable('a, 'e), 'a => rejectable('b, 'e)) =>
+      rejectable('b, 'e);
+
+  /* Handling rejection. */
   let catch:
     (rejectable('a, 'e), 'e => rejectable('a, 'e2)) =>
       rejectable('a, 'e2);
 
+  /* Combining. */
   let all:
     list(rejectable('a, 'e)) =>
       rejectable(list('a), 'e);
@@ -200,6 +200,11 @@ module Js: {
   let race:
     list(rejectable('a, 'e)) =>
       rejectable('a, 'e);
+
+  /* Conversions. */
+  let relax:
+    promise('a) =>
+      rejectable('a, _);
 };
 
 
