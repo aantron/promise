@@ -62,17 +62,6 @@ function then(promise, callback) {
     });
 };
 
-function map(promise, callback) {
-    return promise.then(function (value) {
-        try {
-            return resolved(callback(unwrap(value)));
-        }
-        catch (exception) {
-            onUnhandledException[0](exception);
-        }
-    });
-};
-
 function catch_(promise, callback) {
     var safeCallback = function (error) {
         try {
@@ -152,10 +141,8 @@ module Js_ = {
     (rejectable('a, 'e), 'a => rejectable('b, 'e)) => rejectable('b, 'e) =
       "then";
 
-  [@bs.val]
-  external map:
-    (rejectable('a, 'e), 'a => 'b) => rejectable('b, 'e) =
-      "map";
+  let map = (promise, callback) =>
+    flatMap(promise, v => resolved(callback(v)));
 
   let on = (promise, callback) =>
     ignore(map(promise, callback));
@@ -258,46 +245,46 @@ let race = Js_.race;
 
 
 
-let flatMapOk = (promise, _callback) =>
+let flatMapOk = (promise, callback) =>
   flatMap(promise, result =>
     switch (result) {
-    | Ok(_) => [%raw "_callback(result[0])"]
+    | Ok(v) => callback(v)
     | Error(_) as error => resolved(error)
     });
 
-let flatMapError = (promise, _callback) =>
+let flatMapError = (promise, callback) =>
   flatMap(promise, result =>
     switch (result) {
     | Ok(_) as ok => resolved(ok)
-    | Error(_) => [%raw "_callback(result[0])"]
+    | Error(e) => callback(e)
     });
 
-let mapOk = (promise, _callback) =>
+let mapOk = (promise, callback) =>
   map(promise, result =>
     switch (result) {
-    | Ok(_) => Ok([%raw "_callback(result[0])"])
+    | Ok(v) => Ok(callback(v))
     | Error(_) as error => error
     });
 
-let mapError = (promise, _callback) =>
+let mapError = (promise, callback) =>
   map(promise, result =>
     switch (result) {
     | Ok(_) as ok => ok
-    | Error(_) => Error([%raw "_callback(result[0])"])
+    | Error(e) => Error(callback(e))
     });
 
-let onOk = (promise, _callback) =>
+let onOk = (promise, callback) =>
   on(promise, result =>
     switch (result) {
-    | Ok(_) => [%raw "_callback(result[0])"]
+    | Ok(v) => callback(v)
     | Error(_) => ()
     });
 
-let onError = (promise, _callback) =>
+let onError = (promise, callback) =>
   on(promise, result =>
     switch (result) {
     | Ok(_) => ()
-    | Error(_) => [%raw "_callback(result[0])"]
+    | Error(e) => callback(e)
     });
 
 let tapOk = (promise, callback) => {
@@ -317,24 +304,24 @@ module Operators = {
 
 
 
-let flatMapSome = (promise, _callback) =>
+let flatMapSome = (promise, callback) =>
   flatMap(promise, option =>
     switch (option) {
-    | Some(_) => [%raw "_callback(Caml_option.valFromOption(option))"]
+    | Some(v) => callback(v)
     | None => resolved(None)
     });
 
-let mapSome = (promise, _callback) =>
+let mapSome = (promise, callback) =>
   map(promise, option =>
     switch (option) {
-    | Some(_) => Some([%raw "_callback(Caml_option.valFromOption(option))"])
+    | Some(v) => Some(callback(v))
     | None => None
     });
 
-let onSome = (promise, _callback) =>
+let onSome = (promise, callback) =>
   on(promise, option =>
     switch (option) {
-    | Some(_) => [%raw "_callback(Caml_option.valFromOption(option))"]
+    | Some(v) => callback(v)
     | None => ()
     });
 

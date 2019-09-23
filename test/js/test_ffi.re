@@ -289,8 +289,16 @@ let curryTests = Framework.suite("curry", [
   test("partially applied", () => {
     let add = (a, b) => a + b;
     Promise.resolved(1)
-    ->Promise.map'(add(1))
+    ->Promise.map(add(1))
     ->Promise.map(n => n == 2);
+  }),
+
+  test("partially applied, cascade", () => {
+    let add3 = (a, b, c) => a + b + c;
+    Promise.resolved(1)
+    ->Promise.map(add3(2))
+    ->Promise.map(f => f(3))
+    ->Promise.map(n => n == 6);
   }),
 ]);
 
