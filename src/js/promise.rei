@@ -204,7 +204,15 @@ module Js: {
   /* Conversions. */
   let relax:
     promise('a) =>
-      rejectable('a, _);
+      rejectable('a, 'e);
+
+  let toResult:
+    rejectable('a, 'e) =>
+      promise(result('a, 'e));
+
+  let fromResult:
+    promise(result('a, 'e)) =>
+      rejectable('a, 'e);
 
   let fromJsPromise:
     Js.Promise.t('a) =>

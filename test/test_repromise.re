@@ -472,9 +472,9 @@ let raceTests = Framework.suite("race", [
        guaranteeing that the second time will run after the first time.. */
     let delay = Promise.resolved();
 
-    ignore(delay->Promise.flatMap(fun () => p));
+    ignore(delay->Promise.flatMap(() => p));
 
-    delay->Promise.flatMap(fun () => {
+    delay->Promise.flatMap(() => {
       resolve(42);
       /* This tests now succeeds only if resolving p resolved final^, despite
          the fact that p was returned to flatMap while still a pending
@@ -490,10 +490,10 @@ let raceTests = Framework.suite("race", [
 
     let delay = Promise.resolved();
 
-    ignore(delay->Promise.flatMap(fun () => p));
+    ignore(delay->Promise.flatMap(() => p));
 
     delay
-    ->Promise.flatMap(fun () => {
+    ->Promise.flatMap(() => {
       let final = Promise.race([p]);
       resolve(42);
       final->Promise.map(n => n == 42);
@@ -633,6 +633,30 @@ let resultTests = Framework.suite("result", [
     (Promise.resolved(Error(42))
     >>= (n => Promise.resolved(Ok(n + 1))))
     ->Promise.map(v => v == Error(42));
+  }),
+
+  test("toResult, resolved", () => {
+    Promise.Js.resolved(1)
+    ->Promise.Js.toResult
+    ->Promise.Js.map(result => result == Ok(1));
+  }),
+
+  test("toResult, rejected", () => {
+    Promise.Js.rejected(2)
+    ->Promise.Js.toResult
+    ->Promise.Js.map(result => result == Error(2));
+  }),
+
+  test("fromResult, ok", () => {
+    Promise.resolved(Ok(3))
+    ->Promise.Js.fromResult
+    ->Promise.Js.map(v => v == 3);
+  }),
+
+  test("fromResult, error", () => {
+    Promise.resolved(Error(4))
+    ->Promise.Js.fromResult
+    ->Promise.Js.catch(v => Promise.resolved(v == 4));
   }),
 ]);
 

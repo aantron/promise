@@ -119,6 +119,11 @@ external mapArray: ('a => 'b, array('a)) => array('b) = "mapArray";
 
 
 
+/* Compatibility with BukleScript < 6. */
+type result('a, 'e) = Belt.Result.t('a, 'e) = Ok('a) | Error('e);
+
+
+
 module Js_ = {
   type t('a, 'e) = rejectable('a, 'e);
 
@@ -209,6 +214,14 @@ module Js_ = {
       jsRace(listToArray(promises));
     };
 
+  let toResult = promise =>
+    catch(map(promise, v => Ok(v)), e => resolved(Error(e)));
+
+  let fromResult = promise =>
+    flatMap(relax(promise), fun
+      | Ok(v) => resolved(v)
+      | Error(e) => rejected(e));
+
   external fromJsPromise:
     Js.Promise.t('a) => rejectable('a, Js.Promise.error) = "%identity";
 
@@ -243,9 +256,6 @@ let arrayAll = Js_.arrayAll;
 let race = Js_.race;
 
 
-
-/* Compatibility with BukleScript < 6. */
-type result('a, 'e) = Belt.Result.t('a, 'e) = Ok('a) | Error('e);
 
 let flatMapOk = (promise, _callback) =>
   flatMap(promise, result =>

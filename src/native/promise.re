@@ -552,6 +552,14 @@ module Js = {
   let catch = catch;
   let all = all;
   let race = race;
+
+  let toResult = promise =>
+    catch(map(promise, v => Ok(v)), e => resolved(Error(e)));
+
+  let fromResult = promise =>
+    flatMap(relax(promise), fun
+      | Ok(v) => resolved(v)
+      | Error(e) => rejected(e));
 };
 
 
