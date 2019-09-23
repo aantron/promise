@@ -285,4 +285,15 @@ let soundnessTests = Framework.suite("soundness", [
 
 
 
-let suites = [interopTests, soundnessTests];
+let curryTests = Framework.suite("curry", [
+  test("partially applied", () => {
+    let add = (a, b) => a + b;
+    Promise.resolved(1)
+    ->Promise.map'(add(1))
+    ->Promise.map(n => n == 2);
+  }),
+]);
+
+
+
+let suites = [interopTests, soundnessTests, curryTests];
