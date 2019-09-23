@@ -24,7 +24,7 @@ jobs:
       install:
         - '[ -d node_modules ] || npm install'
       script:
-        - make bucklescript-coverage
+        - npm run test
         - bash test/bundle/size.sh
       before_cache:
         - ./node_modules/.bin/bsb -clean-world
@@ -44,7 +44,7 @@ jobs:
         - ocaml -version
         - opam install -y --deps-only .
       script:
-        - make native-coverage
+        - BISECT_ENABLE=yes dune exec test/test_main.exe
         - bisect-ppx-report send-to Coveralls
         - opam lint
       before_cache:
