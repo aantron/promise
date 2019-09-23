@@ -27,10 +27,10 @@ WEBPACK := npx webpack --display none --mode production --optimize-minimize
 bundle-size-test :
 	@npm run build
 	@$(WEBPACK) \
-	  --entry ./test/bundle/main_control.js \
-	  --output ./test/bundle/bundle_control.js
+	  --entry ./lib/js/test/bundle/control.js \
+	  --output ./test/bundle/control.js
 	@$(WEBPACK) \
-	  --entry ./test/bundle/main_promise.js \
-	  --output ./test/bundle/bundle_promise.js
+	  --entry ./lib/js/test/bundle/uses_promise.js \
+	  --output ./test/bundle/promise.js
 	@ls -l lib/js/src/js/promise.js
-	@ls -l test/bundle/bundle*.js
+	@ls -l test/bundle/*.js
