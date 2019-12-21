@@ -1,4 +1,4 @@
-# Repromise &nbsp;&nbsp;&nbsp; [![Version 0.6.1][npm-img]][npm] [![Travis status][travis-img]][travis] [![Coverage][coveralls-img]][coveralls]
+# Promise &nbsp;&nbsp;&nbsp; [![Version 0.6.1][npm-img]][npm] [![Travis status][travis-img]][travis] [![Coverage][coveralls-img]][coveralls]
 
 [npm-img]: https://img.shields.io/npm/v/@aantron/repromise.svg
 [npm]: https://www.npmjs.com/package/@aantron/repromise
@@ -10,13 +10,13 @@
 <br/>
 
 ```reason
-let (p, resolveP) = Repromise.make();
+let (p, resolve) = Promise.pending();
 p
-|> Repromise.map(s => s ++ ", world!")
-|> Repromise.wait(Js.log);
-resolveP("Hello");
+->Promise.map((s) => s ++ " world!")
+->Promise.get(Js.log);
+resolve("Hello");
 
-/* Hello, world! */
+/* Hello world! */
 ```
 
 <br/>
