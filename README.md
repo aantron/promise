@@ -2,76 +2,55 @@
 
 [npm-img]: https://img.shields.io/npm/v/@aantron/repromise.svg
 [npm]: https://www.npmjs.com/package/@aantron/repromise
-[travis]: https://travis-ci.org/aantron/repromise/branches
-[travis-img]: https://img.shields.io/travis/aantron/repromise/master.svg?label=travis
+[travis]: https://travis-ci.org/aantron/promise/branches
+[travis-img]: https://img.shields.io/travis/aantron/promise/master.svg?label=travis
 [coveralls]: https://coveralls.io/github/aantron/repromise?branch=master
 [coveralls-img]: https://img.shields.io/coveralls/aantron/repromise/master.svg
 
-<br/>
+A super light and type-safe binding to JS promises.
 
 ```reason
-let (p, resolve) = Promise.pending();
+let p = Promise.resolved("Hello");
+Js.log(p);
+
+/* Promise { 'Hello' } */
+
 p
-->Promise.map((s) => s ++ " world!")
-->Promise.get(Js.log);
-resolve("Hello");
+->Promise.map(s => s ++ " world!")
+->Promise.get(s => Js.log(s));
 
 /* Hello world! */
 ```
 
-<br/>
+As you can see from `Js.log(p)`, each `Promise` is a familiar JS promise. So,
+you can use `Promise` directly to write JS bindings.
 
-**Repromise** is a simple Reason promise library. It has:
+There is only one exception to this: when there is a promise nested inside
+another promise. JS doesn't allow this. `Promise` automatically handles that
+for you. The way `Promise` does that makes JS promises type-safe in Reason.
 
-- **Clean API** &mdash; correct types, unlike JS promises.
-- **Interop** &mdash; nonetheless, each Repromise is a JS promise underneath.
-You can `console.log` them 😄
+`Promise` also offers a cleaner API, as we would expect in ReasonML :)
 
-How does this work?
+`Promise` is just a tiny binding with a few small tricks. It weighs in at about
+1K bundled.
 
-It turns out that a cheap runtime check is all that's needed to make JS
-promises behave safely.
-
-So, Repromise is a very thin layer over the familiar JS `Promise`, which
-converts `Promise` into the kind of neat API you'd want to use in ReasonML.
-This gives...
-
-- **Simplicity** &mdash; no new runtime data types, no bookkeeping.
-- **Bindings** &mdash; anything that takes or returns `Promise`, already takes
-and returns Repromise.
-- **Tiny size**
-- **Memory safety** &mdash; Repromise avoids all known pitfalls of naive
-implementations.
-- **Semantics** &mdash; no timing issues, no starvation, etc. JS `Promise`
-actually gets this right 😆
-
-And finally, since the API is a clean start on promises...
-
-- **Better errors** &mdash; Repromises can't be rejected. Instead, they use
-`Result`.
-- **Ecosystem** &mdash; direct interop with Reason native and OCaml, with libuv
-and Lwt.
-
-Even though Repromise is simple, it has a ton of tests to make sure that JS
-`Promise` is behaving safely :smile: The tests also check that Repromise
-behaves the same way on BuckleScript and native, even checking timing and
-typical memory leaks!
+`Promise` also comes with a native implementation, which passes all the same
+tests. The plan is to make `Promise` interop with Lwt, libuv, and js_of_ocaml.
 
 <br/>
 
 ## Installing
 
 ```
-npm install bs-platform
-npm install @aantron/repromise
+npm install reason-promise
 ```
 
-Then, add `@aantron/repromise` to your `bsconfig.json`:
+Then, add `reason-promise` to your `bsconfig.json`:
 
 ```json
 {
   "bs-dependencies": [
-    "@aantron/repromise"
+    "reason-promise"
   ]
 }
 ```
