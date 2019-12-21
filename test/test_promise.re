@@ -18,9 +18,9 @@ let basicTests = Framework.suite("basic", [
     Promise.resolved(true);
   }),
 
-  test("on", () => {
+  test("get", () => {
     let correct = ref(false);
-    Promise.resolved(1)->Promise.on(n => correct := (n == 1));
+    Promise.resolved(1)->Promise.get(n => correct := (n == 1));
     Promise.resolved()->Promise.map(() => correct^);
   }),
 
@@ -531,27 +531,27 @@ let resultTests = Framework.suite("result", [
     ->Promise.map(v => v == Error(43));
   }),
 
-  test("onOk, ok", () => {
+  test("getOk, ok", () => {
     let (p, resolve) = Promise.pending();
-    Promise.resolved(Ok(42))->Promise.onOk(n => resolve(n + 1));
+    Promise.resolved(Ok(42))->Promise.getOk(n => resolve(n + 1));
     p->Promise.map(n => n == 43);
   }),
 
-  test("onOk, error", () => {
+  test("getOk, error", () => {
     let called = ref(false);
-    Promise.resolved(Error(42))->Promise.onOk(_ => called := true);
+    Promise.resolved(Error(42))->Promise.getOk(_ => called := true);
     Promise.resolved()->Promise.map(() => !called^);
   }),
 
-  test("onError, ok", () => {
+  test("getError, ok", () => {
     let called = ref(false);
-    Promise.resolved(Ok(42))->Promise.onError(_ => called := true);
+    Promise.resolved(Ok(42))->Promise.getError(_ => called := true);
     Promise.resolved()->Promise.map(() => !called^);
   }),
 
-  test("onError, error", () => {
+  test("getError, error", () => {
     let (p, resolve) = Promise.pending();
-    Promise.resolved(Error(42))->Promise.onError(n => resolve(n + 1));
+    Promise.resolved(Error(42))->Promise.getError(n => resolve(n + 1));
     p->Promise.map(n => n == 43);
   }),
 
@@ -576,7 +576,7 @@ let resultTests = Framework.suite("result", [
     ->Promise.map(result => result == Ok(42) && !called^);
   }),
 
-  test("onError, error", () => {
+  test("getError, error", () => {
     let correct = ref(false);
     Promise.resolved(Error(42))
     ->Promise.tapError(n => correct := n == 42)
@@ -662,7 +662,7 @@ let resultTests = Framework.suite("result", [
 
 
 
-let optionTests = Framework.suite("opton", [
+let optionTests = Framework.suite("option", [
   test("mapSome, some", () => {
     Promise.resolved(Some(42))
     ->Promise.mapSome(n => n + 1)
@@ -675,15 +675,15 @@ let optionTests = Framework.suite("opton", [
     ->Promise.map(v => v == None);
   }),
 
-  test("onSome, some", () => {
+  test("getSome, some", () => {
     let (p, resolve) = Promise.pending();
-    Promise.resolved(Some(42))->Promise.onSome(n => resolve(n + 1));
+    Promise.resolved(Some(42))->Promise.getSome(n => resolve(n + 1));
     p->Promise.map(n => n == 43);
   }),
 
-  test("onSome, none", () => {
+  test("getSome, none", () => {
     let called = ref(false);
-    Promise.resolved(None)->Promise.onSome(_ => called := true);
+    Promise.resolved(None)->Promise.getSome(_ => called := true);
     Promise.resolved()->Promise.map(() => !called^);
   }),
 

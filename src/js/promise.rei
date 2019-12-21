@@ -28,7 +28,7 @@ let exec:
 
 
 /* Using promises. */
-let on:
+let get:
   (promise('a), 'a => unit) =>
     unit;
 
@@ -50,7 +50,7 @@ let flatMap:
 type result('a, 'e) = Belt.Result.t('a, 'e);
 
 /* Results. */
-let onOk:
+let getOk:
   (promise(result('a, 'e)), 'a => unit) =>
     unit;
 
@@ -66,7 +66,7 @@ let flatMapOk:
   (promise(result('a, 'e)), 'a => promise(result('b, 'e))) =>
     promise(result('b, 'e));
 
-let onError:
+let getError:
   (promise(result('a, 'e)), 'e => unit) =>
     unit;
 
@@ -95,7 +95,7 @@ module Operators: {
 
 
 /* Options. */
-let onSome:
+let getSome:
   (promise(option('a)), 'a => unit) =>
     unit;
 
@@ -171,7 +171,7 @@ module Js: {
       rejectable('a, 'e);
 
   /* Handling fulfillment. */
-  let on:
+  let get:
     (rejectable('a, 'e), 'a => unit) =>
       unit;
 

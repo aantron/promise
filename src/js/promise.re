@@ -144,11 +144,11 @@ module Js_ = {
   let map = (promise, callback) =>
     flatMap(promise, v => resolved(callback(v)));
 
-  let on = (promise, callback) =>
+  let get = (promise, callback) =>
     ignore(map(promise, callback));
 
   let tap = (promise, callback) => {
-    on(promise, callback);
+    get(promise, callback);
     promise;
   };
 
@@ -232,7 +232,7 @@ let exec = executor => {
 let resolved = Js_.resolved;
 let flatMap = Js_.flatMap;
 let map = Js_.map;
-let on = Js_.on;
+let get = Js_.get;
 let tap = Js_.tap;
 let all = Js_.all;
 let all2 = Js_.all2;
@@ -273,27 +273,27 @@ let mapError = (promise, callback) =>
     | Error(e) => Error(callback(e))
     });
 
-let onOk = (promise, callback) =>
-  on(promise, result =>
+let getOk = (promise, callback) =>
+  get(promise, result =>
     switch (result) {
     | Ok(v) => callback(v)
     | Error(_) => ()
     });
 
-let onError = (promise, callback) =>
-  on(promise, result =>
+let getError = (promise, callback) =>
+  get(promise, result =>
     switch (result) {
     | Ok(_) => ()
     | Error(e) => callback(e)
     });
 
 let tapOk = (promise, callback) => {
-  onOk(promise, callback);
+  getOk(promise, callback);
   promise;
 };
 
 let tapError = (promise, callback) => {
-  onError(promise, callback);
+  getError(promise, callback);
   promise;
 };
 
@@ -318,15 +318,15 @@ let mapSome = (promise, callback) =>
     | None => None
     });
 
-let onSome = (promise, callback) =>
-  on(promise, option =>
+let getSome = (promise, callback) =>
+  get(promise, option =>
     switch (option) {
     | Some(v) => callback(v)
     | None => ()
     });
 
 let tapSome = (promise, callback) => {
-  onSome(promise, callback);
+  getSome(promise, callback);
   promise;
 };
 

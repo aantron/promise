@@ -211,11 +211,11 @@ let flatMap = (promise, callback) => {
 let map = (promise, mapper) =>
   flatMap(promise, value => resolved(mapper(value)));
 
-let on = (promise, callback) =>
+let get = (promise, callback) =>
   ignore(map(promise, callback));
 
 let tap = (promise, callback) => {
-  on(promise, callback);
+  get(promise, callback);
   promise;
 };
 
@@ -482,23 +482,23 @@ let mapError = (promise, callback) =>
     | Ok(_) as ok => ok
     | Error(error) => Error(callback(error)));
 
-let onOk = (promise, callback) =>
-  on(promise, fun
+let getOk = (promise, callback) =>
+  get(promise, fun
     | Ok(value) => callback(value)
     | Error(_) => ());
 
-let onError = (promise, callback) =>
-  on(promise, fun
+let getError = (promise, callback) =>
+  get(promise, fun
     | Ok(_) => ()
     | Error(error) => callback(error));
 
 let tapOk = (promise, callback) => {
-  onOk(promise, callback);
+  getOk(promise, callback);
   promise;
 };
 
 let tapError = (promise, callback) => {
-  onError(promise, callback);
+  getError(promise, callback);
   promise;
 };
 
@@ -519,13 +519,13 @@ let mapSome = (promise, callback) =>
     | Some(value) => Some(callback(value))
     | None => None);
 
-let onSome = (promise, callback) =>
-  on(promise, fun
+let getSome = (promise, callback) =>
+  get(promise, fun
     | Some(value) => callback(value)
     | None => ());
 
 let tapSome = (promise, callback) => {
-  onSome(promise, callback);
+  getSome(promise, callback);
   promise;
 };
 
@@ -547,7 +547,7 @@ module Js = {
   let rejected = rejected;
   let flatMap = flatMap;
   let map = map;
-  let on = on;
+  let get = get;
   let tap = tap;
   let catch = catch;
   let all = all;
