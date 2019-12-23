@@ -1,6 +1,6 @@
-# Promise &nbsp;&nbsp;&nbsp; [![Version 0.6.1][version-img]][version] [![Travis status][travis-img]][travis] [![Coverage][coveralls-img]][coveralls]
+# Promise &nbsp;&nbsp;&nbsp; [![Version 1.0.0-dev.0][version-img]][version] [![Travis status][travis-img]][travis] [![Coverage][coveralls-img]][coveralls]
 
-[version-img]: https://img.shields.io/badge/version-0.6.1-blue.svg
+[version-img]: https://img.shields.io/badge/version-1.0.0--dev.0-blue.svg
 [version]: https://github.com/aantron/promise/releases
 [travis]: https://travis-ci.org/aantron/promise/branches
 [travis-img]: https://img.shields.io/travis/aantron/promise/master.svg?label=travis
