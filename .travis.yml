@@ -22,7 +22,7 @@ jobs:
       before_install:
         - '[ "$TRAVIS_EVENT_TYPE" != cron ] || rm -rf ./node_modules'
       install:
-        - '[ -d node_modules ] || npm install'
+        - 'npx which bsb || npm install'
       script:
         - npm run test
         - bash test/bundle/size.sh
