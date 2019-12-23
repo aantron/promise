@@ -347,7 +347,7 @@ let all = promises => {
   finalPromise;
 };
 
-let arrayAll = promises =>
+let allArray = promises =>
   map(all(Array.to_list(promises)), Array.of_list);
 
 /* Not a "legitimate" implementation. To get a legitimate one, the tricky parts

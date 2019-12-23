@@ -358,11 +358,11 @@ let allTests = Framework.suite("all", [
     result;
   }),
 
-  test("arrayAll", () => {
+  test("allArray", () => {
     let (p1, resolveP1) = Promise.pending();
     let (p2, resolveP2) = Promise.pending();
     let result =
-      Promise.arrayAll([|p1, p2|])
+      Promise.allArray([|p1, p2|])
       ->Promise.map(fun
         | [|x, y|] => x == 42 && y == 43
         | _ => false);

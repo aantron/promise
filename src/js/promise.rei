@@ -122,7 +122,7 @@ let all:
   list(promise('a)) =>
     promise(list('a));
 
-let arrayAll:
+let allArray:
   array(promise('a)) =>
     promise(array('a));
 

@@ -228,7 +228,7 @@ For convenience, there are several variants of `Promise.all`:
 - [`Promise.all4`][all4]
 - [`Promise.all5`][all5]
 - [`Promise.all6`][all6]
-- `Promise.allArray`
+- [`Promise.allArray`][allArray]
 
 <br/>
 
@@ -452,6 +452,7 @@ code may be necessary to handle this, as with any JS binding.
 [all4]: https://github.com/aantron/promise/blob/27f085d15e3ca97a6e46d1b486f34b8f4d6ec036/src/js/promise.rei#L137-L139
 [all5]: https://github.com/aantron/promise/blob/27f085d15e3ca97a6e46d1b486f34b8f4d6ec036/src/js/promise.rei#L141-L143
 [all6]: https://github.com/aantron/promise/blob/27f085d15e3ca97a6e46d1b486f34b8f4d6ec036/src/js/promise.rei#L145-L152
+[allArray]: https://github.com/aantron/promise/blob/bba101076fce64dd394d7b60ad1b706972f05a85/src/js/promise.rei#L125-L127
 [getOk]: https://github.com/aantron/promise/blob/27f085d15e3ca97a6e46d1b486f34b8f4d6ec036/src/js/promise.rei#L53-L55
 [getError]: https://github.com/aantron/promise/blob/27f085d15e3ca97a6e46d1b486f34b8f4d6ec036/src/js/promise.rei#L69-L71
 [tapOk]:https://github.com/aantron/promise/blob/27f085d15e3ca97a6e46d1b486f34b8f4d6ec036/src/js/promise.rei#L57-L59

@@ -168,11 +168,11 @@ module Js_ = {
   [@bs.val]
   external jsAll: 'a => 'b = "all";
 
-  let arrayAll = promises =>
+  let allArray = promises =>
     map(jsAll(promises), mapArray(unwrap));
 
   let all = promises =>
-    map(arrayAll(listToArray(promises)), results => arrayToList(results));
+    map(allArray(listToArray(promises)), results => arrayToList(results));
 
   let all2 = (p1, p2) =>
     jsAll((p1, p2));
@@ -240,7 +240,7 @@ let all3 = Js_.all3;
 let all4 = Js_.all4;
 let all5 = Js_.all5;
 let all6 = Js_.all6;
-let arrayAll = Js_.arrayAll;
+let allArray = Js_.allArray;
 let race = Js_.race;
 
 
