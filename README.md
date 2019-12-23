@@ -4,8 +4,8 @@
 [version]: https://github.com/aantron/promise/releases
 [travis]: https://travis-ci.org/aantron/promise/branches
 [travis-img]: https://img.shields.io/travis/aantron/promise/master.svg?label=travis
-[coveralls]: https://coveralls.io/github/aantron/repromise?branch=master
-[coveralls-img]: https://img.shields.io/coveralls/aantron/repromise/master.svg
+[coveralls]: https://coveralls.io/github/aantron/promise?branch=master
+[coveralls-img]: https://img.shields.io/coveralls/aantron/promise/master.svg
 
 A super light and type-safe binding to JS promises.
 
