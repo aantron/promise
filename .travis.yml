@@ -26,6 +26,18 @@ jobs:
       script:
         - npm run test
         - bash test/bundle/size.sh
+        - pushd ..
+        - git clone https://github.com/aantron/promise-example-bsb.git
+        - cd promise-example-bsb
+        - npm install
+        - npm run test
+        - cd ..
+        - git clone https://github.com/aantron/promise-example-binding.git
+        - cd promise-example-binding
+        - npm install
+        - npm run test
+        - popd
+        - pwd
       before_cache:
         - ./node_modules/.bin/bsb -clean-world
         - npm cache clean --force
