@@ -1,7 +1,7 @@
-# Promise &nbsp;&nbsp;&nbsp; [![Version 0.6.1][npm-img]][npm] [![Travis status][travis-img]][travis] [![Coverage][coveralls-img]][coveralls]
+# Promise &nbsp;&nbsp;&nbsp; [![Version 0.6.1][version-img]][version] [![Travis status][travis-img]][travis] [![Coverage][coveralls-img]][coveralls]
 
-[npm-img]: https://img.shields.io/npm/v/@aantron/repromise.svg
-[npm]: https://www.npmjs.com/package/@aantron/repromise
+[version-img]: https://img.shields.io/badge/version-0.6.1-blue.svg
+[version]: https://github.com/aantron/promise/releases
 [travis]: https://travis-ci.org/aantron/promise/branches
 [travis-img]: https://img.shields.io/travis/aantron/promise/master.svg?label=travis
 [coveralls]: https://coveralls.io/github/aantron/repromise?branch=master
