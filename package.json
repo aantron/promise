@@ -1,21 +1,21 @@
 {
   "name": "reason-promise",
   "version": "1.0.0-dev.0",
-  "description": "Type-safe JS promises for ReasonML",
+  "description": "Light and type-safe binding to JS promises",
   "keywords": [
     "BuckleScript",
     "reason",
     "promise",
     "async"
   ],
-  "homepage": "https://aantron.github.io/repromise",
+  "homepage": "https://github.com/aantron/promise",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/aantron/repromise.git"
+    "url": "git+https://github.com/aantron/promise.git"
   },
   "bugs": {
-    "url": "https://github.com/aantron/repromise/issues"
+    "url": "https://github.com/aantron/promise/issues"
   },
   "author": {
     "name": "Anton Bachin",

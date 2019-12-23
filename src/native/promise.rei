@@ -1,6 +1,6 @@
 /* This file is part of reason-promise, released under the MIT license. See
    LICENSE.md for details, or visit
-   https://github.com/aantron/repromise/blob/master/LICENSE.md. */
+   https://github.com/aantron/promise/blob/master/LICENSE.md. */
 
 
 
@@ -233,8 +233,8 @@ let onUnhandledException: ref(exn => unit);
 module ReadyCallbacks: {
   let callbacksPending: unit => bool;
 
-  /* When about to iterate over the ready callbacks, Repromise first takes a
-     snapshot of them, and iterates over the snapshot. This is to prevent new
+  /* When about to iterate over the ready callbacks, reason-promise first takes
+     a snapshot of them, and iterates over the snapshot. This is to prevent new
      ready callbacks, that may be created by the processing of the current ones,
      from being processed immediately. That could lead to I/O loop starvation
      and other problems. */

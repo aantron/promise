@@ -1,6 +1,6 @@
 /* This file is part of reason-promise, released under the MIT license. See
    LICENSE.md for details, or visit
-   https://github.com/aantron/repromise/blob/master/LICENSE.md. */
+   https://github.com/aantron/promise/blob/master/LICENSE.md. */
 
 
 
@@ -20,12 +20,12 @@ let onUnhandledException = ref(exn => {
 
 
 [%%bs.raw {|
-function WrappedRepromise(p) {
+function WrappedPromise(p) {
     this.wrapped = p;
 };
 
 function unwrap(value) {
-    if (value instanceof WrappedRepromise)
+    if (value instanceof WrappedPromise)
         return value.wrapped;
     else
         return value;
@@ -33,7 +33,7 @@ function unwrap(value) {
 
 function wrap(value) {
     if (value != null && typeof value.then === 'function')
-        return new WrappedRepromise(value);
+        return new WrappedPromise(value);
     else
         return value;
 }
@@ -195,7 +195,7 @@ module Js_ = {
 
   let race = promises =>
     if (promises == []) {
-      raise(Invalid_argument("Repromise.race([]) would be pending forever"));
+      raise(Invalid_argument("Promise.race([]) would be pending forever"));
     }
     else {
       jsRace(listToArray(promises));

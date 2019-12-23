@@ -1,6 +1,6 @@
 /* This file is part of reason-promise, released under the MIT license. See
    LICENSE.md for details, or visit
-   https://github.com/aantron/repromise/blob/master/LICENSE.md. */
+   https://github.com/aantron/promise/blob/master/LICENSE.md. */
 
 
 
@@ -69,14 +69,14 @@ let interopTests = Framework.suite("interop", [
     Promise.resolved(isPromise(p));
   }),
 
-  test("js promise is repromise", () => {
+  test("js promise is reason-promise", () => {
     let js_promise: Promise.t(int) = [%bs.raw {|Promise.resolve(1)|}];
     js_promise
     ->Promise.flatMap(n => Promise.resolved(n + 1))
     ->Promise.flatMap(n => Promise.resolved(n == 2));
   }),
 
-  test("repromise as js argument", () => {
+  test("reason-promise as js argument", () => {
     module Then = {
       [@bs.send.pipe: Promise.t('a)]
       external js_then: ('a => Promise.t('b)) => Promise.t('b) =

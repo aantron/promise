@@ -1,7 +1,7 @@
 {
   "name": "reason-promise",
   "version": "0.6.1",
-  "description": "A fresh take on promises for ReasonML (native version)",
+  "description": "Native implementation of a JS promise binding",
   "keywords": [
     "BuckleScript",
     "reason",
@@ -9,7 +9,7 @@
     "promise"
   ],
   "license": "MIT",
-  "repository": "aantron/repromise",
+  "repository": "aantron/promise",
   "author": {
     "name": "Anton Bachin",
     "email": "antonbachin@yahoo.com",

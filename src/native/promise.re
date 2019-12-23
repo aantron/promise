@@ -1,6 +1,6 @@
 /* This file is part of reason-promise, released under the MIT license. See
    LICENSE.md for details, or visit
-   https://github.com/aantron/repromise/blob/master/LICENSE.md. */
+   https://github.com/aantron/promise/blob/master/LICENSE.md. */
 
 
 
@@ -251,8 +251,8 @@ let catch = (promise, callback) => {
 
 
 
-/* Repromise.all and Repromise.race have to remove callbacks in some
-   circumstances; see test/native/test_ffi.re for details. */
+/* Promise.all and Promise.race have to remove callbacks in some circumstances;
+   see test/native/test_ffi.re for details. */
 module CallbackRemovers = {
   let empty = () =>
     ref([]);
@@ -409,7 +409,7 @@ let all6 = (p1, p2, p3, p4, p5, p6) => {
 
 let race = promises => {
   if (promises == []) {
-    raise(Invalid_argument("Repromise.race([]) would be pending forever"));
+    raise(Invalid_argument("Promise.race([]) would be pending forever"));
   };
 
   let callbackRemovers = CallbackRemovers.empty();
