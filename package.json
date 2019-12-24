@@ -1,6 +1,6 @@
 {
   "name": "reason-promise",
-  "version": "1.0.0-dev.0",
+  "version": "1.0.0",
   "description": "Light and type-safe binding to JS promises",
   "keywords": [
     "BuckleScript",
