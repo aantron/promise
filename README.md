@@ -23,7 +23,7 @@ p
 ```
 
 As you can see from `Js.log(p)`, each `Promise` is an ordinary, familiar JS
-promise. So, you can use `Promise` directly to write JS bindings.
+promise. So, you can use `Promise` directly to [write JS bindings](#Bindings).
 
 There is only one exception to this: when there is a promise nested inside
 another promise. JS doesn't allow this. `Promise` automatically handles that
