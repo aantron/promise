@@ -72,6 +72,9 @@ npm install
 npm run test    /* To run each example. */
 ```
 
+There it also an example repo with
+[a trivial binding to parts of node-fetch][example-binding].
+
 <br>
 
 - [Creating new promises](#Creating)
@@ -372,6 +375,8 @@ both no-op identity functions that only change the type.
 <a id="Bindings"></a>
 ### Advanced: Bindings
 
+Refer to the [example repo][example-binding].
+
 When you want to bind a JS function that *returns* a promise, you can use
 `Promise` directly in its return value:
 
@@ -435,6 +440,7 @@ can be resolved or rejected with, since JS can return anything :) Additional JS
 code may be necessary to handle this, as with any JS binding.
 
 [example-repo]: https://github.com/aantron/promise-example-bsb
+[example-binding]: https://github.com/aantron/promise-example-binding
 [Result]: https://bucklescript.github.io/bucklescript/api/Belt.Result.html
 [Option]: https://bucklescript.github.io/bucklescript/api/Belt.Option.html
 
