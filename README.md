@@ -244,10 +244,8 @@ Promises that can fail are represented using the standard library's
 ```reason
 open Belt.Result;
 
-let () = {
-  let p = Promise.resolved(Ok("Hello"));
-  p->Promise.getOk(s => Js.log(s));   /* Hello */
-};
+Promise.resolved(Ok("Hello"))
+->Promise.getOk(s => Js.log(s));      /* Hello */
 ```
 
 [`Promise.getOk`][getOk] waits for `p` to have a value, and runs its function
@@ -257,10 +255,8 @@ only if that value is `Ok(_)`. If you instead resolve the promise with
 ```reason
 open Belt.Result;
 
-let () = {
-  let p = Promise.resolved(Error("Failed"));
-  p->Promise.getOk(s => Js.log(s));   /* Program just exits. */
-};
+Promise.resolved(Error("Failed"))
+->Promise.getOk(s => Js.log(s));      /* Program just exits. */
 ```
 
 You can wait for either kind of value by calling [`Promise.getOk`][getOk] or
@@ -273,8 +269,7 @@ let () = {
   let p = Promise.resolved(Error("Failed"));
   p->Promise.getOk(s => Js.log(s));
   p->Promise.getError(s => Js.log("Error: " ++ s));
-                                      /* Error: Failed */
-};
+};                                    /* Error: Failed */
 ```
 
 ...or respond to all outcomes using the ordinary [`Promise.get`][get]:
@@ -282,14 +277,12 @@ let () = {
 ```reason
 open Belt.Result;
 
-let () = {
-  let p = Promise.resolved(Error("Failed"));
-  p->Promise.get(result =>
-    switch (result) {
-    | Ok(s) => Js.log(s);
-    | Error(s) => Js.log("Error: " ++ s);
-    });                               /* Error: Failed */
-};
+Promise.resolved(Error("Failed"))
+->Promise.get(result =>
+  switch (result) {
+  | Ok(s) => Js.log(s);
+  | Error(s) => Js.log("Error: " ++ s);
+  });                                 /* Error: Failed */
 ```
 
 The full set of functions for handling results is:
@@ -355,8 +348,7 @@ you simply convert a rejection to a resolution. In the next example, note the
 final line is no longer using `Promise.Js`, but `Promise`:
 
 ```reason
-let p = Promise.Js.rejected("Failed");
-p
+Promise.Js.rejected("Failed")
 ->Promise.Js.catch(s => Promise.resolved("Error: " ++ s))
 ->Promise.get(s => Js.log(s));        /* Error: Failed */
 ```
@@ -412,7 +404,8 @@ function delayReject(value, milliseconds) {
 [@bs.val]
 external delayRejectRaw: ('a, int) => Promise.Js.t(_, 'a) = "delayReject";
 let delayReject = (value, milliseconds) =>
-  delayRejectRaw(value, milliseconds)->Promise.Js.toResult;
+  delayRejectRaw(value, milliseconds)
+  ->Promise.Js.toResult;
 
 delayReject("Hello", 1000)
 ->Promise.getError(s => Js.log(s));
