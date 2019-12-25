@@ -56,8 +56,9 @@ jobs:
         - ocaml -version
         - opam install -y --deps-only .
       script:
-        - BISECT_ENABLE=yes dune exec test/test_main.exe
-        - bisect-ppx-report send-to Coveralls
+        - dune exec test/test_main.exe
+        # - BISECT_ENABLE=yes dune exec test/test_main.exe
+        # - bisect-ppx-report send-to Coveralls
         - opam lint
       before_cache:
         - opam clean

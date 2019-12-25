@@ -1,6 +1,5 @@
 (library
  (name promise)
  (public_name promise)
- (preprocess (pps bisect_ppx --conditional))
  (libraries result)
  (flags (:standard -w +A)))

@@ -17,12 +17,6 @@ depends: [
   "ocaml"
   "reason" {build & >= "3.3.2"}
   "result"
-
-  "bisect_ppx" {dev & >= "2.0.0"}
-]
-
-pin-depends: [
-  ["bisect_ppx.git" "git+https://github.com/aantron/bisect_ppx.git"]
 ]
 
 build: [

@@ -21,7 +21,6 @@
     "@esy-ocaml/reason": "^3.3.2"
   },
   "devDependencies": {
-    "bisect_ppx": "aantron/bisect_ppx",
     "@opam/merlin": "^3.0.5",
     "ocaml": "~4.6.0"
   },
