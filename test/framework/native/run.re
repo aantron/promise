@@ -2,15 +2,11 @@
    LICENSE.md for details, or visit
    https://github.com/aantron/promise/blob/master/LICENSE.md. */
 
-
-
-let rec main_loop = () => {
+let rec main_loop = () =>
   if (!Promise.ReadyCallbacks.callbacksPending()) {
-    ()
-  }
-  else {
+    ();
+  } else {
     let callbackSnapshot = Promise.ReadyCallbacks.snapshot();
     Promise.ReadyCallbacks.call(callbackSnapshot);
     main_loop();
-  }
-};
+  };

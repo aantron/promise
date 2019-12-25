@@ -2,8 +2,6 @@
    LICENSE.md for details, or visit
    https://github.com/aantron/promise/blob/master/LICENSE.md. */
 
-
-
 /* Mutable doubly-linked lists, like in a typical imperative language. These are
    used for callback lists, because reason-promise needs fast append and fast
    deletion of any node in the list, when the reference to the target node is

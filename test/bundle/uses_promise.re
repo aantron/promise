@@ -1,2 +1,1 @@
-let _ =
-  Promise.resolved(1);
+let _ = Promise.resolved(1);

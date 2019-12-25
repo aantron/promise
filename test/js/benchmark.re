@@ -2,18 +2,13 @@
    LICENSE.md for details, or visit
    https://github.com/aantron/promise/blob/master/LICENSE.md. */
 
-
-
 let test = Framework.test;
 
-
-
-[@bs.val]
-external hrtime: unit => (int, int) = "process.hrtime";
+[@bs.val] external hrtime: unit => (int, int) = "process.hrtime";
 
 let hrtime = () => {
-  let (seconds, nanoseconds) = hrtime ();
-  float_of_int(seconds) +. float_of_int(nanoseconds) *. 1e-9
+  let (seconds, nanoseconds) = hrtime();
+  float_of_int(seconds) +. float_of_int(nanoseconds) *. 1e-9;
 };
 
 let resolved_repetitions = 100_000_000;
@@ -30,37 +25,42 @@ let measure_resolved = (label, f) => {
   Promise.resolved(true);
 };
 
-let resolved = Framework.suite("resolved", [
-  test("Js.Promise.resolve", () => {
-    measure_resolved("Js.Promise.resolve", () =>
-      for (_ in 1 to resolved_repetitions) {
-        ignore(Js.Promise.resolve(1));
-      });
-  }),
-
-  test("Promise.resolved", () => {
-    measure_resolved("Promise.resolved", () =>
-      for (_ in 1 to resolved_repetitions) {
-        ignore(Promise.resolved(1));
-      });
-  }),
-
-  test("Js.Promise.resolve, nested promise", () => {
-    let p = Js.Promise.resolve(1);
-    measure_resolved("Js.Promise.resolve, nested", () =>
-      for (_ in 1 to resolved_repetitions) {
-        ignore(Js.Promise.resolve(p));
-      });
-  }),
-
-  test("Promise.resolved, nested promise", () => {
-    let p = Promise.resolved(1);
-    measure_resolved("Promise.resolved, nested", () =>
-      for (_ in 1 to resolved_repetitions) {
-        ignore(Promise.resolved(p))
-      });
-  }),
-]);
+let resolved =
+  Framework.suite(
+    "resolved",
+    [
+      test("Js.Promise.resolve", () =>
+        measure_resolved("Js.Promise.resolve", () =>
+          for (_ in 1 to resolved_repetitions) {
+            ignore(Js.Promise.resolve(1));
+          }
+        )
+      ),
+      test("Promise.resolved", () =>
+        measure_resolved("Promise.resolved", () =>
+          for (_ in 1 to resolved_repetitions) {
+            ignore(Promise.resolved(1));
+          }
+        )
+      ),
+      test("Js.Promise.resolve, nested promise", () => {
+        let p = Js.Promise.resolve(1);
+        measure_resolved("Js.Promise.resolve, nested", () =>
+          for (_ in 1 to resolved_repetitions) {
+            ignore(Js.Promise.resolve(p));
+          }
+        );
+      }),
+      test("Promise.resolved, nested promise", () => {
+        let p = Promise.resolved(1);
+        measure_resolved("Promise.resolved, nested", () =>
+          for (_ in 1 to resolved_repetitions) {
+            ignore(Promise.resolved(p));
+          }
+        );
+      }),
+    ],
+  );
 
 /* The number of "thens" we can schedule is limited by the size of the heap,
    because each one's callback is queued for calling on the next tick.
@@ -77,7 +77,7 @@ let then_ticks = 20;
 let measure_then = (label, f) => {
   let start_time = hrtime();
 
-  let rec iteration = iterations_remaining => {
+  let rec iteration = iterations_remaining =>
     if (iterations_remaining > 0) {
       f();
 
@@ -85,8 +85,7 @@ let measure_then = (label, f) => {
          callbacks scheduled by f(). */
       Promise.resolved()
       ->Promise.flatMap(() => iteration(iterations_remaining - 1));
-    }
-    else {
+    } else {
       let elapsed = hrtime() -. start_time;
       let nanoseconds =
         elapsed
@@ -96,34 +95,33 @@ let measure_then = (label, f) => {
       Printf.printf("%s   %f\n", label, nanoseconds);
 
       Promise.resolved(true);
-    }
-  };
+    };
   iteration(then_ticks);
 };
 
-let flatMap = Framework.suite("flatMap", [
-  test("Js.Promise.then_", () => {
-    let p = Js.Promise.resolve(1);
-    measure_then("Js.Promise.then_", () =>
-      for (_ in 1 to then_repetitions) {
-        p
-        |> Js.Promise.then_(_ => p)
-        |> ignore
-      });
-  }),
-
-  test("Promise.flatMap", () => {
-    let p = Promise.resolved(1);
-    measure_then("Promise.flatMap", () =>
-      for (_ in 1 to then_repetitions) {
-        ignore(p->Promise.flatMap(_ => p));
-      });
-  }),
-]);
-
-
+let flatMap =
+  Framework.suite(
+    "flatMap",
+    [
+      test("Js.Promise.then_", () => {
+        let p = Js.Promise.resolve(1);
+        measure_then("Js.Promise.then_", () =>
+          for (_ in 1 to then_repetitions) {
+            p |> Js.Promise.then_(_ => p) |> ignore;
+          }
+        );
+      }),
+      test("Promise.flatMap", () => {
+        let p = Promise.resolved(1);
+        measure_then("Promise.flatMap", () =>
+          for (_ in 1 to then_repetitions) {
+            ignore(p->Promise.flatMap(_ => p));
+          }
+        );
+      }),
+    ],
+  );
 
 let suites = [resolved, flatMap];
 
-let () =
-  Framework.run("benchmark", suites);
+let () = Framework.run("benchmark", suites);

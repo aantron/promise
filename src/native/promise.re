@@ -2,29 +2,25 @@
    LICENSE.md for details, or visit
    https://github.com/aantron/promise/blob/master/LICENSE.md. */
 
-
-
 type callbacks('a, 'e) = {
   onResolve: MutableList.list('a => unit),
   onReject: MutableList.list('e => unit),
 };
 
-
-
 type rejectable('a, 'e) =
-  ref([
-    | `Fulfilled('a)
-    | `Rejected('e)
-    | `Pending(callbacks('a, 'e))
-    | `Merged(rejectable('a, 'e))
-  ]);
+  ref(
+    [
+      | `Fulfilled('a)
+      | `Rejected('e)
+      | `Pending(callbacks('a, 'e))
+      | `Merged(rejectable('a, 'e))
+    ],
+  );
 
 type never;
 
 type promise('a) = rejectable('a, never);
 type t('a) = promise('a);
-
-
 
 /* The `Merged constructor and this function, underlying, are used to avoid a
    memory leak that arises when flatMap is called on promises in a loop. See the
@@ -43,43 +39,37 @@ type t('a) = promise('a);
    underlying, in order to find the true merged (outer) promise on which
    operations should be performed, rather than working directly on proxies. */
 let rec underlying = p =>
-  switch p^ {
+  switch (p^) {
   | `Fulfilled(_)
   | `Rejected(_)
-  | `Pending(_) =>
-    p;
+  | `Pending(_) => p
 
   | `Merged(p') =>
     let p'' = underlying(p');
     if (p'' !== p') {
-      p := `Merged(p'')
+      p := `Merged(p'');
     };
     p'';
   };
 
-
-
-let onUnhandledException = ref(exn => {
-  prerr_endline("Unhandled exception in promise callback:");
-  prerr_endline(Printexc.to_string(exn));
-  Printexc.print_backtrace(stderr);
-});
-
-
+let onUnhandledException =
+  ref(exn => {
+    prerr_endline("Unhandled exception in promise callback:");
+    prerr_endline(Printexc.to_string(exn));
+    Printexc.print_backtrace(stderr);
+  });
 
 module ReadyCallbacks = {
   let callbacks: ref(MutableList.list(unit => unit)) =
     ref(MutableList.create());
 
-  let callbacksPending = () =>
-    !MutableList.isEmpty(callbacks^);
+  let callbacksPending = () => !MutableList.isEmpty(callbacks^);
 
   let defer = (callback, value) =>
     MutableList.append(callbacks^, () => callback(value)) |> ignore;
 
   let deferMultiple = (newCallbacks, value) =>
-    newCallbacks
-    |> MutableList.iter(callback => defer(callback, value));
+    newCallbacks |> MutableList.iter(callback => defer(callback, value));
 
   type snapshot = MutableList.list(unit => unit);
 
@@ -89,78 +79,66 @@ module ReadyCallbacks = {
     theSnapshot;
   };
 
-  let isEmpty = snapshot =>
-    MutableList.isEmpty(snapshot);
+  let isEmpty = snapshot => MutableList.isEmpty(snapshot);
 
-  let call = snapshot =>
-    snapshot |> MutableList.iter(callback => callback());
+  let call = snapshot => snapshot |> MutableList.iter(callback => callback());
 };
 
-
-
 let newInternal = () =>
-  ref(`Pending({
-    onResolve: MutableList.create(),
-    onReject: MutableList.create()
-  }));
+  ref(
+    `Pending({
+      onResolve: MutableList.create(),
+      onReject: MutableList.create(),
+    }),
+  );
 
-let resolveInternal = p => value =>
-  switch (underlying(p))^ {
+let resolveInternal = (p, value) =>
+  switch ((underlying(p))^) {
   | `Fulfilled(_)
-  | `Rejected(_) =>
-    ()
+  | `Rejected(_) => ()
   | `Pending(callbacks) =>
     ReadyCallbacks.deferMultiple(callbacks.onResolve, value);
     p := `Fulfilled(value);
   | `Merged(_) =>
     /* This case is impossible, because we called underyling on the promise,
        above. */
-    assert(false);
+    assert(false)
   };
 
-let rejectInternal = p => error =>
-  switch (underlying(p))^ {
+let rejectInternal = (p, error) =>
+  switch ((underlying(p))^) {
   | `Fulfilled(_)
-  | `Rejected(_) =>
-    ()
+  | `Rejected(_) => ()
   | `Pending(callbacks) =>
     ReadyCallbacks.deferMultiple(callbacks.onReject, error);
     p := `Rejected(error);
   | `Merged(_) =>
     /* This case is impossible, because we called underyling on the promise,
        above. */
-    assert(false);
+    assert(false)
   };
 
+let resolved = value => ref(`Fulfilled(value));
 
-
-let resolved = value =>
-  ref(`Fulfilled(value));
-
-let rejected = error =>
-  ref(`Rejected(error));
-
-
+let rejected = error => ref(`Rejected(error));
 
 let makePromiseBehaveAs = (outerPromise, nestedPromise) => {
   let underlyingNested = underlying(nestedPromise);
 
-  switch underlyingNested^ {
-  | `Fulfilled(value) =>
-    resolveInternal(outerPromise, value);
-  | `Rejected(error) =>
-    rejectInternal(outerPromise, error);
+  switch (underlyingNested^) {
+  | `Fulfilled(value) => resolveInternal(outerPromise, value)
+  | `Rejected(error) => rejectInternal(outerPromise, error)
 
   | `Pending(callbacks) =>
     let underlyingOuter = underlying(outerPromise);
-    switch underlyingOuter^ {
+    switch (underlyingOuter^) {
     | `Fulfilled(_)
     | `Rejected(_) =>
       /* These two cases are impossible, because if makePromiseBehaveAs is
          called, flatMap or catch_ called the callback that was passed to it, so
          the outer promise is still pending. It is this function which resolves
          the outer promise. */
-      assert(false);
+      assert(false)
 
     | `Pending(outerCallbacks) =>
       MutableList.concatenate(outerCallbacks.onResolve, callbacks.onResolve);
@@ -169,12 +147,12 @@ let makePromiseBehaveAs = (outerPromise, nestedPromise) => {
 
     | `Merged(_) =>
       /* This case is impossible, because we called underlying above. */
-      assert(false);
+      assert(false)
     };
 
   | `Merged(_) =>
     /* Impossible because we are working on the underlying promise. */
-    assert(false);
+    assert(false)
   };
 };
 
@@ -183,17 +161,13 @@ let flatMap = (promise, callback) => {
 
   let onResolve = value =>
     switch (callback(value)) {
-    | exception exn =>
-      ignore(onUnhandledException^(exn));
-    | nestedPromise =>
-      makePromiseBehaveAs(outerPromise, nestedPromise);
+    | exception exn => ignore(onUnhandledException^(exn))
+    | nestedPromise => makePromiseBehaveAs(outerPromise, nestedPromise)
     };
 
-  switch (underlying(promise))^ {
-  | `Fulfilled(value) =>
-    ReadyCallbacks.defer(onResolve, value);
-  | `Rejected(error) =>
-    rejectInternal(outerPromise, error)
+  switch ((underlying(promise))^) {
+  | `Fulfilled(value) => ReadyCallbacks.defer(onResolve, value)
+  | `Rejected(error) => rejectInternal(outerPromise, error)
 
   | `Pending(callbacks) =>
     MutableList.append(callbacks.onResolve, onResolve) |> ignore;
@@ -202,7 +176,7 @@ let flatMap = (promise, callback) => {
 
   | `Merged(_) =>
     /* This case is impossible, cause of the call to underlying above. */
-    assert(false);
+    assert(false)
   };
 
   outerPromise;
@@ -211,8 +185,7 @@ let flatMap = (promise, callback) => {
 let map = (promise, mapper) =>
   flatMap(promise, value => resolved(mapper(value)));
 
-let get = (promise, callback) =>
-  ignore(map(promise, callback));
+let get = (promise, callback) => ignore(map(promise, callback));
 
 let tap = (promise, callback) => {
   get(promise, callback);
@@ -224,17 +197,13 @@ let catch = (promise, callback) => {
 
   let onReject = error =>
     switch (callback(error)) {
-    | exception exn =>
-      ignore(onUnhandledException^(exn));
-    | nestedPromise =>
-      makePromiseBehaveAs(outerPromise, nestedPromise);
+    | exception exn => ignore(onUnhandledException^(exn))
+    | nestedPromise => makePromiseBehaveAs(outerPromise, nestedPromise)
     };
 
-  switch (underlying(promise))^ {
-  | `Fulfilled(value) =>
-    resolveInternal(outerPromise, value);
-  | `Rejected(error) =>
-    ReadyCallbacks.defer(onReject, error);
+  switch ((underlying(promise))^) {
+  | `Fulfilled(value) => resolveInternal(outerPromise, value)
+  | `Rejected(error) => ReadyCallbacks.defer(onReject, error)
 
   | `Pending(callbacks) =>
     MutableList.append(callbacks.onResolve, resolveInternal(outerPromise))
@@ -243,19 +212,16 @@ let catch = (promise, callback) => {
 
   | `Merged(_) =>
     /* This case is impossible, because of the call to underlying above. */
-    assert(false);
+    assert(false)
   };
 
   outerPromise;
 };
 
-
-
 /* Promise.all and Promise.race have to remove callbacks in some circumstances;
    see test/native/test_ffi.re for details. */
 module CallbackRemovers = {
-  let empty = () =>
-    ref([]);
+  let empty = () => ref([]);
 
   let call = removers => {
     removers^ |> List.iter(remover => remover());
@@ -264,18 +230,15 @@ module CallbackRemovers = {
 
   let add = (removers, promise, whichList, callbackNode) => {
     let remover = () =>
-      switch (underlying(promise))^ {
+      switch ((underlying(promise))^) {
       | `Pending(callbacks) =>
-        MutableList.remove(whichList(callbacks), callbackNode);
-      | _ =>
-        ();
+        MutableList.remove(whichList(callbacks), callbackNode)
+      | _ => ()
       };
 
     removers := [remover, ...removers^];
   };
 };
-
-
 
 let all = promises => {
   let callbackRemovers = CallbackRemovers.empty();
@@ -290,10 +253,11 @@ let all = promises => {
     if (unresolvedPromiseCount^ == 0) {
       results^
       |> List.map(cell =>
-        switch cell^ {
-        | None => assert(false)
-        | Some(value) => value
-        })
+           switch (cell^) {
+           | None => assert(false)
+           | Some(value) => value
+           }
+         )
       |> resolveInternal(finalPromise);
     };
   };
@@ -304,83 +268,116 @@ let all = promises => {
   };
 
   results :=
-    promises |> List.map(promise => {
-      let cell = ref(None);
+    promises
+    |> List.map(promise => {
+         let cell = ref(None);
 
-      switch (underlying(promise))^ {
-      | `Fulfilled(value) =>
-      /* It's very important to defer here instead of resolving the final
-         promise immediately. Doing the latter will cause the callback removal
-         mechanism to forget about removing callbacks which will be added later
-         in the iteration over the promise list. It is possible to resolve
-         immediately but then the code has to be changed, probably to perform
-         two passes over the promise list. */
-        ReadyCallbacks.defer(onResolve(cell), value);
-      | `Rejected(error) =>
-        ReadyCallbacks.defer(rejectFinalPromise, error);
+         switch ((underlying(promise))^) {
+         | `Fulfilled(value) =>
+           /* It's very important to defer here instead of resolving the final
+              promise immediately. Doing the latter will cause the callback removal
+              mechanism to forget about removing callbacks which will be added later
+              in the iteration over the promise list. It is possible to resolve
+              immediately but then the code has to be changed, probably to perform
+              two passes over the promise list. */
+           ReadyCallbacks.defer(onResolve(cell), value)
+         | `Rejected(error) =>
+           ReadyCallbacks.defer(rejectFinalPromise, error)
 
-      | `Pending(callbacks) =>
-        let callbackNode =
-          MutableList.append(callbacks.onResolve, onResolve(cell));
-        CallbackRemovers.add(
-          callbackRemovers,
-          promise,
-          callbacks => callbacks.onResolve,
-          callbackNode);
+         | `Pending(callbacks) =>
+           let callbackNode =
+             MutableList.append(callbacks.onResolve, onResolve(cell));
+           CallbackRemovers.add(
+             callbackRemovers,
+             promise,
+             callbacks => callbacks.onResolve,
+             callbackNode,
+           );
 
-        let callbackNode =
-          MutableList.append(callbacks.onReject, rejectFinalPromise);
-        CallbackRemovers.add(
-          callbackRemovers,
-          promise,
-          callbacks => callbacks.onReject,
-          callbackNode);
+           let callbackNode =
+             MutableList.append(callbacks.onReject, rejectFinalPromise);
+           CallbackRemovers.add(
+             callbackRemovers,
+             promise,
+             callbacks => callbacks.onReject,
+             callbackNode,
+           );
 
-      | `Merged(_) =>
-        /* Impossible because of the call to underlying above. */
-        assert(false);
-      };
+         | `Merged(_) =>
+           /* Impossible because of the call to underlying above. */
+           assert(false)
+         };
 
-      cell;
-    });
+         cell;
+       });
 
   finalPromise;
 };
 
-let allArray = promises =>
-  map(all(Array.to_list(promises)), Array.of_list);
+let allArray = promises => map(all(Array.to_list(promises)), Array.of_list);
 
 /* Not a "legitimate" implementation. To get a legitimate one, the tricky parts
    of "all," above, should be factoed out. */
 let all2 = (p1, p2) => {
   let promises = [Obj.magic(p1), Obj.magic(p2)];
-  map(all(promises), fun
-  | [v1, v2] => (Obj.magic(v1), Obj.magic(v2))
-  | _ => assert(false));
+  map(
+    all(promises),
+    fun
+    | [v1, v2] => (Obj.magic(v1), Obj.magic(v2))
+    | _ => assert(false),
+  );
 };
 
 let all3 = (p1, p2, p3) => {
   let promises = [Obj.magic(p1), Obj.magic(p2), Obj.magic(p3)];
-  map(all(promises), fun
-  | [v1, v2, v3] => (Obj.magic(v1), Obj.magic(v2), Obj.magic(v3))
-  | _ => assert(false));
+  map(
+    all(promises),
+    fun
+    | [v1, v2, v3] => (Obj.magic(v1), Obj.magic(v2), Obj.magic(v3))
+    | _ => assert(false),
+  );
 };
 
 let all4 = (p1, p2, p3, p4) => {
-  let promises = [Obj.magic(p1), Obj.magic(p2), Obj.magic(p3), Obj.magic(p4)];
-  map(all(promises), fun
-  | [v1, v2, v3, v4] =>
-    (Obj.magic(v1), Obj.magic(v2), Obj.magic(v3), Obj.magic(v4))
-  | _ => assert(false));
+  let promises = [
+    Obj.magic(p1),
+    Obj.magic(p2),
+    Obj.magic(p3),
+    Obj.magic(p4),
+  ];
+  map(
+    all(promises),
+    fun
+    | [v1, v2, v3, v4] => (
+        Obj.magic(v1),
+        Obj.magic(v2),
+        Obj.magic(v3),
+        Obj.magic(v4),
+      )
+    | _ => assert(false),
+  );
 };
 
 let all5 = (p1, p2, p3, p4, p5) => {
-  let promises =
-    [Obj.magic(p1), Obj.magic(p2), Obj.magic(p3), Obj.magic(p4), Obj.magic(p5)];
-  map(all(promises), fun
-  | [v1, v2, v3, v4, v5] =>
-    (Obj.magic(v1), Obj.magic(v2), Obj.magic(v3), Obj.magic(v4), Obj.magic(v5))
-  | _ => assert(false));
+  let promises = [
+    Obj.magic(p1),
+    Obj.magic(p2),
+    Obj.magic(p3),
+    Obj.magic(p4),
+    Obj.magic(p5),
+  ];
+  map(
+    all(promises),
+    fun
+    | [v1, v2, v3, v4, v5] => (
+        Obj.magic(v1),
+        Obj.magic(v2),
+        Obj.magic(v3),
+        Obj.magic(v4),
+        Obj.magic(v5),
+      )
+    | _ => assert(false),
+  );
 };
 
 let all6 = (p1, p2, p3, p4, p5, p6) => {
@@ -390,22 +387,22 @@ let all6 = (p1, p2, p3, p4, p5, p6) => {
     Obj.magic(p3),
     Obj.magic(p4),
     Obj.magic(p5),
-    Obj.magic(p6)
+    Obj.magic(p6),
   ];
-  map(all(promises), fun
-  | [v1, v2, v3, v4, v5, v6] =>
-    (
-      Obj.magic(v1),
-      Obj.magic(v2),
-      Obj.magic(v3),
-      Obj.magic(v4),
-      Obj.magic(v5),
-      Obj.magic(v6)
-    )
-  | _ => assert(false));
+  map(
+    all(promises),
+    fun
+    | [v1, v2, v3, v4, v5, v6] => (
+        Obj.magic(v1),
+        Obj.magic(v2),
+        Obj.magic(v3),
+        Obj.magic(v4),
+        Obj.magic(v5),
+        Obj.magic(v6),
+      )
+    | _ => assert(false),
+  );
 };
-
-
 
 let race = promises => {
   if (promises == []) {
@@ -424,73 +421,92 @@ let race = promises => {
     rejectInternal(finalPromise, error);
   };
 
-  promises |> List.iter(promise =>
-    switch (underlying(promise))^ {
-    | `Fulfilled(value) =>
-      ReadyCallbacks.defer(resolveFinalPromise, value);
-    | `Rejected(error) =>
-      ReadyCallbacks.defer(rejectFinalPromise, error);
+  promises
+  |> List.iter(promise =>
+       switch ((underlying(promise))^) {
+       | `Fulfilled(value) =>
+         ReadyCallbacks.defer(resolveFinalPromise, value)
+       | `Rejected(error) => ReadyCallbacks.defer(rejectFinalPromise, error)
 
-    | `Pending(callbacks) =>
-      let callbackNode =
-        MutableList.append(callbacks.onResolve, resolveFinalPromise);
-      CallbackRemovers.add(
-          callbackRemovers,
-          promise,
-          callbacks => callbacks.onResolve,
-          callbackNode);
+       | `Pending(callbacks) =>
+         let callbackNode =
+           MutableList.append(callbacks.onResolve, resolveFinalPromise);
+         CallbackRemovers.add(
+           callbackRemovers,
+           promise,
+           callbacks => callbacks.onResolve,
+           callbackNode,
+         );
 
-      let callbackNode =
-        MutableList.append(callbacks.onReject, rejectFinalPromise);
-      CallbackRemovers.add(
-          callbackRemovers,
-          promise,
-          callbacks => callbacks.onReject,
-          callbackNode);
+         let callbackNode =
+           MutableList.append(callbacks.onReject, rejectFinalPromise);
+         CallbackRemovers.add(
+           callbackRemovers,
+           promise,
+           callbacks => callbacks.onReject,
+           callbackNode,
+         );
 
-    | `Merged(_) =>
-      /* Impossible, because of the call to underlying above. */
-      assert false;
-    });
+       | `Merged(_) =>
+         /* Impossible, because of the call to underlying above. */
+         assert(false)
+       }
+     );
 
   finalPromise;
 };
 
-
-
 type result('a, 'e) = Result.result('a, 'e);
 
-open Result
+open Result;
 
 let flatMapOk = (promise, callback) =>
-  flatMap(promise, fun
+  flatMap(
+    promise,
+    fun
     | Ok(value) => callback(value)
-    | Error(_) as error => resolved(error));
+    | Error(_) as error => resolved(error),
+  );
 
 let flatMapError = (promise, callback) =>
-  flatMap(promise, fun
+  flatMap(
+    promise,
+    fun
     | Ok(_) as ok => resolved(ok)
-    | Error(error) => callback(error));
+    | Error(error) => callback(error),
+  );
 
 let mapOk = (promise, callback) =>
-  map(promise, fun
+  map(
+    promise,
+    fun
     | Ok(value) => Ok(callback(value))
-    | Error(_) as error => error);
+    | Error(_) as error => error,
+  );
 
 let mapError = (promise, callback) =>
-  map(promise, fun
+  map(
+    promise,
+    fun
     | Ok(_) as ok => ok
-    | Error(error) => Error(callback(error)));
+    | Error(error) => Error(callback(error)),
+  );
 
 let getOk = (promise, callback) =>
-  get(promise, fun
+  get(
+    promise,
+    fun
     | Ok(value) => callback(value)
-    | Error(_) => ());
+    | Error(_) => (),
+  );
 
 let getError = (promise, callback) =>
-  get(promise, fun
+  get(
+    promise,
+    fun
     | Ok(_) => ()
-    | Error(error) => callback(error));
+    | Error(error) => callback(error),
+  );
 
 let tapOk = (promise, callback) => {
   getOk(promise, callback);
@@ -507,29 +523,34 @@ module Operators = {
   let (>>=) = flatMapOk;
 };
 
-
-
 let flatMapSome = (promise, callback) =>
-  flatMap(promise, fun
+  flatMap(
+    promise,
+    fun
     | Some(value) => callback(value)
-    | None => resolved(None));
+    | None => resolved(None),
+  );
 
 let mapSome = (promise, callback) =>
-  map(promise, fun
+  map(
+    promise,
+    fun
     | Some(value) => Some(callback(value))
-    | None => None);
+    | None => None,
+  );
 
 let getSome = (promise, callback) =>
-  get(promise, fun
+  get(
+    promise,
+    fun
     | Some(value) => callback(value)
-    | None => ());
+    | None => (),
+  );
 
 let tapSome = (promise, callback) => {
   getSome(promise, callback);
   promise;
 };
-
-
 
 module Js = {
   type t('a, 'e) = rejectable('a, 'e);
@@ -557,25 +578,24 @@ module Js = {
     catch(map(promise, v => Ok(v)), e => resolved(Error(e)));
 
   let fromResult = promise =>
-    flatMap(relax(promise), fun
+    flatMap(
+      relax(promise),
+      fun
       | Ok(v) => resolved(v)
-      | Error(e) => rejected(e));
+      | Error(e) => rejected(e),
+    );
 };
-
-
 
 let pending = () => {
   let (p, resolve, _) = Js.pending();
   (p, resolve);
-}
+};
 
 let exec = executor => {
   let (p, resolve) = pending();
   executor(resolve);
   p;
 };
-
-
 
 module FastPipe = {
   let (|.) = (v, f) => f(v);

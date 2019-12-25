@@ -20,26 +20,22 @@
  * 02111-1307, USA.
  */
 
-
-
 /* This is a vendored copy/port of Lwt's tester – it is the only OCaml
    fully-asynchronous tester already available. For the file's history and blame
    before import, see
      https://github.com/ocsigen/lwt/blob/c7ad8b3/test/test.mli */
-
-
 
 /** Helpers for tests. */
 
 type test;
 type suite;
 
-let test: (string, ~only_if: unit => bool = ?, unit => Promise.t(bool)) => test;
+let test: (string, ~only_if: unit => bool=?, unit => Promise.t(bool)) => test;
 /** Like [test_direct], but defines a test which runs a thread. */
 
-let suite: (string, ~only_if: unit => bool = ?, list(test)) => suite;
+let suite: (string, ~only_if: unit => bool=?, list(test)) => suite;
 /** Defines a suite of tests */
 
 let run: (string, list(suite)) => unit;
 /** Run all the given tests and exit the program with an exit code
-    of [0] if all tests succeeded and with [1] otherwise. */
+    of [0] if all tests succeeded and with [1] otherwise. */;
