@@ -4,10 +4,10 @@
 
 
 
-type rejectable('a, 'e);
+type rejectable('a, 'e);                    /* Internal; use Promise.Js.t. */
 type never;
 
-type promise('a) = rejectable('a, never);
+type promise('a) = rejectable('a, never);   /* Internal; use Promise.t. */
 type t('a) = promise('a);
 
 
