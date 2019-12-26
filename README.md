@@ -69,7 +69,7 @@ To quickly get a project for pasting the code examples, clone the
 git clone https://github.com/aantron/promise-example-bsb
 cd promise-example-bsb
 npm install
-npm run test    /* To run each example. */
+npm run test    # To run each example.
 ```
 
 There it also an example repo with
