@@ -225,7 +225,7 @@ module Js: {
 
 
 
-module FastPipe: {
+module PipeFirst: {
 };
 
 

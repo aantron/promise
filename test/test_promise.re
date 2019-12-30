@@ -5,7 +5,7 @@
 
 
 let test = Framework.test;
-open! Promise.FastPipe;
+open! Promise.PipeFirst;
 
 
 

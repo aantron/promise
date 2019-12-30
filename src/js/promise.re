@@ -332,7 +332,7 @@ let tapSome = (promise, callback) => {
 
 
 
-module FastPipe = {
+module PipeFirst = {
 };
 
 module Js = Js_;

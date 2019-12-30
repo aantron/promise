@@ -217,7 +217,7 @@ module Js: {
 
 
 
-module FastPipe: {
+module PipeFirst: {
   let (|.): ('a, 'a => 'b) => 'b;
 };
 

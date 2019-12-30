@@ -577,6 +577,6 @@ let exec = executor => {
 
 
 
-module FastPipe = {
+module PipeFirst = {
   let (|.) = (v, f) => f(v);
 };
