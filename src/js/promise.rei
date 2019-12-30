@@ -4,11 +4,11 @@
 
 
 
-type rejectable('a, 'e);                    /* Internal; use Promise.Js.t. */
+type rejectable(+'a, +'e);                  /* Internal; use Promise.Js.t. */
 type never;
 
-type promise('a) = rejectable('a, never);   /* Internal; use Promise.t. */
-type t('a) = promise('a);
+type promise(+'a) = rejectable('a, never);  /* Internal; use Promise.t. */
+type t(+'a) = promise('a);
 
 
 
@@ -155,7 +155,7 @@ let all6:
 
 /* For writing bindings. */
 module Js: {
-  type t('a, 'e) = rejectable('a, 'e);
+  type t(+'a, +'e) = rejectable('a, 'e);
 
   /* Making. */
   let pending:

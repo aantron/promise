@@ -304,4 +304,61 @@ let curryTests = Framework.suite("curry", [
 
 
 
-let suites = [interopTests, soundnessTests, curryTests];
+type type_ = [
+  | `A
+  | `B
+]
+
+type subtype = [
+  | `A
+]
+
+let covarianceTests = Framework.suite("covariance", [
+  test("promise", () => {
+    let p: Promise.t(subtype) = Promise.resolved(`A);
+    let p: Promise.t(type_) = (p :> Promise.t(type_));
+    ignore(p);
+    Promise.resolved(true);
+  }),
+
+  test("ok", () => {
+    let p: Promise.t(result(subtype, unit)) = Promise.resolved(Ok(`A));
+    let p: Promise.t(result(type_, unit)) =
+      (p :> Promise.t(result(type_, unit)));
+    ignore(p);
+    Promise.resolved(true);
+  }),
+
+  test("error", () => {
+    let p: Promise.t(result(unit, subtype)) = Promise.resolved(Error(`A));
+    let p: Promise.t(result(unit, type_)) =
+      (p :> Promise.t(result(unit, type_)));
+    ignore(p);
+    Promise.resolved(true);
+  }),
+
+  test("option", () => {
+    let p: Promise.t(option(subtype)) = Promise.resolved(Some(`A));
+    let p: Promise.t(option(type_)) = (p :> Promise.t(option(type_)));
+    ignore(p);
+    Promise.resolved(true);
+  }),
+
+  test("fulfillment", () => {
+    let p: Promise.Js.t(subtype, unit) = Promise.Js.resolved(`A);
+    let p: Promise.Js.t(type_, unit) = (p :> Promise.Js.t(type_, unit));
+    ignore(p);
+    Promise.resolved(true);
+  }),
+
+  test("rejection", () => {
+    let p: Promise.Js.t(unit, subtype) = Promise.Js.rejected(`A);
+    let p: Promise.Js.t(unit, type_) = (p :> Promise.Js.t(unit, type_));
+    p->Promise.Js.catch(_ => Promise.resolved())->ignore;
+    Promise.resolved(true);
+  }),
+]);
+
+
+
+let suites = [interopTests, soundnessTests, curryTests, covarianceTests];

@@ -4,11 +4,11 @@
 
 
 
-type rejectable('a, 'e);
+type rejectable(+'a, +'e);
 type never;
 
-type promise('a) = rejectable('a, never);
-type t('a) = promise('a);
+type promise(+'a) = rejectable('a, never);
+type t(+'a) = promise('a);
 
 
 
