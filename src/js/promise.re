@@ -24,14 +24,14 @@ function NestedPromise(p) {
     this.nested = p;
 };
 
-function unwrap(value) {
+function unbox(value) {
     if (value instanceof NestedPromise)
         return value.nested;
     else
         return value;
 }
 
-function wrap(value) {
+function box(value) {
     if (value != null && typeof value.then === 'function')
         return new NestedPromise(value);
     else
@@ -40,21 +40,21 @@ function wrap(value) {
 
 function make(executor) {
     return new Promise(function (resolve, reject) {
-        var wrappingResolve = function(value) {
-            resolve(wrap(value));
+        var boxingResolve = function(value) {
+            resolve(box(value));
         };
-        executor(wrappingResolve, reject);
+        executor(boxingResolve, reject);
     });
 };
 
 function resolved(value) {
-    return Promise.resolve(wrap(value));
+    return Promise.resolve(box(value));
 };
 
 function then(promise, callback) {
     return promise.then(function (value) {
         try {
-            return callback(unwrap(value));
+            return callback(unbox(value));
         }
         catch (exception) {
             onUnhandledException[0](exception);
@@ -162,14 +162,14 @@ module Js_ = {
       "catch_";
 
   [@bs.val]
-  external unwrap: 'a => 'a = "unwrap";
+  external unbox: 'a => 'a = "unbox";
 
   [@bs.scope "Promise"]
   [@bs.val]
   external jsAll: 'a => 'b = "all";
 
   let allArray = promises =>
-    map(jsAll(promises), mapArray(unwrap));
+    map(jsAll(promises), mapArray(unbox));
 
   let all = promises =>
     map(allArray(listToArray(promises)), results => arrayToList(results));
