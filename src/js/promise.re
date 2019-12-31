@@ -20,20 +20,20 @@ let onUnhandledException = ref(exn => {
 
 
 [%%bs.raw {|
-function WrappedPromise(p) {
-    this.wrapped = p;
+function NestedPromise(p) {
+    this.nested = p;
 };
 
 function unwrap(value) {
-    if (value instanceof WrappedPromise)
-        return value.wrapped;
+    if (value instanceof NestedPromise)
+        return value.nested;
     else
         return value;
 }
 
 function wrap(value) {
     if (value != null && typeof value.then === 'function')
-        return new WrappedPromise(value);
+        return new NestedPromise(value);
     else
         return value;
 }
