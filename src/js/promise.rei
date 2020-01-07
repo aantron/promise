@@ -83,10 +83,12 @@ let flatMapError:
     promise(result('a, 'e2));
 
 module Operators: {
+  [@ocaml.deprecated "Use bs-let"]
   let (>|=):
     (promise(result('a, 'e)), 'a => 'b) =>
       promise(result('b, 'e));
 
+  [@ocaml.deprecated "Use bs-let"]
   let (>>=):
     (promise(result('a, 'e)), 'a => promise(result('b, 'e))) =>
       promise(result('b, 'e));

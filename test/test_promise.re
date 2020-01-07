@@ -607,6 +607,7 @@ let resultTests = Framework.suite("result", [
     ->Promise.map(v => v == Error(43));
   }),
 
+  [@ocaml.warning "-3"]
   test(">|=, ok", () => {
     let open Promise.Operators;
     (Promise.resolved(Ok(42))
@@ -614,6 +615,7 @@ let resultTests = Framework.suite("result", [
     ->Promise.map(v => v == Ok(43));
   }),
 
+  [@ocaml.warning "-3"]
   test(">|=, error", () => {
     let open Promise.Operators;
     (Promise.resolved(Error(42))
@@ -621,6 +623,7 @@ let resultTests = Framework.suite("result", [
     ->Promise.map(v => v == Error(42));
   }),
 
+  [@ocaml.warning "-3"]
   test(">>=, ok", () => {
     let open Promise.Operators;
     (Promise.resolved(Ok(42))
@@ -628,6 +631,7 @@ let resultTests = Framework.suite("result", [
     ->Promise.map(v => v == Ok(43));
   }),
 
+  [@ocaml.warning "-3"]
   test(">>=, error", () => {
     let open Promise.Operators;
     (Promise.resolved(Error(42))
