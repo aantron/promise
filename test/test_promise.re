@@ -66,8 +66,8 @@ let basicTests = Framework.suite("basic", [
     Promise.resolved(1)
     ->Promise.flatMap (n =>
       Promise.resolved(n + 1)
-      ->Promise.flatMap (n => Promise.resolved(n + 1)))
-    ->Promise.flatMap (n => Promise.resolved(n == 3));
+      ->Promise.flatMap(n => Promise.resolved(n + 1)))
+    ->Promise.flatMap(n => Promise.resolved(n == 3));
   }),
 
   /* If promises are implemented on JS directly as ordinary JS promises,
