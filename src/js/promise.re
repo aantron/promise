@@ -57,7 +57,7 @@ function then(promise, callback) {
             return callback(unbox(value));
         }
         catch (exception) {
-            onUnhandledException[0](exception);
+            onUnhandledException.contents(exception);
         }
     });
 };
@@ -68,7 +68,7 @@ function catch_(promise, callback) {
             return callback(error);
         }
         catch (exception) {
-            onUnhandledException[0](exception);
+            onUnhandledException.contents(exception);
         }
     };
 
