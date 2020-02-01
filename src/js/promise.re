@@ -20,12 +20,12 @@ let onUnhandledException = ref(exn => {
 
 
 [%%bs.raw {|
-function NestedPromise(p) {
+function PromiseBox(p) {
     this.nested = p;
 };
 
 function unbox(value) {
-    if (value instanceof NestedPromise)
+    if (value instanceof PromiseBox)
         return value.nested;
     else
         return value;
@@ -33,7 +33,7 @@ function unbox(value) {
 
 function box(value) {
     if (value != null && typeof value.then === 'function')
-        return new NestedPromise(value);
+        return new PromiseBox(value);
     else
         return value;
 }

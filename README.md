@@ -10,33 +10,40 @@
 A super light and type-safe binding to JS promises.
 
 ```reason
-let p = Promise.resolved("Hello");
-Js.log(p);
+Promise.resolved("Hello")->Js.log;  /* Promise { 'Hello' } */
 
-/* Promise { 'Hello' } */
-
-p
+Promise.resolved("Hello")
 ->Promise.map(s => s ++ " world!")
-->Promise.get(s => Js.log(s));
-
-/* Hello world! */
+->Promise.get(s => Js.log(s));      /* Hello world! */
 ```
 
-As you can see from `Js.log(p)`, each `Promise` is an ordinary, familiar JS
-promise. So, you can use `Promise` directly to [write JS bindings](#Bindings).
+As you can see on the first line, `Promise.t` maps directly to familiar JS
+promises from your JS runtime. That means...
 
-There is only one exception to this: when there is a promise nested inside
-another promise. JS doesn't allow this. `Promise` automatically handles that
-for you. The way `Promise` does that makes JS promises type-safe in Reason.
+- You can use `reason-promise` directly to [write JS bindings](#Bindings).
+- All JS tooling for promises immediately applies to `reason-promise`.
+- Even if you do something exotic, like switch out the promise implementation at
+  the JS level, for, say, better stack traces, `reason-promise` still binds to
+  it!
 
-`Promise` also offers a cleaner API, as we would expect in ReasonML :)
+There is only one exception to the rule that `Promise.t` maps directly to JS
+promises: when there is a promise nested inside another promise. JS doesn't
+allow this at all. [`reason-promise` emulates it in a way that makes its API
+type-safe](#TypeSafety). This is in contrast to BuckleScript's built-in
+`Js.Promise`, which exposes the JS behavior that silently flattens nested
+promises, with the result that [the API in BuckleScript has incorrect
+types](#JSPromiseFlattening).
 
-`Promise` is just a tiny binding with a few small tricks. It weighs in at about
-1K bundled.
+In addition:
 
-`Promise` also comes with a pure-Reason implementation, which passes all the
-same tests. The plan for that is to make `Promise` interop with Lwt, libuv,
-and js_of_ocaml.
+- `reason-promise` offers a clean functional API, with [helpers for `Result` and
+  `Option`](#Errors).
+- `reason-promise` is tiny. It weighs in at about [1K bundled][bundle-size].
+- `reason-promise` also comes with a [pure-Reason implementation][native], which
+  passes all the same tests. It can be used for native code or in JS.
+
+[bundle-size]: https://travis-ci.org/aantron/promise/jobs/638748670#L241
+[native]: https://github.com/aantron/promise/tree/master/src/native
 
 <br/>
 
@@ -75,6 +82,10 @@ npm run test    # To run each example.
 There it also an example repo with
 [a trivial binding to parts of node-fetch][example-binding].
 
+While reading the tutorial, it can be useful to glance at the [type
+signatures][rei] of the functions from time to time. They provide a neat summary
+of what each function does and what it expects from its callback.
+
 <br>
 
 - [Creating new promises](#Creating)
@@ -82,9 +93,11 @@ There it also an example repo with
 - [Transforming promises](#Transforming)
 - [Tracing](#Tracing)
 - [Concurrent combinations](#Combining)
-- [Handling errors](#Errors)
+- [Handling errors with `Result`](#Errors)
 - [Advanced: Rejection](#Rejection)
 - [Advanced: Bindings](#Bindings)
+- [Discussion: Why JS promises are unsafe](#JSPromiseFlattening)
+- [Discussion: How `reason-promise` makes promises type-safe](#TypeSafety)
 
 <br/>
 
@@ -236,7 +249,7 @@ For convenience, there are several variants of `Promise.all`:
 <br/>
 
 <a id="Errors"></a>
-### Handling errors
+### Handling errors with `Result`
 
 Promises that can fail are represented using the standard library's
 [`Result`][Result], and its constructors `Ok` and `Error`:
@@ -432,10 +445,127 @@ As always, it is important to be careful about the set of values that a promise
 can be resolved or rejected with, since JS can return anything :) Additional JS
 code may be necessary to handle this, as with any JS binding.
 
+<br/>
+
+<a id="JSPromiseFlattening"></a>
+### Discussion: Why JS promises are unsafe
+
+The JS function [`Promise.resolve`][Promise.resolve] has a special check for
+whether the value being put into a promise is another promise or not.
+Unfortunately, this check makes it impossible to assign JS's `Promise.resolve`
+a correct type in Reason (and most type systems).
+
+Here are the details. The code will use
+[`Js.Promise.resolve`][Js.Promise.resolve], BuckleScript's binding to JS's
+`Promise.resolve`.
+
+`Js.Promise.resolve` takes a value, and creates a promise containing that value:
+
+```reason
+Js.Promise.resolve(1)->Js.log;
+/* Promise { 1 } */
+
+Js.Promise.resolve("foo")->Js.log;
+/* Promise { "foo" } */
+```
+
+So, we should give it the type
+
+```reason
+Js.Promise.resolve: 'a => Js.Promise.t('a);
+```
+
+and, indeed, that's the type it has in BuckleScript.
+
+Following the pattern, we would expect this:
+
+```reason
+let anotherPromise = Js.Promise.resolve(1);
+Js.Promise.resolve(anotherPromise)->Js.log;
+/* Promise { Promise { 1 } } */
+```
+
+We would expect the result to have type `Js.Promise.t(Js.Promise.t(int))`...
+but that's not what happens! Instead, the output is just
+
+```reason
+/* Promise { 1 } */
+```
+
+The nested promise is missing! When you pass `anotherPromise` to
+`Js.Promise.resolve`, JS sneakily unwraps `anotherPromise`, violating the type!
+This is special-case behavior that JS runs only when the value is a promise
+(technically, a "thenable"), and there is no way to easily encode such special
+casing in the type system.
+
+The result is, if your program executes something like this, it will have
+ordinary values in places where it expects promises. For example, if you call
+`then_` on the promise above, you would expect the program to see a promise
+containing `1` in the callback. Instead, the callback will get just `1`, causing
+a runtime error as soon as the program tries to use promise functions on the
+`1`.
+
+The same special casing occurs throughout the JS `Promise` API &mdash; for
+example, when you return a promise from the callback of `.then`. This means that
+most of the JS `Promise` functions can't be assigned a correct type and used
+safely from Reason.
+
+<br/>
+
+<a id="TypeSafety"></a>
+## Discussion: How `reason-promise` makes promises type-safe
+
+The previous section shows that [JS promise functions are
+broken](#JSPromiseFlattening). An important observation is that it is only the
+*functions* that are broken &mdash; the promise *data representation* is not.
+That means that to make JS promises type-safe, we can keep the same data
+representation, and just provide safe replacement functions to use with it in
+Reason. This is good news for interop :)
+
+To fix the functions, only the [special-case flattening](#JSPromiseFlattening)
+has to be undone. So, when you call `reason-promise`'s
+[`Promise.resolved(value)`][resolved], it checks whether `value` is a promise
+or not, and...
+
+- If `value` *is not* a promise, `reason-promise` just passes it to JS's
+  [`Promise.resolve`][Promise.resolve], because JS will do the right thing.
+- If `value` *is* a promise, it's not safe to simply pass it to JS, because it
+  will trigger the special-casing. So, `reason-promise` boxes the nested
+  promise:
+
+  ```reason
+  let value = Promise.resolved(1);
+  Promise.resolved(value)->Js.log;
+  /* Promise { PromiseBox { Promise { 1 } } } */
+  ```
+
+  This box, of course, is not a promise, so it's enough to bypass the
+  special-casing.
+
+  Whenever you try to take the value out of this resulting promise (for example,
+  by calling [`Promise.get`][get] on it), `reason-promise` transparently
+  unboxes the nested promise before passing it to your callback.
+
+This conditional boxing and unboxing is done throughout `reason-promise`. It
+only happens for nested promises. For all other values, `reason-promise`
+behaves, internally, exactly like JS `Promise` (though with a cleaner outer
+API). This is enough to make promises type-safe.
+
+This is a simple scheme, but `reason-promise` includes a very thorough
+[test suite][tests] to be extra sure that it always manages the boxing
+correctly.
+
+This conditional boxing is similar to how unboxed optionals are implemented in
+BuckleScript. Optionals are almost always unboxed, but when BuckleScript isn't
+sure that the unboxing will be safe, it inserts a runtime check that boxes some
+values, while still keeping most values unboxed.
+
 [example-repo]: https://github.com/aantron/promise-example-bsb
 [example-binding]: https://github.com/aantron/promise-example-binding
+[rei]: https://github.com/aantron/promise/blob/c68b1feefdd5efc0397ba92f392d6cc47233f161/src/js/promise.rei#L15-L154
 [Result]: https://bucklescript.github.io/bucklescript/api/Belt.Result.html
 [Option]: https://bucklescript.github.io/bucklescript/api/Belt.Option.html
+[tests]: https://github.com/aantron/promise/tree/master/test
 
 [pending]: https://github.com/aantron/promise/blob/dcbd596fa8207c62b7c26416ff681f25e6eedb67/src/js/promise.rei#L16-L18
 [resolved]: https://github.com/aantron/promise/blob/dcbd596fa8207c62b7c26416ff681f25e6eedb67/src/js/promise.rei#L20-L22
@@ -475,5 +605,7 @@ code may be necessary to handle this, as with any JS binding.
 [Js.fromResult]: https://github.com/aantron/promise/blob/dcbd596fa8207c62b7c26416ff681f25e6eedb67/src/js/promise.rei#L213-L215
 [Js.fromBsPromise]: https://github.com/aantron/promise/blob/dcbd596fa8207c62b7c26416ff681f25e6eedb67/src/js/promise.rei#L217-L219
 [Js.toBsPromise]: https://github.com/aantron/promise/blob/dcbd596fa8207c62b7c26416ff681f25e6eedb67/src/js/promise.rei#L221-L223
+[Promise.resolve]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/resolve
+[Js.Promise.Resolve]: https://bucklescript.github.io/bucklescript/api/Js.Promise.html#VALresolve
 
 <!-- YOU HAVE FOUND THE SECRET EASTER EGG! -->
