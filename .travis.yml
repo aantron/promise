@@ -63,7 +63,6 @@ jobs:
       before_cache:
         - opam clean
 
-matrix:
   fast_finish: true
 
 cache:
