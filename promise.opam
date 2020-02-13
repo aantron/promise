@@ -21,4 +21,5 @@ depends: [
 
 build: [
   ["dune" "build" "-p" name "-j" jobs]
+  ["dune" "exec" "test/test_main.exe" "-p" name "-j" jobs] {with-test}
 ]

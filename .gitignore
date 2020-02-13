@@ -16,3 +16,5 @@ doc/website/build
 doc/website/i18n/*
 test/bundle/*.js
 test/bundle/*.js.gz
+promise-*
+_release
