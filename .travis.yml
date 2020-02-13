@@ -10,10 +10,10 @@ jobs:
         - '[ "$ESY_CACHED" == yes ] || npm install --no-save esy'
         - '[ "$ESY_CACHED" != yes ] || SKIP_UPDATE=--skip-repository-update'
         - export PATH="$(pwd)/node_modules/.bin:$PATH"
-        - esy install $SKIP_UPDATE
+        - esy install $SKIP_UPDATE -P ./promise.opam
       script:
-        - esy dune build test/test_main.exe
-        - esy dune exec test/test_main.exe
+        - esy -P ./promise.opam dune build test/test_main.exe
+        - esy -P ./promise.opam dune exec test/test_main.exe
       before_cache:
         - npm cache clean --force
         - rm -rf node_modules/.cache/_esy
