@@ -513,7 +513,7 @@ safely from Reason.
 <br/>
 
 <a id="TypeSafety"></a>
-## Discussion: How `reason-promise` makes promises type-safe
+### Discussion: How `reason-promise` makes promises type-safe
 
 The previous section shows that [JS promise functions are
 broken](#JSPromiseFlattening). An important observation is that it is only the
