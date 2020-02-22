@@ -580,3 +580,10 @@ let exec = executor => {
 module PipeFirst = {
   let (|.) = (v, f) => f(v);
 };
+
+
+
+module Let = {
+  let (let.promise) = flatMap;
+  let (let.promise_map) = map;
+};

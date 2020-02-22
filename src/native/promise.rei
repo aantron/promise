@@ -246,3 +246,15 @@ module ReadyCallbacks: {
   let isEmpty: snapshot => bool;
   let call: snapshot => unit;
 };
+
+
+
+module Let: {
+  let (let.promise):
+    (promise('a), 'a => promise('b)) =>
+      promise('b);
+
+  let (let.promise_map):
+    (promise('a), 'a => 'b) =>
+      promise('b);
+};

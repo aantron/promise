@@ -319,4 +319,46 @@ let allLoopTests = Framework.suite("all loop", [
 
 
 
-let suites = [promiseLoopTests, raceLoopTests, allLoopTests];
+let letTests = Framework.suite("let", Promise.Let.[
+  test("basic", () => {
+    let.promise n = Promise.resolved(42);
+    Promise.resolved(n == 42);
+  }),
+
+  test("sequence", () => {
+    let.promise n = Promise.resolved(42);
+    let.promise n' = Promise.resolved(n + 1);
+    Promise.resolved(n == 42 && n' == 43);
+  }),
+
+  test("map", () => {
+    let.promise_map n = Promise.resolved(42);
+    n == 42
+  }),
+
+/*
+  test("map sequence", () => {
+    let.promise_map n = Promise.resolved(42);
+    let.promise_map n' = Promise.resolved(43);
+    n == 42 && n' == 43
+  }),
+*/
+
+  test("flatMap then map", () => {
+    let.promise n = Promise.resolved(42);
+    let.promise_map n' = Promise.resolved(n + 1);
+    n == 42 && n' == 43;
+  }),
+
+/*
+  test("flatMap then map", () => {
+    let.promise_map n = Promise.resolved(42);
+    let.promise n' = Promise.resolved(n + 1);
+    Promise.resolved(n == 42 && n' == 43);
+  }),
+*/
+]);
+
+
+
+let suites = [promiseLoopTests, raceLoopTests, allLoopTests, letTests];
