@@ -46,7 +46,7 @@ jobs:
       before_install:
         - '[ "$TRAVIS_EVENT_TYPE" != cron ] || rm -rf ~/.opam'
       install:
-        - VERSION=2.0.5
+        - VERSION=2.0.6
         - OPAM=opam-$VERSION-x86_64-linux
         - wget https://github.com/ocaml/opam/releases/download/$VERSION/$OPAM
         - sudo mv $OPAM /usr/local/bin/opam
