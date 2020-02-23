@@ -51,9 +51,10 @@ jobs:
         - wget https://github.com/ocaml/opam/releases/download/$VERSION/$OPAM
         - sudo mv $OPAM /usr/local/bin/opam
         - sudo chmod a+x /usr/local/bin/opam
-        - opam init -ya --compiler=4.08.1 --disable-sandboxing
+        - opam init -ya --compiler=4.10.0 --disable-sandboxing
         - eval `opam env`
         - ocaml -version
+        - opam pin add -y reason --dev-repo
         - opam install -y --deps-only .
       script:
         - dune exec test/test_main.exe
