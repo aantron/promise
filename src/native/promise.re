@@ -460,37 +460,35 @@ let race = promises => {
 
 type result('a, 'e) = Result.result('a, 'e);
 
-open Result
-
 let flatMapOk = (promise, callback) =>
   flatMap(promise, fun
-    | Ok(value) => callback(value)
-    | Error(_) as error => resolved(error));
+    | Result.Ok(value) => callback(value)
+    | Result.Error(_) as error => resolved(error));
 
 let flatMapError = (promise, callback) =>
   flatMap(promise, fun
-    | Ok(_) as ok => resolved(ok)
-    | Error(error) => callback(error));
+    | Result.Ok(_) as ok => resolved(ok)
+    | Result.Error(error) => callback(error));
 
 let mapOk = (promise, callback) =>
   map(promise, fun
-    | Ok(value) => Ok(callback(value))
-    | Error(_) as error => error);
+    | Result.Ok(value) => Result.Ok(callback(value))
+    | Result.Error(_) as error => error);
 
 let mapError = (promise, callback) =>
   map(promise, fun
-    | Ok(_) as ok => ok
-    | Error(error) => Error(callback(error)));
+    | Result.Ok(_) as ok => ok
+    | Result.Error(error) => Error(callback(error)));
 
 let getOk = (promise, callback) =>
   get(promise, fun
-    | Ok(value) => callback(value)
-    | Error(_) => ());
+    | Result.Ok(value) => callback(value)
+    | Result.Error(_) => ());
 
 let getError = (promise, callback) =>
   get(promise, fun
-    | Ok(_) => ()
-    | Error(error) => callback(error));
+    | Result.Ok(_) => ()
+    | Result.Error(error) => callback(error));
 
 let tapOk = (promise, callback) => {
   getOk(promise, callback);
@@ -554,12 +552,12 @@ module Js = {
   let race = race;
 
   let toResult = promise =>
-    catch(map(promise, v => Ok(v)), e => resolved(Error(e)));
+    catch(map(promise, v => Result.Ok(v)), e => resolved(Result.Error(e)));
 
   let fromResult = promise =>
     flatMap(relax(promise), fun
-      | Ok(v) => resolved(v)
-      | Error(e) => rejected(e));
+      | Result.Ok(v) => resolved(v)
+      | Result.Error(e) => rejected(e));
 };
 
 
