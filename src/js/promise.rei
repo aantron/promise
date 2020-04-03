@@ -4,10 +4,14 @@
 
 
 
+/* Internal type names; don't use these. Instead, use Promise.t and Promise.Js.t
+   from outside this library. */
 type rejectable(+'a, +'e);                  /* Internal; use Promise.Js.t. */
 type never;
-
 type promise(+'a) = rejectable('a, never);  /* Internal; use Promise.t. */
+
+
+/* The main, public promise type (Promise.t). */
 type t(+'a) = promise('a);
 
 
