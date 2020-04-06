@@ -473,8 +473,8 @@ log(Promise.resolved("Hello"));       /* Hello */
 ### Discussion: Why JS promises are unsafe
 
 The JS function [`Promise.resolve`][Promise.resolve] has a special case, which
-is triggered when you try to resolve a promise with another promise.
-Unfortunately, this special case makes it impossible to assign JS's
+is triggered when you try to resolve a promise with another, nested promise.
+Unfortunately, this special case makes it impossible to assign
 `Promise.resolve` a consistent type in Reason (and most type systems).
 
 Here are the details. The code will use
@@ -488,7 +488,7 @@ Js.log(Js.Promise.resolve(1));
 /* Promise { 1 } */
 
 Js.log(Js.Promise.resolve("foo"));
-/* Promise { "foo" } */
+/* Promise { 'foo' } */
 ```
 
 So, we should give it the type
@@ -523,23 +523,34 @@ Js.Promise.t(Js.Promise.t(int))
 
 i.e., the type of the value we were (reasonably) expecting.
 
-When you pass `nestedPromise` to `Js.Promise.resolve`, JS sneakily unwraps
-`nestedPromise`, violating the type! There is no way to easily encode such
-special casing in the type system &mdash; especially since JS does it not only
-to nested promises, but to any nested object that has a `.then` method.
+When you pass `nestedPromise` to `Js.Promise.resolve`, JS unwraps
+`nestedPromise`, violating the type! There is no easy way to encode such special
+casing in the type system &mdash; especially since JS does it not only to
+nested promises, but to any would-be nested object that has a `.then` method.
 
-The result is, if your program executes something like this, because of the
-sneaky unwrapping, it will have ordinary values in places where it expects
-another level of promises. For example, if you called `Js.Promise.then_` on the
-promise above, you would *expect* the callback to see a promise containing `1`.
-Instead, the callback will get just a bare `1`, causing a runtime error as soon
-as the callback tries to use promise functions on the `1`. The type system is
-supposed to prevent such errors! That's part of the point of using Reason :)
+The result is, if your program executes something like this, it will have
+ordinary values in places where it expects another level of promises. For
+example, if you do
+
+```reason
+let nestedPromise = Js.Promise.resolve(1);
+
+Js.Promise.resolve(nestedPromise)
+->Js.Promise.then_(p => /* ... */)
+```
+
+you would *expect* `p` in the callback to be a promise containing `1`, and the
+type of `p` is indeed `Js.Promise.t(int)`. Instead, however, `p` is just the
+bare value `1`. That means the callback will cause a runtime error as soon as
+it tries to use promise functions on the `1`. Worse, you might store `p` in a
+data structure, and the runtime error will occur at a very distant place in the
+code. The type system is supposed to prevent such errors! That's part of the
+point of using Reason.
 
 The same special casing occurs throughout the JS `Promise` API &mdash; for
-example, when you return a promise from the callback of `.then`. This means that
-*most* of the JS `Promise` functions can't be assigned a correct type and used
-safely from Reason.
+example, when you return a promise from the callback of `then_`. This means that
+*most* of the JS `Promise` functions can't be assigned a correct type and
+directly, safely be used from Reason.
 
 <br/>
 
