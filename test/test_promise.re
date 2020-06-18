@@ -662,6 +662,161 @@ let resultTests = Framework.suite("result", [
     ->Promise.Js.fromResult
     ->Promise.Js.catch(v => Promise.resolved(v == 4));
   }),
+
+  test("allOk, ok", () => {
+    let (p1, r1) = Promise.pending();
+    let (p2, r2) = Promise.pending();
+    let p3 = Promise.allOk([p1, p2]);
+    r1(Ok(42));
+    r2(Ok(43));
+    p3->Promise.map((==)(Ok([42, 43])));
+  }),
+
+  test("allOk, error", () => {
+    let (p1, r1) = Promise.pending();
+    let (p2, r2) = Promise.pending();
+    let p3 = Promise.allOk([p1, p2]);
+    r1(Ok(42));
+    r2(Error(43));
+    p3->Promise.map((==)(Error(43)));
+  }),
+
+  test("allOk, fast fail", () => {
+    let (p1, _) = Promise.pending();
+    let (p2, r2) = Promise.pending();
+    let p3 = Promise.allOk([p1, p2]);
+    r2(Error(43));
+    p3->Promise.map((==)(Error(43)));
+  }),
+
+  test("allOk, multiple error", () => {
+    let (p1, r1) = Promise.pending();
+    let (p2, r2) = Promise.pending();
+    let p3 = Promise.allOk([p1, p2]);
+    r1(Error(42));
+    r2(Error(43));
+    p3->Promise.map((==)(Error(42)));
+  }),
+
+  test("allOk2, ok", () => {
+    let (p1, r1) = Promise.pending();
+    let (p2, r2) = Promise.pending();
+    let p3 = Promise.allOk2(p1, p2);
+    r1(Ok(42));
+    r2(Ok("43"));
+    p3->Promise.map((==)(Ok((42, "43"))));
+  }),
+
+  test("allOk2, error", () => {
+    let (p1, r1) = Promise.pending();
+    let (p2, r2) = Promise.pending();
+    let p3 = Promise.allOk2(p1, p2);
+    r1(Ok(42));
+    r2(Error("43"));
+    p3->Promise.map((==)(Error("43")));
+  }),
+
+  test("allOk3, ok", () => {
+    let (p1, r1) = Promise.pending();
+    let (p2, r2) = Promise.pending();
+    let (p3, r3) = Promise.pending();
+    let p4 = Promise.allOk3(p1, p2, p3);
+    r1(Ok(42));
+    r2(Ok("43"));
+    r3(Ok(44));
+    p4->Promise.map((==)(Ok((42, "43", 44))));
+  }),
+
+  test("allOk3, error", () => {
+    let (p1, r1) = Promise.pending();
+    let (p2, r2) = Promise.pending();
+    let (p3, _) = Promise.pending();
+    let p4 = Promise.allOk3(p1, p2, p3);
+    r1(Ok(42));
+    r2(Error("43"));
+    p4->Promise.map((==)(Error("43")));
+  }),
+
+  test("allOk4, ok", () => {
+    let (p1, r1) = Promise.pending();
+    let (p2, r2) = Promise.pending();
+    let (p3, r3) = Promise.pending();
+    let (p4, r4) = Promise.pending();
+    let p5 = Promise.allOk4(p1, p2, p3, p4);
+    r1(Ok(42));
+    r2(Ok("43"));
+    r3(Ok(44));
+    r4(Ok(45));
+    p5->Promise.map((==)(Ok((42, "43", 44, 45))));
+  }),
+
+  test("allOk4, error", () => {
+    let (p1, r1) = Promise.pending();
+    let (p2, r2) = Promise.pending();
+    let (p3, _) = Promise.pending();
+    let (p4, _) = Promise.pending();
+    let p5 = Promise.allOk4(p1, p2, p3, p4);
+    r1(Ok(42));
+    r2(Error("43"));
+    p5->Promise.map((==)(Error("43")));
+  }),
+
+  test("allOk5, ok", () => {
+    let (p1, r1) = Promise.pending();
+    let (p2, r2) = Promise.pending();
+    let (p3, r3) = Promise.pending();
+    let (p4, r4) = Promise.pending();
+    let (p5, r5) = Promise.pending();
+    let p6 = Promise.allOk5(p1, p2, p3, p4, p5);
+    r1(Ok(42));
+    r2(Ok("43"));
+    r3(Ok(44));
+    r4(Ok(45));
+    r5(Ok(46));
+    p6->Promise.map((==)(Ok((42, "43", 44, 45, 46))));
+  }),
+
+  test("allOk5, error", () => {
+    let (p1, r1) = Promise.pending();
+    let (p2, r2) = Promise.pending();
+    let (p3, _) = Promise.pending();
+    let (p4, _) = Promise.pending();
+    let (p5, _) = Promise.pending();
+    let p6 = Promise.allOk5(p1, p2, p3, p4, p5);
+    r1(Ok(42));
+    r2(Error("43"));
+    p6->Promise.map((==)(Error("43")));
+  }),
+
+  test("allOk6, ok", () => {
+    let (p1, r1) = Promise.pending();
+    let (p2, r2) = Promise.pending();
+    let (p3, r3) = Promise.pending();
+    let (p4, r4) = Promise.pending();
+    let (p5, r5) = Promise.pending();
+    let (p6, r6) = Promise.pending();
+    let p7 = Promise.allOk6(p1, p2, p3, p4, p5, p6);
+    r1(Ok(42));
+    r2(Ok("43"));
+    r3(Ok(44));
+    r4(Ok(45));
+    r5(Ok(46));
+    r6(Ok(47));
+    p7->Promise.map((==)(Ok((42, "43", 44, 45, 46, 47))));
+  }),
+
+  test("allOk6, error", () => {
+    let (p1, r1) = Promise.pending();
+    let (p2, r2) = Promise.pending();
+    let (p3, _) = Promise.pending();
+    let (p4, _) = Promise.pending();
+    let (p5, _) = Promise.pending();
+    let (p6, _) = Promise.pending();
+    let p7 = Promise.allOk6(p1, p2, p3, p4, p5, p6);
+    r1(Ok(42));
+    r2(Error("43"));
+    p7->Promise.map((==)(Error("43")));
+  }),
 ]);
 
 

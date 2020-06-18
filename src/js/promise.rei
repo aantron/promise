@@ -157,6 +157,48 @@ let all6:
    promise('f)) =>
     promise(('a, 'b, 'c, 'd, 'e, 'f));
 
+let allOk:
+  list(promise(result('a, 'e))) =>
+    promise(result(list('a), 'e));
+
+let allOkArray:
+  array(promise(result('a, 'e))) =>
+    promise(result(array('a), 'e));
+
+let allOk2:
+  (promise(result('a, 'err)), promise(result('b, 'err))) =>
+    promise(result(('a, 'b), 'err));
+
+let allOk3:
+  (promise(result('a, 'err)),
+   promise(result('b, 'err)),
+   promise(result('c, 'err))) =>
+    promise(result(('a, 'b, 'c), 'err));
+
+let allOk4:
+  (promise(result('a, 'err)),
+   promise(result('b, 'err)),
+   promise(result('c, 'err)),
+   promise(result('d, 'err))) =>
+    promise(result(('a, 'b, 'c, 'd), 'err));
+
+let allOk5:
+  (promise(result('a, 'err)),
+   promise(result('b, 'err)),
+   promise(result('c, 'err)),
+   promise(result('d, 'err)),
+   promise(result('e, 'err))) =>
+    promise(result(('a, 'b, 'c, 'd, 'e), 'err));
+
+let allOk6:
+  (promise(result('a, 'err)),
+   promise(result('b, 'err)),
+   promise(result('c, 'err)),
+   promise(result('d, 'err)),
+   promise(result('e, 'err)),
+   promise(result('f, 'err))) =>
+    promise(result(('a, 'b, 'c, 'd, 'e, 'f), 'err));
+
 
 
 /* For writing bindings. */

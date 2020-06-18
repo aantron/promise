@@ -328,6 +328,20 @@ There are also similar functions for working with [`Option`][Option]:
 - [`Promise.mapSome`][mapSome]
 - [`Promise.flatMapSome`][flatMapSome]
 
+In addition, there is also a set of variants of `Promise.all` for results, which
+propagate any `Error(_)` as soon as it is received:
+
+- [`Promise.allOk`][allOk]
+- [`Promise.allOk2`][allOk2]
+- [`Promise.allOk3`][allOk3]
+- [`Promise.allOk4`][allOk4]
+- [`Promise.allOk5`][allOk5]
+- [`Promise.allOk6`][allOk6]
+- [`Promise.allOkArray`][allOkArray]
+
+If you'd like instead to fully wait for all the promises to resolve with either
+`Ok(_)` or `Error(_)`, you can use the ordinary `Promise.all` and its variants.
+
 <br/>
 
 <a id="Rejection"></a>
@@ -639,6 +653,13 @@ values, while still keeping most values unboxed.
 [tapSome]: https://github.com/aantron/promise/blob/51001f911ff31ecf51a633fba9f782769a2726c9/src/js/promise.rei#L108-L110
 [mapSome]: https://github.com/aantron/promise/blob/51001f911ff31ecf51a633fba9f782769a2726c9/src/js/promise.rei#L112-L114
 [flatMapSome]: https://github.com/aantron/promise/blob/51001f911ff31ecf51a633fba9f782769a2726c9/src/js/promise.rei#L116-L118
+[allOk]: https://github.com/aantron/promise/blob/51001f911ff31ecf51a633fba9f782769a2726c9/src/js/promise.rei#L116-L118
+[allOk2]: https://github.com/aantron/promise/blob/51001f911ff31ecf51a633fba9f782769a2726c9/src/js/promise.rei#L116-L118
+[allOk3]: https://github.com/aantron/promise/blob/51001f911ff31ecf51a633fba9f782769a2726c9/src/js/promise.rei#L116-L118
+[allOk4]: https://github.com/aantron/promise/blob/51001f911ff31ecf51a633fba9f782769a2726c9/src/js/promise.rei#L116-L118
+[allOk5]: https://github.com/aantron/promise/blob/51001f911ff31ecf51a633fba9f782769a2726c9/src/js/promise.rei#L116-L118
+[allOk6]: https://github.com/aantron/promise/blob/51001f911ff31ecf51a633fba9f782769a2726c9/src/js/promise.rei#L116-L118
+[allOkArray]: https://github.com/aantron/promise/blob/51001f911ff31ecf51a633fba9f782769a2726c9/src/js/promise.rei#L116-L118
 [Promise.Js]: https://github.com/aantron/promise/blob/51001f911ff31ecf51a633fba9f782769a2726c9/src/js/promise.rei#L163
 [Js.get]: https://github.com/aantron/promise/blob/51001f911ff31ecf51a633fba9f782769a2726c9/src/js/promise.rei#L180-L182
 [Js.tap]: https://github.com/aantron/promise/blob/51001f911ff31ecf51a633fba9f782769a2726c9/src/js/promise.rei#L184-L186

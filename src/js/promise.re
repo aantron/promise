@@ -267,6 +267,112 @@ let tapError = (promise, callback) => {
   promise;
 };
 
+let allOkArray = promises => {
+  let promiseCount = Array.length(promises);
+
+  let resultValues = Array.make(promiseCount, None);
+  let resultCount = ref(0);
+  let (resultPromise, resolve) = pending();
+
+  let (callbackRemover, removeCallbacks) = pending();
+
+  promises |> Array.iteri((index, promise) =>
+    /* Because callbacks are added to the user's promises through calls to the
+       JS runtime's Promise.race, this function leaks memory if and only if the
+       JS runtime's Promise functions leak memory. In particular, if one of the
+       promises resolves with Error(_), the callbacks on the other promises
+       should be removed. If not done, and long-pending promises are repeatedly
+       passed to allOk in a loop, they will gradually accumulate huge lists of
+       stale callbacks. This is also true of Promise.race, so we rely on the
+       quality of the runtime's Promise.race implementation to proactively
+       remove these callbacks. */
+    race([promise, callbackRemover])
+    |> wrapped => get(wrapped, result =>
+      switch (result) {
+      | Ok(v) =>
+        resultValues[index] = Some(v);
+        incr(resultCount);
+        if (resultCount^ >= promiseCount) {
+          resultValues
+          |> Array.map(v =>
+            switch (v) {
+            | Some(v) => v
+            | None => assert(false)
+            })
+          |> values => resolve(Ok(values))
+        };
+      | Error(e) =>
+        resolve(Error(e));
+        removeCallbacks(Error(e));
+      }));
+
+  resultPromise
+};
+
+let allOk = promises =>
+  mapOk(allOkArray(Array.of_list(promises)), Array.to_list);
+
+let allOk2 = (p1, p2) => {
+  let promises = [|Obj.magic(p1), Obj.magic(p2)|];
+  mapOk(allOkArray(promises), fun
+  | [|v1, v2|] => (Obj.magic(v1), Obj.magic(v2))
+  | _ => assert(false))
+};
+
+let allOk3 = (p1, p2, p3) => {
+  let promises = [|Obj.magic(p1), Obj.magic(p2), Obj.magic(p3)|];
+  mapOk(allOkArray(promises), fun
+  | [|v1, v2, v3|] => (Obj.magic(v1), Obj.magic(v2), Obj.magic(v3))
+  | _ => assert(false))
+};
+
+let allOk4 = (p1, p2, p3, p4) => {
+  let promises = [|Obj.magic(p1), Obj.magic(p2), Obj.magic(p3), Obj.magic(p4)|];
+  mapOk(allOkArray(promises), fun
+  | [|v1, v2, v3, v4|] =>
+    (Obj.magic(v1), Obj.magic(v2), Obj.magic(v3), Obj.magic(v4))
+  | _ =>
+    assert(false))
+};
+
+let allOk5 = (p1, p2, p3, p4, p5) => {
+  let promises = [|
+    Obj.magic(p1),
+    Obj.magic(p2),
+    Obj.magic(p3),
+    Obj.magic(p4),
+    Obj.magic(p5)
+  |];
+  mapOk(allOkArray(promises), fun
+  | [|v1, v2, v3, v4, v5|] =>
+    (Obj.magic(v1), Obj.magic(v2), Obj.magic(v3), Obj.magic(v4), Obj.magic(v5))
+  | _ =>
+    assert(false))
+};
+
+let allOk6 = (p1, p2, p3, p4, p5, p6) => {
+  let promises = [|
+    Obj.magic(p1),
+    Obj.magic(p2),
+    Obj.magic(p3),
+    Obj.magic(p4),
+    Obj.magic(p5),
+    Obj.magic(p6)
+  |];
+  mapOk(allOkArray(promises), fun
+  | [|v1, v2, v3, v4, v5, v6|] =>
+    (
+      Obj.magic(v1),
+      Obj.magic(v2),
+      Obj.magic(v3),
+      Obj.magic(v4),
+      Obj.magic(v5),
+      Obj.magic(v6)
+    )
+  | _ =>
+    assert(false))
+};
+
 module Operators = {
   let (>|=) = mapOk;
   let (>>=) = flatMapOk;
