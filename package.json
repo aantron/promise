@@ -33,7 +33,8 @@
   "scripts": {
     "build": "bsb -make-world",
     "watch": "bsb -w -make-world",
-    "clean": "bsb -clean-world",
+    "clean": "bsb -clean-world && rm -rf lib promise-* *.tar.gz *.tgz _release",
+    "very-clean": "rm -rf node_modules _esy _opam package-lock.json",
     "test": "bsb -make-world && node lib/js/test/test_main.js",
     "benchmark": "bsb -make-world && node lib/js/test/js/benchmark.js"
   },
