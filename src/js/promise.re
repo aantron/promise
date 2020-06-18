@@ -74,37 +74,7 @@ function catch_(promise, callback) {
 
     return promise.catch(safeCallback);
 };
-
-function arrayToList(array) {
-  var list = 0;
-  for (var index = array.length - 1; index >= 0; --index) {
-    list = [array[index], list];
-  }
-  return list;
-};
-
-function listToArray(list) {
-  var array = [];
-  while (list !== 0) {
-    array.push(list[0]);
-    list = list[1];
-  }
-  return array;
-};
-
-function mapArray(f, a) {
-  return a.map(f);
-};
 |}];
-
-[@bs.val]
-external arrayToList: array('a) => list('a) = "arrayToList";
-
-[@bs.val]
-external listToArray: list('a) => array('a) = "listToArray";
-
-[@bs.val]
-external mapArray: ('a => 'b, array('a)) => array('b) = "mapArray";
 
 
 
@@ -169,10 +139,10 @@ module Js_ = {
   external jsAll: 'a => 'b = "all";
 
   let allArray = promises =>
-    map(jsAll(promises), mapArray(unbox));
+    map(jsAll(promises), promises => Belt.Array.map(promises, unbox));
 
   let all = promises =>
-    map(allArray(listToArray(promises)), results => arrayToList(results));
+    map(allArray(Belt.List.toArray(promises)), Belt.List.fromArray);
 
   let all2 = (p1, p2) =>
     jsAll((p1, p2));
@@ -198,7 +168,7 @@ module Js_ = {
       raise(Invalid_argument("Promise.race([]) would be pending forever"));
     }
     else {
-      jsRace(listToArray(promises));
+      jsRace(Belt.List.toArray(promises));
     };
 
   let toResult = promise =>

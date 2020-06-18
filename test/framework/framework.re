@@ -48,7 +48,19 @@ type outcome =
 let test = (test_name, ~only_if = () => true, run) =>
   {test_name, skip_if_this_is_false: only_if, run};
 
-let run_test = test =>
+let currentSuiteName = ref("none");
+let currentTestName = ref("none");
+
+let () = {
+  let onUnhandledException = Promise.onUnhandledException^;
+  Promise.onUnhandledException := exn => {
+    Printf.eprintf("\nIn test '%s/%s':\n", currentSuiteName^, currentTestName^);
+    onUnhandledException(exn);
+  };
+};
+
+let run_test = test => {
+  currentTestName := test.test_name;
   if (test.skip_if_this_is_false() == false) {
     Promise.resolved(Skipped)
   }
@@ -61,6 +73,7 @@ let run_test = test =>
         Promise.resolved(Failed)
       })
   };
+};
 
 /* We don't support exception handling in the tester for now, largely because
    the [Promise] module doesn't know what to do about exceptions at this point.
@@ -114,6 +127,7 @@ let run_test_suite: suite => Promise.t(suite_outcomes) = suite =>
           run_each_test(more_tests, [outcome_with_name, ...reversed_outcomes]);
         })
       };
+    currentSuiteName := suite.suite_name;
     run_each_test(suite.suite_tests, []);
   };
 

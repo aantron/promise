@@ -2,4 +2,7 @@
    as typical BuckleScript programs are likely to be using these anyway. */
 
 let f = (g, x) =>
-  raise(Invalid_argument(g(Some(x), Belt.Result.Ok(x))));
+  raise(Invalid_argument(
+    g(
+      Some(Belt.Array.map(x, ignore)),
+      Belt.Result.Ok(Belt.List.fromArray(x)))));

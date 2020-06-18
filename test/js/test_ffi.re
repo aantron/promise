@@ -241,7 +241,9 @@ let soundnessTests = Framework.suite("soundness", [
     ->Promise.flatMap(p => Promise.resolved(jsPromiseIsPromiseLike(p)));
   }),
 
+  [@ocaml.warning "-33"]
   test("resolved: Almost-Promise-like", () => {
+    let open Js_OO;
     Promise.resolved(makeAlmostPromiseLike(42))
     ->Promise.flatMap(x => Promise.resolved(x##_then == 42));
   }),
