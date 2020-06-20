@@ -268,15 +268,15 @@ let tapError = (promise, callback) => {
 };
 
 let allOkArray = promises => {
-  let promiseCount = Array.length(promises);
+  let promiseCount = Belt.Array.length(promises);
 
-  let resultValues = Array.make(promiseCount, None);
+  let resultValues = Belt.Array.make(promiseCount, None);
   let resultCount = ref(0);
   let (resultPromise, resolve) = pending();
 
   let (callbackRemover, removeCallbacks) = pending();
 
-  promises |> Array.iteri((index, promise) =>
+  promises->Belt.Array.forEachWithIndex((index, promise) =>
     /* Because callbacks are added to the user's promises through calls to the
        JS runtime's Promise.race, this function leaks memory if and only if the
        JS runtime's Promise functions leak memory. In particular, if one of the
@@ -290,11 +290,10 @@ let allOkArray = promises => {
     |> wrapped => get(wrapped, result =>
       switch (result) {
       | Ok(v) =>
-        resultValues[index] = Some(v);
+        resultValues->Belt.Array.setExn(index, Some(v));
         incr(resultCount);
         if (resultCount^ >= promiseCount) {
-          resultValues
-          |> Array.map(v =>
+          resultValues->Belt.Array.map(v =>
             switch (v) {
             | Some(v) => v
             | None => assert(false)
@@ -310,7 +309,7 @@ let allOkArray = promises => {
 };
 
 let allOk = promises =>
-  mapOk(allOkArray(Array.of_list(promises)), Array.to_list);
+  mapOk(allOkArray(Belt.List.toArray(promises)), Belt.List.fromArray);
 
 let allOk2 = (p1, p2) => {
   let promises = [|Obj.magic(p1), Obj.magic(p2)|];
