@@ -3,6 +3,7 @@ lib/
 package-lock.json
 _build
 .merlin
+.bsb.lock
 *.install
 esy.lock
 scratch/
