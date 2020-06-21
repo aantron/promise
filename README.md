@@ -47,7 +47,7 @@ In addition:
   implementation][native], which passes all the same tests. It can be used for
   native code or in JS.
 
-[bundle-size]: https://travis-ci.org/aantron/promise/jobs/638748670#L241
+[bundle-size]: https://travis-ci.org/github/aantron/promise/jobs/700562910#L210
 [native]: https://github.com/aantron/promise/tree/master/src/native
 
 <br>

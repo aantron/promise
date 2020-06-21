@@ -311,66 +311,23 @@ let allOkArray = promises => {
 let allOk = promises =>
   mapOk(allOkArray(Belt.List.toArray(promises)), Belt.List.fromArray);
 
-let allOk2 = (p1, p2) => {
-  let promises = [|Obj.magic(p1), Obj.magic(p2)|];
-  mapOk(allOkArray(promises), fun
-  | [|v1, v2|] => (Obj.magic(v1), Obj.magic(v2))
-  | _ => assert(false))
-};
+let unsafeAllOkArray =
+  Obj.magic(allOkArray);
 
-let allOk3 = (p1, p2, p3) => {
-  let promises = [|Obj.magic(p1), Obj.magic(p2), Obj.magic(p3)|];
-  mapOk(allOkArray(promises), fun
-  | [|v1, v2, v3|] => (Obj.magic(v1), Obj.magic(v2), Obj.magic(v3))
-  | _ => assert(false))
-};
+let allOk2 = (p1, p2) =>
+  unsafeAllOkArray((p1, p2));
 
-let allOk4 = (p1, p2, p3, p4) => {
-  let promises = [|Obj.magic(p1), Obj.magic(p2), Obj.magic(p3), Obj.magic(p4)|];
-  mapOk(allOkArray(promises), fun
-  | [|v1, v2, v3, v4|] =>
-    (Obj.magic(v1), Obj.magic(v2), Obj.magic(v3), Obj.magic(v4))
-  | _ =>
-    assert(false))
-};
+let allOk3 = (p1, p2, p3) =>
+  unsafeAllOkArray((p1, p2, p3));
 
-let allOk5 = (p1, p2, p3, p4, p5) => {
-  let promises = [|
-    Obj.magic(p1),
-    Obj.magic(p2),
-    Obj.magic(p3),
-    Obj.magic(p4),
-    Obj.magic(p5)
-  |];
-  mapOk(allOkArray(promises), fun
-  | [|v1, v2, v3, v4, v5|] =>
-    (Obj.magic(v1), Obj.magic(v2), Obj.magic(v3), Obj.magic(v4), Obj.magic(v5))
-  | _ =>
-    assert(false))
-};
+let allOk4 = (p1, p2, p3, p4) =>
+  unsafeAllOkArray((p1, p2, p3, p4));
 
-let allOk6 = (p1, p2, p3, p4, p5, p6) => {
-  let promises = [|
-    Obj.magic(p1),
-    Obj.magic(p2),
-    Obj.magic(p3),
-    Obj.magic(p4),
-    Obj.magic(p5),
-    Obj.magic(p6)
-  |];
-  mapOk(allOkArray(promises), fun
-  | [|v1, v2, v3, v4, v5, v6|] =>
-    (
-      Obj.magic(v1),
-      Obj.magic(v2),
-      Obj.magic(v3),
-      Obj.magic(v4),
-      Obj.magic(v5),
-      Obj.magic(v6)
-    )
-  | _ =>
-    assert(false))
-};
+let allOk5 = (p1, p2, p3, p4, p5) =>
+  unsafeAllOkArray((p1, p2, p3, p4, p5));
+
+let allOk6 = (p1, p2, p3, p4, p5, p6) =>
+  unsafeAllOkArray((p1, p2, p3, p4, p5, p6));
 
 module Operators = {
   let (>|=) = mapOk;

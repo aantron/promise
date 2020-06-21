@@ -17,7 +17,7 @@ gzip -9f test/bundle/uses_promise.js
 CONTROL=`stat -c '%s' test/bundle/control.js.gz`
 PROMISE=`stat -c '%s' test/bundle/uses_promise.js.gz`
 DIFFERENCE=`expr $PROMISE - $CONTROL`
-LIMIT=1024
+LIMIT=1152
 
 if [ $DIFFERENCE -gt $LIMIT ]
 then
