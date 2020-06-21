@@ -478,7 +478,7 @@ let mapOk = (promise, callback) =>
 let mapError = (promise, callback) =>
   map(promise, fun
     | Result.Ok(_) as ok => ok
-    | Result.Error(error) => Error(callback(error)));
+    | Result.Error(error) => Result.Error(callback(error)));
 
 let getOk = (promise, callback) =>
   get(promise, fun
@@ -597,7 +597,7 @@ let allOkArray = promises => {
     race([promise, callbackRemover])
     |> wrapped => get(wrapped, result =>
       switch (result) {
-      | Ok(v) =>
+      | Result.Ok(v) =>
         resultValues[index] = Some(v);
         incr(resultCount);
         if (resultCount^ >= promiseCount) {
@@ -607,11 +607,11 @@ let allOkArray = promises => {
             | Some(v) => v
             | None => assert(false)
             })
-          |> values => resolve(Ok(values))
+          |> values => resolve(Result.Ok(values))
         };
-      | Error(e) =>
-        resolve(Error(e));
-        removeCallbacks(Error(e));
+      | Result.Error(e) =>
+        resolve(Result.Error(e));
+        removeCallbacks(Result.Error(e));
       }));
 
   resultPromise
