@@ -274,42 +274,42 @@ let allOkArray = promises => {
     resolved(Ok([||]));
   }
   else {
-  let resultValues = Belt.Array.make(promiseCount, None);
-  let resultCount = ref(0);
-  let (resultPromise, resolve) = pending();
+    let resultValues = Belt.Array.make(promiseCount, None);
+    let resultCount = ref(0);
+    let (resultPromise, resolve) = pending();
 
-  let (callbackRemover, removeCallbacks) = pending();
+    let (callbackRemover, removeCallbacks) = pending();
 
-  promises->Belt.Array.forEachWithIndex((index, promise) =>
-    /* Because callbacks are added to the user's promises through calls to the
-       JS runtime's Promise.race, this function leaks memory if and only if the
-       JS runtime's Promise functions leak memory. In particular, if one of the
-       promises resolves with Error(_), the callbacks on the other promises
-       should be removed. If not done, and long-pending promises are repeatedly
-       passed to allOk in a loop, they will gradually accumulate huge lists of
-       stale callbacks. This is also true of Promise.race, so we rely on the
-       quality of the runtime's Promise.race implementation to proactively
-       remove these callbacks. */
-    race([promise, callbackRemover])
-    |> wrapped => get(wrapped, result =>
-      switch (result) {
-      | Ok(v) =>
-        resultValues->Belt.Array.setExn(index, Some(v));
-        incr(resultCount);
-        if (resultCount^ >= promiseCount) {
-          resultValues->Belt.Array.map(v =>
-            switch (v) {
-            | Some(v) => v
-            | None => assert(false)
-            })
-          |> values => resolve(Ok(values))
-        };
-      | Error(e) =>
-        resolve(Error(e));
-        removeCallbacks(Error(e));
-      }));
+    promises->Belt.Array.forEachWithIndex((index, promise) =>
+      /* Because callbacks are added to the user's promises through calls to the
+         JS runtime's Promise.race, this function leaks memory if and only if
+         the JS runtime's Promise functions leak memory. In particular, if one
+         of the promises resolves with Error(_), the callbacks on the other
+         promises should be removed. If not done, and long-pending promises are
+         repeatedly passed to allOk in a loop, they will gradually accumulate
+         huge lists of stale callbacks. This is also true of Promise.race, so we
+         rely on the quality of the runtime's Promise.race implementation to
+         proactively remove these callbacks. */
+      race([promise, callbackRemover])
+      |> wrapped => get(wrapped, result =>
+        switch (result) {
+        | Ok(v) =>
+          resultValues->Belt.Array.setExn(index, Some(v));
+          incr(resultCount);
+          if (resultCount^ >= promiseCount) {
+            resultValues->Belt.Array.map(v =>
+              switch (v) {
+              | Some(v) => v
+              | None => assert(false)
+              })
+            |> values => resolve(Ok(values))
+          };
+        | Error(e) =>
+          resolve(Error(e));
+          removeCallbacks(Error(e));
+        }));
 
-  resultPromise
+    resultPromise
   };
 };
 
