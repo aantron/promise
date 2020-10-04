@@ -270,6 +270,10 @@ let tapError = (promise, callback) => {
 let allOkArray = promises => {
   let promiseCount = Belt.Array.length(promises);
 
+  if (promiseCount == 0) {
+    resolved(Ok([||]));
+  }
+  else {
   let resultValues = Belt.Array.make(promiseCount, None);
   let resultCount = ref(0);
   let (resultPromise, resolve) = pending();
@@ -306,6 +310,7 @@ let allOkArray = promises => {
       }));
 
   resultPromise
+  };
 };
 
 let allOk = promises =>

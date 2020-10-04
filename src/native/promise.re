@@ -578,6 +578,10 @@ let exec = executor => {
 let allOkArray = promises => {
   let promiseCount = Array.length(promises);
 
+  if (promiseCount == 0) {
+    resolved(Ok([||]));
+  }
+  else {
   let resultValues = Array.make(promiseCount, None);
   let resultCount = ref(0);
   let (resultPromise, resolve) = pending();
@@ -615,6 +619,7 @@ let allOkArray = promises => {
       }));
 
   resultPromise
+  };
 };
 
 let allOk = promises =>

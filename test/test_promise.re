@@ -276,8 +276,8 @@ let allTests = Framework.suite("all", [
   }),
 
   test("empty", () => {
-    let p = Promise.all([]);
-    remainsPending(p, []);
+    Promise.all([])
+    ->Promise.map(results => results == []);
   }),
 
   test("all2", () => {
@@ -696,6 +696,11 @@ let resultTests = Framework.suite("result", [
     r1(Error(42));
     r2(Error(43));
     p3->Promise.map((==)(Error(42)));
+  }),
+
+  test("allOk, empty", () => {
+    Promise.allOk([])
+    ->Promise.map(result => result == Ok([]));
   }),
 
   test("allOk2, ok", () => {
