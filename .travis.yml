@@ -55,7 +55,6 @@ jobs:
         - opam init -ya --compiler=4.02.3 --disable-sandboxing
         - eval `opam env`
         - ocaml -version
-        - opam pin add -y reason --dev-repo
         - opam install -y --deps-only .
       script:
         - dune exec test/test_main.exe
