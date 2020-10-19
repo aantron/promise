@@ -579,7 +579,7 @@ let allOkArray = promises => {
   let promiseCount = Array.length(promises);
 
   if (promiseCount == 0) {
-    resolved(Ok([||]));
+    resolved(Result.Ok([||]));
   }
   else {
     let resultValues = Array.make(promiseCount, None);
