@@ -1,7 +1,5 @@
-# Promise &nbsp;&nbsp;&nbsp; [![Version][version-img]][version] [![Travis status][travis-img]][travis] [![Coverage][coveralls-img]][coveralls]
+# Promise &nbsp;&nbsp;&nbsp; [![Travis status][travis-img]][travis] [![Coverage][coveralls-img]][coveralls]
 
-[version-img]: https://img.shields.io/badge/version-1.1.2-blue.svg
-[version]: https://www.npmjs.com/package/reason-promise
 [travis]: https://travis-ci.org/aantron/promise/branches
 [travis-img]: https://img.shields.io/travis/aantron/promise/master.svg?label=travis
 [coveralls]: https://coveralls.io/github/aantron/promise?branch=master
