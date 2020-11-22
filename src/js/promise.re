@@ -10,9 +10,9 @@ type never;
 type promise(+'a) = rejectable('a, never);
 type t(+'a) = promise('a);
 
+type exn;
 
-
-let onUnhandledException = ref(exn => {
+let onUnhandledException = ref((exn:exn) => {
   prerr_endline("Unhandled exception in promise callback:");
   Js.Console.error(exn);
 });

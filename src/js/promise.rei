@@ -15,7 +15,7 @@ type promise(+'a) = rejectable('a, never);  /* Internal; use Promise.t. */
 type t(+'a) = promise('a);
 
 
-
+type exn;
 /* Making promises. */
 let pending:
   unit =>
