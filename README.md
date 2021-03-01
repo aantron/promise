@@ -1,5 +1,7 @@
-# Promise &nbsp;&nbsp;&nbsp; [![Travis status][travis-img]][travis] [![Coverage][coveralls-img]][coveralls]
+# Promise &nbsp;&nbsp;&nbsp; [![NPM link][npm-img]][npm] [![Travis status][travis-img]][travis] [![Coverage][coveralls-img]][coveralls]
 
+[npm]: https://www.npmjs.com/package/reason-promise
+[npm-img]: https://img.shields.io/npm/v/reason-promise
 [travis]: https://travis-ci.org/aantron/promise/branches
 [travis-img]: https://img.shields.io/travis/aantron/promise/master.svg?label=travis
 [coveralls]: https://coveralls.io/github/aantron/promise?branch=master
@@ -7,7 +9,7 @@
 
 A lightweight, type-safe binding to JS promises:
 
-```reason
+```rescript
 Js.log(Promise.resolved("Hello"));  /* Promise { 'Hello' } */
 
 Promise.resolved("Hello")
@@ -41,7 +43,7 @@ In addition:
 - `reason-promise` offers a clean functional API, which replaces rejection with
   [helpers for `Result` and `Option`](#Errors).
 - `reason-promise` is tiny. It weighs in at about [1K bundled][bundle-size].
-- `reason-promise` also has a full, standalone [pure-Reason
+- `reason-promise` also has a full, standalone [pure-OCaml
   implementation][native], which passes all the same tests. It can be used for
   native code or in JS.
 
@@ -52,18 +54,18 @@ In addition:
 
 ## Tutorial
 
-- [Installing](#Installing)
-- [Getting started](#GettingStarted)
-- [Creating new promises](#Creating)
-- [Getting values from promises](#Values)
-- [Transforming promises](#Transforming)
-- [Tracing](#Tracing)
-- [Concurrent combinations](#Combining)
-- [Handling errors with `Result`](#Errors)
-- [Advanced: Rejection](#Rejection)
-- [Advanced: Bindings](#Bindings)
-- [Discussion: Why JS promises are unsafe](#JSPromiseFlattening)
-- [Discussion: How `reason-promise` makes promises type-safe](#TypeSafety)
+- [**Installing**](#Installing)
+- [**Getting started**](#GettingStarted)
+- [**Creating new promises**](#Creating)
+- [**Getting values from promises**](#Values)
+- [**Transforming promises**](#Transforming)
+- [**Tracing**](#Tracing)
+- [**Concurrent combinations**](#Combining)
+- [**Handling errors with `Result`**](#Errors)
+- [**Advanced: Rejection**](#Rejection)
+- [**Advanced: Bindings**](#Bindings)
+- [**Discussion: Why JS promises are unsafe**](#JSPromiseFlattening)
+- [**Discussion: How `reason-promise` makes promises type-safe**](#TypeSafety)
 
 <br/>
 
@@ -114,35 +116,34 @@ of what each function does and what it expects from its callback.
 The most basic function for creating a new promise is
 [`Promise.pending`][pending]:
 
-```reason
-let (p, resolve) = Promise.pending();
-Js.log(p);    /* Promise { <pending> } */
+```rescript
+let (p, resolve) = Promise.pending()
+Js.log(p)     /* Promise { <pending> } */
 ```
 
 The second value returned, `resolve`, is a function for resolving the promise:
 
-```reason
-let (p, resolve) = Promise.pending();
-resolve("Hello");
-Js.log(p);    /* Promise { 'Hello' } */
+```rescript
+let (p, resolve) = Promise.pending()
+resolve("Hello")
+Js.log(p)     /* Promise { 'Hello' } */
 ```
 
 [`Promise.resolved`][resolved] is a helper that returns an already-resolved
 promise:
 
-```reason
-let p = Promise.resolved("Hello");
-Js.log(p);    /* Promise { 'Hello' } */
+```rescript
+let p = Promise.resolved("Hello")
+Js.log(p)     /* Promise { 'Hello' } */
 ```
 
 ...and [`Promise.exec`][exec] is for wrapping functions that take callbacks:
 
-```reason
-[@bs.val]
-external setTimeout: (unit => unit, int) => unit = "setTimeout";
+```rescript
+@bs.val external setTimeout: (unit => unit, int) => unit = "setTimeout"
 
-let p = Promise.exec(resolve => setTimeout(resolve, 1000));
-Js.log(p);    /* Promise { <pending> } */
+let p = Promise.exec(resolve => setTimeout(resolve, 1000))
+Js.log(p)     /* Promise { <pending> } */
 
 /* Program then waits for one second before exiting. */
 ```
@@ -154,12 +155,12 @@ Js.log(p);    /* Promise { <pending> } */
 
 To do something once a promise is resolved, use [`Promise.get`][get]:
 
-```reason
-let (p, resolve) = Promise.pending();
+```rescript
+let (p, resolve) = Promise.pending()
 
-p->Promise.get(s => Js.log(s));
+p->Promise.get(s => Js.log(s))
 
-resolve("Hello");   /* Prints "Hello". */
+resolve("Hello")    /* Prints "Hello". */
 ```
 
 <br/>
@@ -169,14 +170,14 @@ resolve("Hello");   /* Prints "Hello". */
 
 Use [`Promise.map`][map] to transform the value inside a promise:
 
-```reason
-let (p, resolve) = Promise.pending();
+```rescript
+let (p, resolve) = Promise.pending()
 
 p
 ->Promise.map(s => s ++ " world")
-->Promise.get(s => Js.log(s));
+->Promise.get(s => Js.log(s))
 
-resolve("Hello");   /* Hello world */
+resolve("Hello")    /* Hello world */
 ```
 
 To be precise, `Promise.map` creates a *new* promise with the transformed value.
@@ -193,16 +194,16 @@ will flatten the nested promise.
 If you have a chain of promise operations, and you'd like to inspect the value
 in the middle of the chain, use [`Promise.tap`][tap]:
 
-```reason
-let (p, resolve) = Promise.pending();
+```rescript
+let (p, resolve) = Promise.pending()
 
 p
 ->Promise.tap(s => Js.log("Value is now: " ++ s))
 ->Promise.map(s => s ++ " world")
 ->Promise.tap(s => Js.log("Value is now: " ++ s))
-->Promise.get(s => Js.log(s));
+->Promise.get(s => Js.log(s))
 
-resolve("Hello");
+resolve("Hello")
 
 /*
 Value is now: Hello
@@ -218,15 +219,17 @@ Hello world
 
 [`Promise.race`][race] waits for *one* of the promises passed to it to resolve:
 
-```reason
-[@bs.val]
-external setTimeout: (unit => unit, int) => unit = "setTimeout";
+```rescript
+@bs.val external setTimeout: (unit => unit, int) => unit = "setTimeout"
 
-let one_second = Promise.exec(resolve => setTimeout(resolve, 1000));
-let five_seconds = Promise.exec(resolve => setTimeout(resolve, 5000));
+let one_second = Promise.exec(resolve => setTimeout(resolve, 1000))
+let five_seconds = Promise.exec(resolve => setTimeout(resolve, 5000))
 
 Promise.race([one_second, five_seconds])
-->Promise.get(() => { Js.log("Hello"); exit(0); });
+->Promise.get(() => {
+  Js.log("Hello")
+  exit(0)
+})
 
 /* Prints "Hello" after one second. */
 ```
@@ -234,15 +237,17 @@ Promise.race([one_second, five_seconds])
 [`Promise.all`][all] instead waits for *all* of the promises passed to it,
 concurrently:
 
-```reason
-[@bs.val]
-external setTimeout: (unit => unit, int) => unit = "setTimeout";
+```rescript
+@bs.val external setTimeout: (unit => unit, int) => unit = "setTimeout"
 
-let one_second = Promise.exec(resolve => setTimeout(resolve, 1000));
-let five_seconds = Promise.exec(resolve => setTimeout(resolve, 5000));
+let one_second = Promise.exec(resolve => setTimeout(resolve, 1000))
+let five_seconds = Promise.exec(resolve => setTimeout(resolve, 5000))
 
 Promise.all([one_second, five_seconds])
-->Promise.get(_ => { Js.log("Hello"); exit(0); });
+->Promise.get(_ => {
+  Js.log("Hello")
+  exit(0)
+})
 
 /* Prints "Hello" after five seconds. */
 ```
@@ -264,48 +269,48 @@ For convenience, there are several variants of `Promise.all`:
 Promises that can fail are represented using the standard library's
 [`Result`][Result], and its constructors `Ok` and `Error`:
 
-```reason
-open Belt.Result;
+```rescript
+open Belt.Result
 
 Promise.resolved(Ok("Hello"))
-->Promise.getOk(s => Js.log(s));      /* Hello */
+->Promise.getOk(s => Js.log(s))       /* Hello */
 ```
 
 [`Promise.getOk`][getOk] waits for `p` to have a value, and runs its function
 only if that value is `Ok(_)`. If you instead resolve the promise with
 `Error(_)`, there will be no output:
 
-```reason
-open Belt.Result;
+```rescript
+open Belt.Result
 
 Promise.resolved(Error("Failed"))
-->Promise.getOk(s => Js.log(s));      /* Program just exits. */
+->Promise.getOk(s => Js.log(s))       /* Program just exits. */
 ```
 
 You can wait for either kind of value by calling [`Promise.getOk`][getOk] and
 [`Promise.getError`][getError]:
 
-```reason
-open Belt.Result;
+```rescript
+open Belt.Result
 
 let () = {
-  let p = Promise.resolved(Error("Failed"));
-  p->Promise.getOk(s => Js.log(s));
-  p->Promise.getError(s => Js.log("Error: " ++ s));
-};                                    /* Error: Failed */
+  let p = Promise.resolved(Error("Failed"))
+  p->Promise.getOk(s => Js.log(s))
+  p->Promise.getError(s => Js.log("Error: " ++ s))
+}                                     /* Error: Failed */
 ```
 
 ...or respond to all outcomes using the ordinary [`Promise.get`][get]:
 
-```reason
-open Belt.Result;
+```rescript
+open Belt.Result
 
 Promise.resolved(Error("Failed"))
 ->Promise.get(result =>
-  switch (result) {
-  | Ok(s) => Js.log(s);
-  | Error(s) => Js.log("Error: " ++ s);
-  });                                 /* Error: Failed */
+  switch result {
+  | Ok(s) => Js.log(s)
+  | Error(s) => Js.log("Error: " ++ s)
+  })                                  /* Error: Failed */
 ```
 
 The full set of functions for handling results is:
@@ -367,8 +372,8 @@ However, because `Promise.Js` uses JS rejection for error handling rather than
 
 Underneath, `Promise` and `Promise.Js` have the same implementation:
 
-```reason
-type Promise.t('a) = Promise.Js.t('a, never);
+```rescript
+type Promise.t('a) = Promise.Js.t('a, never)
 ```
 
 That is, `Promise` is really `Promise.Js` that has no rejection type, and no
@@ -384,10 +389,10 @@ There are several helpers for converting between `Promise` and `Promise.Js`:
 you simply convert a rejection to a resolution. In the next example, note the
 final line is no longer using `Promise.Js`, but `Promise`:
 
-```reason
+```rescript
 Promise.Js.rejected("Failed")
 ->Promise.Js.catch(s => Promise.resolved("Error: " ++ s))
-->Promise.get(s => Js.log(s));        /* Error: Failed */
+->Promise.get(s => Js.log(s))         /* Error: Failed */
 ```
 
 There are also two functions for converting between `Promise.Js` and the current
@@ -409,22 +414,21 @@ Refer to the [example node-fetch binding repo][example-binding].
 When you want to bind a JS function that *returns* a promise, you can use
 `Promise` directly in its return value:
 
-```reason
+```rescript
 /* A mock JS library. */
-[%%bs.raw {|
+%%bs.raw(`
 function delay(value, milliseconds) {
   return new Promise(function(resolve) {
     setTimeout(function() { resolve(value); }, milliseconds)
   });
-}|}]
+}`)
 
 /* Our binding. */
-[@bs.val]
-external delay: ('a, int) => Promise.t('a) = "delay";
+@bs.val external delay: ('a, int) => Promise.t('a) = "delay"
 
 /* Usage. */
 delay("Hello", 1000)
-->Promise.get(s => Js.log(s));
+->Promise.get(s => Js.log(s))
 
 /* Prints "Hello" after one second. */
 ```
@@ -433,25 +437,24 @@ If the promise can be rejected, you should use `Promise.Js` instead, and
 [convert to `Promise`](#Rejection) as quickly as possible, with intelligent
 handling of rejection. Here is one way to do that:
 
-```reason
+```rescript
 /* Mock JS library. */
-[%%bs.raw {|
+%%bs.raw(`
 function delayReject(value, milliseconds) {
   return new Promise(function(resolve, reject) {
     setTimeout(function() { reject(value); }, milliseconds)
   });
-}|}]
+}`)
 
 /* Binding. */
-[@bs.val]
-external delayRejectRaw: ('a, int) => Promise.Js.t(_, 'a) = "delayReject";
+@bs.val external delayRejectRaw: ('a, int) => Promise.Js.t(_, 'a) = "delayReject"
 let delayReject = (value, milliseconds) =>
   delayRejectRaw(value, milliseconds)
-  ->Promise.Js.toResult;
+  ->Promise.Js.toResult
 
 /* Usage. */
 delayReject("Hello", 1000)
-->Promise.getError(s => Js.log(s));
+->Promise.getError(s => Js.log(s))
 
 /* Prints "Hello" after one second. */
 ```
@@ -459,24 +462,23 @@ delayReject("Hello", 1000)
 Note that this binding has two steps: there is a raw binding, and then an extra
 wrapper that converts rejections into `Result`s. If the potential rejections
 are messy, this is a good place to insert additional logic for converting them
-to nice Reason values :)
+to nice ReScript values :)
 
 When *passing* a promise to JS, it is generally safe to use `Promise` rather
 than `Promise.Js`:
 
-```reason
+```rescript
 /* Mock JS library. */
-[%%bs.raw {|
+%%bs.raw(`
 function log(p) {
   p.then(function (v) { console.log(v); });
-}|}]
+}`)
 
 /* Binding. */
-[@bs.val]
-external log: Promise.t('a) => unit = "log";
+@bs.val external log: Promise.t('a) => unit = "log"
 
 /* Usage. */
-log(Promise.resolved("Hello"));       /* Hello */
+log(Promise.resolved("Hello"))        /* Hello */
 ```
 
 <br/>
@@ -487,7 +489,7 @@ log(Promise.resolved("Hello"));       /* Hello */
 The JS function [`Promise.resolve`][Promise.resolve] has a special case, which
 is triggered when you try to resolve a promise with another, nested promise.
 Unfortunately, this special case makes it impossible to assign
-`Promise.resolve` a consistent type in Reason (and most type systems).
+`Promise.resolve` a consistent type in ReScript (and most type systems).
 
 Here are the details. The code will use
 [`Js.Promise.resolve`][Js.Promise.resolve], BuckleScript's direct binding to
@@ -495,41 +497,41 @@ JS's `Promise.resolve`.
 
 `Js.Promise.resolve` takes a value, and creates a promise containing that value:
 
-```reason
-Js.log(Js.Promise.resolve(1));
+```rescript
+Js.log(Js.Promise.resolve(1))
 /* Promise { 1 } */
 
-Js.log(Js.Promise.resolve("foo"));
+Js.log(Js.Promise.resolve("foo"))
 /* Promise { 'foo' } */
 ```
 
 So, we should give it the type
 
-```reason
-Js.Promise.resolve: 'a => Js.Promise.t('a);
+```rescript
+Js.Promise.resolve: 'a => Js.Promise.t('a)
 ```
 
 and, indeed, that's the type it [has][Js.Promise.resolve] in BuckleScript.
 
 Following the pattern, we would *expect*:
 
-```reason
-let nestedPromise = Js.Promise.resolve(1);
+```rescript
+let nestedPromise = Js.Promise.resolve(1)
 
-Js.log(Js.Promise.resolve(nestedPromise));
+Js.log(Js.Promise.resolve(nestedPromise))
 /* Promise { Promise { 1 } } */
 ```
 
 But that's not what happens! Instead, the output is just
 
-```reason
+```rescript
 /* Promise { 1 } */
 ```
 
 The nested promise is missing! But the type system, following the pattern,
 still thinks that this resulting value has type
 
-```reason
+```rescript
 Js.Promise.t(Js.Promise.t(int))
 ```
 
@@ -544,7 +546,7 @@ The result is, if your program executes something like this, it will have
 ordinary values in places where it expects another level of promises. For
 example, if you do
 
-```reason
+```rescript
 let nestedPromise = Js.Promise.resolve(1);
 
 Js.Promise.resolve(nestedPromise)
@@ -557,12 +559,12 @@ bare value `1`. That means the callback will cause a runtime error as soon as
 it tries to use promise functions on the `1`. Worse, you might store `p` in a
 data structure, and the runtime error will occur at a very distant place in the
 code. The type system is supposed to prevent such errors! That's part of the
-point of using Reason.
+point of using ReScript.
 
 The same special casing occurs throughout the JS `Promise` API &mdash; for
 example, when you return a promise from the callback of `then_`. This means that
 *most* of the JS `Promise` functions can't be assigned a correct type and
-directly, safely be used from Reason.
+directly, safely be used from ReScript.
 
 <br/>
 
@@ -573,7 +575,7 @@ The [previous section](#JSPromiseFlattening) shows that JS promise functions are
 broken. An important observation is that it is only the *functions* that are
 broken &mdash; the promise *data structure* is not. That means that to make JS
 promises type-safe, we can keep the existing JS data structure, and just provide
-safe replacement functions to use with it in Reason. This is good news
+safe replacement functions to use with it in ReScript. This is good news
 for interop :)
 
 To fix the functions, only the [special-case flattening](#JSPromiseFlattening)
@@ -587,10 +589,10 @@ or not, and...
   will trigger the special-casing. So, `reason-promise` boxes the nested
   promise:
 
-  ```reason
-  let nestedPromise = Promise.resolved(1);
+  ```rescript
+  let nestedPromise = Promise.resolved(1)
 
-  Js.log(Promise.resolved(nestedPromise));
+  Js.log(Promise.resolved(nestedPromise))
   /* Promise { PromiseBox { Promise { 1 } } } */
   ```
 
