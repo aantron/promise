@@ -880,11 +880,40 @@ let optionTests = Framework.suite("option", [
 
 
 
+let raiseTests = Framework.suite("raise", [
+  test("stops, then", () => {
+    let continued = ref(false);
+    let p =
+      Promise.resolved()
+      ->Promise.flatMap(() => raise(Exit))
+      ->Promise.flatMap(() => {
+        continued := true;
+        Promise.resolved(42);
+      });
+    remainsPending(p, 43);
+  }),
+
+  test("stops, catch", () => {
+    let continued = ref(false);
+    let p =
+      Promise.Js.rejected()
+      ->Promise.Js.catch(() => raise(Exit))
+      ->Promise.Js.flatMap(() => {
+        continued := true;
+        Promise.resolved(42);
+      });
+    remainsPending(p, 43);
+  }),
+]);
+
+
+
 let suites = [
   basicTests,
   rejectTests,
   allTests,
   raceTests,
   resultTests,
-  optionTests
+  optionTests,
+  raiseTests,
 ];

@@ -58,6 +58,7 @@ function then(promise, callback) {
         }
         catch (exception) {
             onUnhandledException.contents(exception);
+            return new Promise(function() {});
         }
     });
 };
@@ -69,6 +70,7 @@ function catch_(promise, callback) {
         }
         catch (exception) {
             onUnhandledException.contents(exception);
+            return new Promise(function() {});
         }
     };
 
