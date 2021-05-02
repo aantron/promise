@@ -119,10 +119,11 @@ module Js_ = {
   let get = (promise, callback) =>
     ignore(map(promise, callback));
 
-  let tap = (promise, callback) => {
-    get(promise, callback);
-    promise;
-  };
+  let tap = (promise, callback) =>
+    map(promise, v => {
+      callback(v);
+      v
+    });
 
   [@bs.scope "Promise"]
   [@bs.val]

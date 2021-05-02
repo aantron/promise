@@ -185,6 +185,18 @@ let rejectTests = Framework.suite("reject", [
     ->Promise.flatMap(() => Promise.resolved(true))
     ->Promise.Js.catch((_) => Promise.resolved(false));
   }),
+
+  /* See https://github.com/aantron/promise/issues/74. If tap internally calls
+     map, but then returns the original promise, and the original promise gets
+     rejected, then both the mapped promise and the original promise are
+     rejected. The rejected mapped promise results in an unhandled promise
+     rejection, because there is no way to handle that rejection - the mapped
+     promise is ignored internally by tap. */
+  test("tap unhandled rejetion", () => {
+    Promise.Js.rejected("foo")
+    ->Promise.Js.tap(ignore)
+    ->Promise.Js.catch(_ => Promise.resolved(true));
+  }),
 ]);
 
 
