@@ -1,0 +1,44 @@
+name: test
+on: [push, pull_request]
+
+jobs:
+  rescript:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - run: npm install
+    - run: npm run test
+    - run: bash test/bundle/size.sh
+    - run: |
+        pushd ..
+        git clone https://github.com/aantron/promise-example-bsb.git
+        cd promise-example-bsb
+        npm install
+        npm run test
+        popd
+    - run: |
+        pushd ..
+        git clone https://github.com/aantron/promise-example-binding.git
+        cd promise-example-binding
+        npm install
+        npm run test
+        popd
+
+  esy:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - run: npx esy install -P ./promise.opam
+    - run: npx esy -P ./promise.opam dune build test/test_main.exe
+    - run: npx esy -P ./promise.opam dune exec test/test_main.exe
+
+  opam:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: ocaml/setup-ocaml@v2
+      with:
+        ocaml-compiler: 4.12.x
+    - run: opam install --deps-only .
+    - run: opam exec -- dune exec test/test_main.exe
+    - run: opam lint
