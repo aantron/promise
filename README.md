@@ -20,10 +20,10 @@ Promise.resolved("Hello")
 As you can see on the first line, `Promise.t` maps directly to familiar JS
 promises from your JS runtime. That means...
 
-- You can use `reason-promise` directly to [write JS bindings](#Bindings).
-- All JS tooling for promises immediately works with `reason-promise`.
+- You can use `Promise` directly to [write JS bindings](#Bindings).
+- All JS tooling for promises immediately works with `Promise`.
 - Even if you do something exotic, like switch out the promise implementation at
-  the JS level, for, say, better stack traces, `reason-promise` still binds to
+  the JS level, for, say, better stack traces, `Promise` still binds to
   it!
 
 <br/>
@@ -31,7 +31,7 @@ promises from your JS runtime. That means...
 There is only one exception to the rule that `Promise.t` maps directly to JS
 promises: when there is a promise nested inside another promise. JS [breaks the
 type safety](#JSPromiseFlattening) of promises in a misguided attempt to
-disallow nesting. [`reason-promise` instead emulates it in a way that makes
+disallow nesting. [`Promise` instead emulates it in a way that makes
 promises type-safe again](#TypeSafety). This is in contrast to BuckleScript's
 built-in `Js.Promise`, which directly exposes the JS behavior, and so is not
 type-safe.
@@ -40,10 +40,10 @@ type-safe.
 
 In addition:
 
-- `reason-promise` offers a clean functional API, which replaces rejection with
+- `Promise` offers a clean functional API, which replaces rejection with
   [helpers for `Result` and `Option`](#Errors).
-- `reason-promise` is tiny. It weighs in at about [1K bundled][bundle-size].
-- `reason-promise` also has a full, standalone [pure-OCaml
+- `Promise` is tiny. It weighs in at about [1K bundled][bundle-size].
+- `Promise` also has a full, standalone [pure-OCaml
   implementation][native], which passes all the same tests. It can be used for
   native code or in JS.
 
@@ -65,7 +65,7 @@ In addition:
 - [**Advanced: Rejection**](#Rejection)
 - [**Advanced: Bindings**](#Bindings)
 - [**Discussion: Why JS promises are unsafe**](#JSPromiseFlattening)
-- [**Discussion: How `reason-promise` makes promises type-safe**](#TypeSafety)
+- [**Discussion: How `Promise` makes promises type-safe**](#TypeSafety)
 
 <br/>
 
@@ -569,7 +569,7 @@ directly, safely be used from ReScript.
 <br/>
 
 <a id="TypeSafety"></a>
-### Discussion: How `reason-promise` makes promises type-safe
+### Discussion: How `Promise` makes promises type-safe
 
 The [previous section](#JSPromiseFlattening) shows that JS promise functions are
 broken. An important observation is that it is only the *functions* that are
@@ -579,14 +579,14 @@ safe replacement functions to use with it in ReScript. This is good news
 for interop :)
 
 To fix the functions, only the [special-case flattening](#JSPromiseFlattening)
-has to be undone. So, when you call `reason-promise`'s
+has to be undone. So, when you call `Promise`'s
 [`Promise.resolved(value)`][resolved], it checks whether `value` is a promise
 or not, and...
 
-- If `value` *is not* a promise, `reason-promise` just passes it to JS's
+- If `value` *is not* a promise, `Promise` just passes it to JS's
   [`Promise.resolve`][Promise.resolve], because JS will do the right thing.
 - If `value` *is* a promise, it's not safe to simply pass it to JS, because it
-  will trigger the special-casing. So, `reason-promise` boxes the nested
+  will trigger the special-casing. So, `Promise` boxes the nested
   promise:
 
   ```rescript
@@ -600,17 +600,17 @@ or not, and...
   enough to suppress the special-casing.
 
   Whenever you try to take the value out of this resulting structure (for
-  example, by calling [`Promise.get`][get] on it), `reason-promise`
+  example, by calling [`Promise.get`][get] on it), `Promise`
   transparently unboxes the `PromiseBox` and passes the nested promise to your
   callback &mdash; as your callback would expect.
 
-This conditional boxing and unboxing is done throughout `reason-promise`. It
+This conditional boxing and unboxing is done throughout `Promise`. It
 only happens for nested promises, and anything else with a `.then` method. For
-all other values, `reason-promise` behaves, internally, exactly like JS
+all other values, `Promise` behaves, internally, exactly like JS
 `Promise` (though with a cleaner outer API). This is enough to make promises
 type-safe.
 
-This is a simple scheme, but `reason-promise` includes a very thorough
+This is a simple scheme, but `Promise` includes a very thorough
 [test suite][tests] to be extra sure that it always manages the boxing
 correctly.
 
