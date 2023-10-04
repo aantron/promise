@@ -1,0 +1,4 @@
+(library
+ (name bundle)
+ (modes melange)
+ (libraries melange.belt promise.melange))

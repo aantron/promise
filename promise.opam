@@ -17,6 +17,7 @@ depends: [
   "ocaml"
   "reason" {build & >= "3.3.2"}
   "result"
+  "melange"
 ]
 
 build: [

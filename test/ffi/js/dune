@@ -1,0 +1,11 @@
+(library
+ (name test_ffi_js)
+ (modes melange)
+ (libraries framework_js)
+ (wrapped false)
+ (preprocess
+  (pps melange.ppx)))
+
+(copy_files
+ (mode fallback)
+ (files ../native/*.re))

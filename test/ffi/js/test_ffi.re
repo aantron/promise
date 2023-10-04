@@ -4,7 +4,7 @@
 
 
 
-[%%bs.raw {|
+[%%mel.raw {|
 function isPromise (p) {
     return (p instanceof Promise);
 }
@@ -14,13 +14,8 @@ function isPromiseLike(v) {
 };
 |}];
 
-[@bs.val]
 external isPromise: Promise.Js.t(_, _) => bool = "isPromise";
-
-[@bs.val]
 external jsPromiseIsPromise: Js.Promise.t(_) => bool = "isPromise";
-
-[@bs.val]
 external jsPromiseIsPromiseLike: Js.Promise.t(_) => bool = "isPromiseLike";
 
 
@@ -70,7 +65,7 @@ let interopTests = Framework.suite("interop", [
   }),
 
   test("js promise is reason-promise", () => {
-    let js_promise: Promise.t(int) = [%bs.raw {|Promise.resolve(1)|}];
+    let js_promise: Promise.t(int) = [%mel.raw {|Promise.resolve(1)|}];
     js_promise
     ->Promise.flatMap(n => Promise.resolved(n + 1))
     ->Promise.flatMap(n => Promise.resolved(n == 2));
@@ -78,7 +73,7 @@ let interopTests = Framework.suite("interop", [
 
   test("reason-promise as js argument", () => {
     module Then = {
-      [@bs.send.pipe: Promise.t('a)]
+      [@mel.send.pipe: Promise.t('a)]
       external js_then: ('a => Promise.t('b)) => Promise.t('b) =
         "then";
     };
@@ -243,7 +238,7 @@ let soundnessTests = Framework.suite("soundness", [
 
   [@ocaml.warning "-33"]
   test("resolved: Almost-Promise-like", () => {
-    let open Js_OO;
+    /* let open Js_OO; */
     Promise.resolved(makeAlmostPromiseLike(42))
     ->Promise.flatMap(x => Promise.resolved(x##_then == 42));
   }),

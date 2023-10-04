@@ -1,0 +1,10 @@
+(library
+ (name promise_js)
+ (public_name promise.melange)
+ (modes melange)
+ (wrapped false)
+ (libraries melange.belt)
+ (preprocess
+  (pps melange.ppx))
+ (flags
+  (:standard -w +A-102-20)))

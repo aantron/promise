@@ -8,7 +8,6 @@ let test = Framework.test;
 
 
 
-[@bs.val]
 external hrtime: unit => (int, int) = "process.hrtime";
 
 let hrtime = () => {
