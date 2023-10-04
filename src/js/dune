@@ -2,7 +2,7 @@
  (name promise_js)
  (public_name promise.melange)
  (modes melange)
- (libraries result melange.belt)
+ (libraries melange.belt)
  (preprocess
   (pps melange.ppx))
  (flags
