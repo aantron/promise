@@ -19,7 +19,7 @@ let onUnhandledException = ref(exn => {
 
 
 
-[%%bs.raw {|
+[%%mel.raw {|
 function PromiseBox(p) {
     this.nested = p;
 };
@@ -90,7 +90,6 @@ module Js_ = {
 
   external relax: promise('a) => rejectable('a, _) = "%identity";
 
-  [@bs.val]
   external jsNew:
     (('a => unit) => ('e => unit) => unit) => rejectable('a, 'e) = "make";
 
@@ -105,10 +104,8 @@ module Js_ = {
     (p, resolve^, reject^);
   };
 
-  [@bs.val]
   external resolved: 'a => rejectable('a, _) = "resolved";
 
-  [@bs.val]
   external flatMap:
     (rejectable('a, 'e), 'a => rejectable('b, 'e)) => rejectable('b, 'e) =
       "then";
@@ -125,20 +122,16 @@ module Js_ = {
       v
     });
 
-  [@bs.scope "Promise"]
-  [@bs.val]
+  [@mel.scope "Promise"]
   external rejected: 'e => rejectable(_, 'e) = "reject";
 
-  [@bs.val]
   external catch:
     (rejectable('a, 'e), 'e => rejectable('a, 'e2)) => rejectable('a, 'e2) =
       "catch_";
 
-  [@bs.val]
   external unbox: 'a => 'a = "unbox";
 
-  [@bs.scope "Promise"]
-  [@bs.val]
+  [@mel.scope "Promise"]
   external jsAll: 'a => 'b = "all";
 
   let allArray = promises =>
@@ -162,8 +155,7 @@ module Js_ = {
   let all6 = (p1, p2, p3, p4, p5, p6) =>
     jsAll((p1, p2, p3, p4, p5, p6));
 
-  [@bs.scope "Promise"]
-  [@bs.val]
+  [@mel.scope "Promise"]
   external jsRace: array(rejectable('a, 'e)) => rejectable('a, 'e) = "race";
 
   let race = promises =>
