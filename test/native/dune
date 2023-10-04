@@ -1,3 +1,3 @@
-(library
- (name test_ffi)
- (libraries framework))
+(executable
+ (name test_main)
+ (libraries isoresult promise test_ffi))

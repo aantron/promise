@@ -1,0 +1,9 @@
+(library
+ (name framework_js)
+ (modes melange)
+ (wrapped false)
+ (libraries promise_js))
+
+(copy_files
+ (mode fallback)
+ (files ../native/*.re))
